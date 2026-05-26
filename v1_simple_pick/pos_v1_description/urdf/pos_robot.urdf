@@ -400,22 +400,24 @@
     </plugin>
 
     <!-- ============================================================
-         GRASP: detachable fixed joint between gripper_base and the
-         soda_can model. Gazebo Harmonic's DetachableJoint starts
-         ATTACHED at world load, so the task script publishes to
-         /grasp/detach during startup to release it (can stays on
-         shelf). At grasp time the script publishes to /grasp/attach
-         to re-form the joint at the current relative positions of
-         gripper and can. At release, /grasp/detach breaks the joint
-         again so gravity drops the can.
+         GRASP: detachable fixed joint between the wrist and the
+         soda_can model. The DetachableJoint starts ATTACHED at world
+         load, so the task script publishes /grasp/detach during
+         startup to release it (can stays on shelf). At grasp time
+         the script publishes /grasp/attach to re-form the joint at
+         the current relative positions. At release, /grasp/detach
+         breaks it again so gravity drops the can onto the tray.
 
-         The plugin must live in the model that owns parent_link
-         (pos_robot), so cross-model attachment via a separately
-         spawned anchor model doesn't work in Gazebo 8 — that's why
-         this is in the robot URDF.
+         parent_link is "arm_wrist" (not "gripper_base") because
+         Gazebo's URDF importer LUMPS links connected by fixed joints
+         into their parent — gripper_base is fixed-joined to
+         arm_wrist, so it collapses into arm_wrist at load time and
+         no longer exists as a separate link. Referencing arm_wrist
+         is kinematically equivalent (gripper_base sits rigidly on
+         the wrist tip) and avoids the URDF→SDF lumping gotcha.
          ============================================================ -->
     <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-      <parent_link>gripper_base</parent_link>
+      <parent_link>arm_wrist</parent_link>
       <child_model>soda_can</child_model>
       <child_link>link</child_link>
       <detach_topic>/grasp/detach</detach_topic>
