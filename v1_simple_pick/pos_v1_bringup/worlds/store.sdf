@@ -1,0 +1,136 @@
+<?xml version="1.0" ?>
+<sdf version="1.10">
+  <world name="store">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ============================================================
+         GROUND
+         ============================================================ -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         SHELF — a brown horizontal plate at z=0.5 in front of robot
+         The robot starts at origin facing +x; shelf is at x=2.0.
+         ============================================================ -->
+    <model name="shelf">
+      <static>true</static>
+      <pose>2.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+          <material>
+            <ambient>0.55 0.35 0.18 1</ambient>
+            <diffuse>0.55 0.35 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Two shelf legs for visual clarity -->
+    <model name="shelf_leg_left">
+      <static>true</static>
+      <pose>2.0 -0.45 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.05 0.05 0.5</size></box></geometry>
+          <material><ambient>0.45 0.28 0.15 1</ambient><diffuse>0.45 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="shelf_leg_right">
+      <static>true</static>
+      <pose>2.0 0.45 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.05 0.05 0.5</size></box></geometry>
+          <material><ambient>0.45 0.28 0.15 1</ambient><diffuse>0.45 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         BOTTLES — three red cylinders on the shelf
+         ============================================================ -->
+    <model name="bottle_0">
+      <pose>2.0 -0.3 0.625 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.3</mass>
+          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="bottle_1">
+      <pose>2.0 0 0.625 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.3</mass>
+          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="bottle_2">
+      <pose>2.0 0.3 0.625 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.3</mass>
+          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

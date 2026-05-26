@@ -1,0 +1,97 @@
+# v1_simple_pick — first runnable scaffold
+
+This is the **minimum** runnable demo of the place-items-on-shelf project. It proves the toolchain (ROS 2 Jazzy + Gazebo Harmonic + Python) is working end-to-end. Future versions live in sibling folders (`v2_*`, `v3_*`, …); we will not modify this one.
+
+## What v1 does
+
+A boxy mobile robot with a flat onboard tray spawns in a simple "store" world. The world contains a shelf with three red bottles on it. A Python task node drives the robot:
+
+```
+start → forward to shelf → pause ("pick") → backward to start → pause ("place") → done
+```
+
+Picking is **simulated by a pause**. No arm motion, no gripper, no perception, no Nav2, no MoveIt — all of those are deferred to later versions. The goal here is only:
+
+1. Verify Gazebo Harmonic launches a custom world.
+2. Verify our URDF spawns and is driveable via `/cmd_vel`.
+3. Verify a Python ROS 2 node can command the robot through a sequence.
+
+If all three work, the scaffolding is correct and we have a foundation for v2.
+
+## Packages
+
+| Package | Role |
+|---|---|
+| `pos_v1_description` | Robot URDF (mobile base + tray + cosmetic arm) |
+| `pos_v1_bringup` | Gazebo world, launch file, ROS↔Gazebo bridge config |
+| `pos_v1_task` | Python node that runs the open-loop pick-and-place sequence |
+
+## Build (on WSL2 Ubuntu 24.04 with ROS 2 Jazzy)
+
+Assuming your workspace is `~/ros2_ws` and this repo is cloned at `~/ros2_ws/src/place-items-on-shelf/`:
+
+```bash
+# Symlink so colcon discovers the v1 packages
+ln -s ~/ros2_ws/src/place-items-on-shelf/v1_simple_pick ~/ros2_ws/src/pos_v1
+
+# Build only the v1 packages
+cd ~/ros2_ws
+rosdep install --from-paths src/pos_v1 --ignore-src -r -y
+colcon build --packages-select pos_v1_description pos_v1_bringup pos_v1_task
+source install/setup.bash
+```
+
+`colcon build` also works without the symlink — it scans recursively — but the symlink keeps the `--packages-select` line short.
+
+## Run
+
+In **terminal 1**:
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch pos_v1_bringup sim.launch.py
+```
+
+This brings up Gazebo with the store world, spawns the robot, and starts the ROS↔Gazebo bridge. You should see a Gazebo window with a blue boxy robot, a brown shelf, and three red cylinders ("bottles") on the shelf.
+
+In **terminal 2** (after Gazebo is fully loaded):
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 run pos_v1_task pick_and_place
+```
+
+The robot drives forward ~1.5 m, pauses (the "pick"), drives back, pauses (the "place"), and prints `Done.`. Total runtime ~20 seconds.
+
+## Tunable knobs
+
+Top of `pos_v1_task/pos_v1_task/pick_and_place.py`:
+
+| Constant | Default | Meaning |
+|---|---|---|
+| `DRIVE_SPEED` | `0.2` | Linear m/s for forward/back motion |
+| `DRIVE_TIME_S` | `7.5` | Seconds to drive forward (and back) |
+| `PICK_PAUSE_S` | `3.0` | Pause at shelf (simulated pick) |
+| `PLACE_PAUSE_S` | `1.0` | Pause at start (simulated place) |
+| `STARTUP_DELAY_S` | `2.0` | Wait for sim to settle before moving |
+
+Adjust if the robot overshoots / undershoots the shelf.
+
+## What we expect to break first time
+
+Honest list — this scaffolding is unverified (written without a Gazebo Harmonic machine to test on). Likely issues you may hit:
+
+1. **Caster scraping.** The caster is a fixed-joint sphere; depending on Gazebo friction defaults the robot may resist turning. If the diff-drive doesn't move smoothly, lower friction in the SDF or replace caster with a free ball-joint sphere.
+2. **Topic naming mismatch.** Gazebo Harmonic's `DiffDrive` plugin defaults the cmd_vel topic to `/model/<model_name>/cmd_vel`. The bridge config assumes the model name is exactly `pos_robot` (matches the launch file's `-name` argument). If you rename the model, update `config/gz_bridge.yaml`.
+3. **`use_sim_time`.** The task node uses wall-clock `time.sleep`, not sim time, so this works regardless. But if you change that, remember to pass `use_sim_time:=true`.
+4. **`gz` vs `ign` commands.** All commands here assume Gazebo Harmonic (`gz` CLI). If you accidentally have Gazebo Fortress installed, swap to `ign`.
+
+Report any of these and we'll fix in a follow-up PR.
+
+## Where we go next (proposed)
+
+- **v2_arm_dynamics** — replace the cosmetic arm with a 3-DOF arm + gripper, driven via `ros2_control`. The task script moves arm joints during the "pick" pause instead of just sleeping.
+- **v3_kinematic_grasp** — add Gazebo's detachable-joint plugin so the gripper actually "grasps" a bottle and carries it on the tray.
+- **v4_nav2** — replace open-loop `cmd_vel` with Nav2 navigation to known shelf waypoints.
+- **v5_perception** — replace Gazebo ground-truth pose with OpenCV HSV detection on an RGB-D camera.
+- **v6_moveit** — replace hand-coded joint trajectories with MoveIt 2 motion planning.
+
+Each is a separate sibling folder so this v1 stays stable as a "hello world" baseline.
