@@ -30,6 +30,18 @@
       <link name="link">
         <collision name="collision">
           <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <!-- Explicit ground friction so the diff-drive wheels can get
+               traction. Without a surface block, the default contact
+               friction can be effectively zero and the wheels spin in
+               place. -->
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>1.0</mu2>
+              </ode>
+            </friction>
+          </surface>
         </collision>
         <visual name="visual">
           <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>

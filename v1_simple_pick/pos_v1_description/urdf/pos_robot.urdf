@@ -17,9 +17,13 @@
   joint_trajectory_controller's PID can do proper torque-based motion
   (gravity is handled by the integral term) and the gripper can apply
   a real squeeze force on the can for friction-based grasping. The
-  drive wheels are still driven by gz-sim's diff_drive plugin; they
-  appear in <ros2_control> as state-only so joint_state_broadcaster
-  publishes them too.
+  drive wheels are driven by gz-sim's DiffDrive plugin and are
+  DELIBERATELY NOT listed in <ros2_control>: when wheel joints are
+  registered with gz_ros2_control (even as state-only), the plugin's
+  hardware interface claims their actuators and the DiffDrive
+  velocity commands get clobbered every tick. /joint_states therefore
+  doesn't include the wheels — that's fine, the pick_and_place task
+  uses /odom (from DiffDrive) for the base, not joint states.
 
   This file is xacro — process it through xacro before passing to
   robot_state_publisher / Gazebo. The launch file does that.
@@ -334,22 +338,21 @@
        ros2_control HARDWARE BLOCK
        Effort interfaces on arm + gripper joints (so PID inside
        joint_trajectory_controller can do gravity-compensating torque
-       control). Wheel joints are state-only — the diff_drive plugin
-       owns the wheel commands.
+       control).
+
+       DELIBERATELY OMITTED: the drive wheels. Earlier versions had
+       left_wheel_joint and right_wheel_joint here as state-only "so
+       joint_state_broadcaster publishes them too", but that broke
+       motion: once gz_ros2_control loaded its hardware interface, it
+       claimed the wheel actuators every tick and the DiffDrive
+       plugin's JointVelocityCmd was overridden. The robot would sit
+       still no matter what was published on /cmd_vel. The wheels are
+       owned exclusively by the gz-sim DiffDrive plugin now.
        ============================================================ -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
-
-    <joint name="left_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="right_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
 
     <joint name="arm_shoulder_joint">
       <command_interface name="effort"/>
@@ -414,6 +417,22 @@
   <gazebo reference="caster">
     <mu1>0.05</mu1>
     <mu2>0.05</mu2>
+  </gazebo>
+
+  <!-- Explicit high friction on the drive wheels. Without an explicit
+       surface, ODE/DART can fall back to near-zero friction and the
+       wheels spin without traction. -->
+  <gazebo reference="left_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>50</kd>
+  </gazebo>
+  <gazebo reference="right_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>50</kd>
   </gazebo>
 
   <!-- High friction on finger pads so the gripper can hold the can.
