@@ -1,29 +1,35 @@
-"""Mobile-manipulator pick-and-place demo for place-items-on-shelf v1.
+"""Mobile-manipulator pick-and-place demo for place-items-on-shelf v1 (Tier 2).
 
-The robot:
-  1. Releases the initial pre-attached grasp joint (DetachableJoint in the
-     URDF starts ATTACHED at world load — we detach so the can sits on the
-     shelf normally).
-  2. Drives forward to the shelf.
-  3. Extends the 3-DOF arm to a pre-grasp pose above the can.
-  4. Lowers the arm so the open gripper surrounds the can.
-  5. Closes the parallel-jaw gripper around the can.
-  6. Publishes /grasp/attach — the DetachableJoint re-forms at the current
-     gripper-to-can offset, so the can rigidly follows the gripper.
-  7. Lifts the arm and drives back to the start.
-  8. Lowers the arm over the tray.
-  9. Publishes /grasp/detach + opens the gripper — gravity drops the can
-     onto the tray.
- 10. Stows the arm.
+Architecture (changed since previous version):
 
-All durations are sim-seconds (use_sim_time=True) so timing tracks Gazebo's
-/clock and works correctly even on a slow RTF (WSL2 + Iris Xe runs at
-~40-60% RTF).
+* Arm + gripper are driven by ros2_control via gz_ros2_control. We publish
+  trajectory_msgs/JointTrajectory to /arm_controller/joint_trajectory and
+  /gripper_controller/joint_trajectory; joint_trajectory_controller with
+  EFFORT command interface (PID gains in controllers.yaml) does the rest.
+* Arm joint angles are computed by ANALYTICAL inverse kinematics
+  (see ik.py) from world-frame Cartesian targets, instead of hand-tuned
+  POSE_* constants.
+* Grasp is FRICTION-BASED: we command the fingers to a position INSIDE
+  the can (overshoot). The joint can't physically reach the target
+  because the can is in the way; the trajectory controller's PID
+  saturates its effort on that joint and the result is a sustained
+  squeeze force on the can. With high finger/can friction (mu=2.0,1.2)
+  that's plenty to hold a 355 g object. No DetachableJoint, no
+  set_pose teleport hack.
 
-Arm joint targets (POSE_*) are hand-tuned for the geometry in this folder
-(robot stopping at world x ≈ 1.5, soda can at world (1.88, 0, 0.5865)). If
-you change drive distance, can position, or link lengths, adjust them in
-the constants block below.
+Sequence:
+  INIT -> wait for controllers, stow arm + open gripper
+  S1   -> drive forward 1.5 m
+  S2   -> IK to pre-grasp pose (6 cm above can, gripper horizontal)
+  S3   -> IK to grasp pose (gripper at can centre)
+  S4   -> close gripper (command 0.018; can blocks at 0.033 -> squeeze)
+  S5   -> IK to lift pose (15 cm above shelf, gripper horizontal)
+  S6   -> IK to carry pose (above tray front, gripper still horizontal so
+          the can stays vertical between the finger pads)
+  S7   -> drive back 1.5 m (still carrying)
+  S8   -> IK to place pose (just above tray top)
+  S9   -> open gripper -> can drops onto tray
+  S10  -> stow arm
 """
 
 import rclpy
@@ -31,41 +37,74 @@ from rclpy.duration import Duration
 from rclpy.parameter import Parameter
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Empty, Float64
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from builtin_interfaces.msg import Duration as RosDuration
+
+from pos_v1_task.ik import ik_solve, shoulder_frame, IKError
 
 
 # ============================================================================
-# Tunables
+# Tunables — durations sim-s, distances metres, angles radians.
 # ============================================================================
-DRIVE_SPEED = 0.2           # m/s
-DRIVE_TIME_S = 7.5          # 1.5 m forward (and back) at 0.2 m/s
-STARTUP_DELAY_S = 3.0       # let Gazebo, controllers, and the initial
-                            # detach settle before commanding motion
-ARM_MOVE_TIME_S = 2.5       # sim-s allowed for arm to reach a new pose
-GRIPPER_MOVE_TIME_S = 1.0   # sim-s for fingers to open/close
-GRASP_SETTLE_S = 0.5        # sim-s after attach/detach
+DRIVE_SPEED = 0.2
+DRIVE_TIME_S = 7.5             # 1.5 m at 0.2 m/s
+STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
+ARM_MOVE_TIME_S = 3.0          # sim-s for each arm-trajectory point
+GRIPPER_CLOSE_TIME_S = 1.5
+GRIPPER_OPEN_TIME_S = 0.8
+SETTLE_S = 0.5                 # post-motion pause
 PUBLISH_PERIOD_S = 0.05
 
-# ---- Arm poses: (shoulder, elbow, wrist) in radians ----
-# At all-zeros the arm points horizontally forward at shoulder height
-# (world z ≈ 0.575 when the robot is at its spawn z=0.1). Positive
-# shoulder pitch raises the arm.
-POSE_STOW       = (-1.30,  2.20,  0.00)   # arm folded back over the column
-POSE_PRE_GRASP  = ( 0.10,  0.00,  0.00)   # arm extended, slightly raised
-POSE_GRASP      = ( 0.02, -0.05,  0.00)   # gripper at can-grip height
-POSE_LIFT       = ( 0.40, -0.30,  0.00)   # raised above shelf top
-POSE_CARRY      = ( 1.10, -2.00,  0.80)   # folded up, gripper over tray
-POSE_PLACE      = ( 0.55, -2.00,  1.15)   # arm angled down toward tray
+# ---- Target object (from store.sdf) ----
+CAN_X = 1.88
+CAN_Z = 0.5865     # can centre height (shelf top 0.525 + half can 0.0615)
+CAN_TOP_Z = 0.648  # shelf top + can height
 
-# ---- Gripper finger offsets (per-finger, metres) ----
-GRIPPER_OPEN   = 0.045   # ~90 mm between fingertips
-GRIPPER_GRASP  = 0.032   # snug around 66 mm can diameter
-GRIPPER_CLOSED = 0.005
+# ---- Gripper orientations ----
+PHI_HORIZONTAL = 0.0       # gripper pointing forward — fingers vertical,
+                           # can held vertically between them
+
+# ---- Arm targets ----
+# Above-can poses are world-frame (the can sits at a known world pose).
+PRE_GRASP_WORLD = (CAN_X, CAN_Z + 0.06, PHI_HORIZONTAL)
+GRASP_WORLD     = (CAN_X, CAN_Z,        PHI_HORIZONTAL)
+LIFT_WORLD      = (CAN_X, CAN_Z + 0.15, PHI_HORIZONTAL)
+
+# Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
+# current robot_x at command time so they track the robot.
+#   tray extends x_robot ∈ [-0.225, 0.225]; top at z_world = 0.185.
+#   gripper x_robot = +0.15 keeps the gripper just forward of the tray
+#   centre — this also keeps the wrist angle within its ±2.0 rad limit.
+CARRY_ROBOT_XZ = (0.20, 0.30)      # 12 cm above tray top, x near tray front
+PLACE_ROBOT_XZ = (0.20, 0.23)      # 4.5 cm above tray top -> short drop
+
+# ---- Stow pose (hand-picked: arm folded back over the column) ----
+STOW_ANGLES = (-1.30, 2.20, 0.00)   # (shoulder, elbow, wrist)
+
+# ---- Gripper finger positions (per-finger offset from centreline, metres) ----
+GRIPPER_OPEN  = 0.045   # fully open (90 mm fingertip gap)
+GRIPPER_GRASP = 0.018   # OVERSHOOT inside the can (33 mm radius)
+                        # -> joint blocks at ~0.033, PID applies squeeze
+
+ARM_JOINTS = ['arm_shoulder_joint', 'arm_elbow_joint', 'arm_wrist_joint']
+GRIPPER_JOINTS = ['left_finger_joint', 'right_finger_joint']
 
 
 # ============================================================================
+def make_traj_msg(joint_names, positions, time_from_start_s):
+    msg = JointTrajectory()
+    msg.joint_names = list(joint_names)
+    pt = JointTrajectoryPoint()
+    pt.positions = [float(p) for p in positions]
+    pt.velocities = [0.0] * len(positions)
+    sec = int(time_from_start_s)
+    nsec = int((time_from_start_s - sec) * 1e9)
+    pt.time_from_start = RosDuration(sec=sec, nanosec=nsec)
+    msg.points.append(pt)
+    return msg
+
+
 def wait_sim_seconds(node, duration_s):
-    """Block until ``duration_s`` SIMULATED seconds have elapsed."""
     clock = node.get_clock()
     target = clock.now() + Duration(seconds=duration_s)
     while clock.now() < target:
@@ -73,7 +112,6 @@ def wait_sim_seconds(node, duration_s):
 
 
 def drive(node, pub, linear_x, duration_s):
-    """Publish a constant Twist for ``duration_s`` SIM seconds, then stop."""
     cmd = Twist()
     cmd.linear.x = linear_x
     clock = node.get_clock()
@@ -85,57 +123,53 @@ def drive(node, pub, linear_x, duration_s):
 
 
 class PickAndPlace:
-    """Holds publishers + state for the pick-and-place sequence."""
-
     def __init__(self, node):
         self.node = node
         self.logger = node.get_logger()
-
         self.cmd_vel = node.create_publisher(Twist, '/cmd_vel', 10)
-        self.pub_shoulder = node.create_publisher(Float64, '/arm/shoulder_cmd', 10)
-        self.pub_elbow = node.create_publisher(Float64, '/arm/elbow_cmd', 10)
-        self.pub_wrist = node.create_publisher(Float64, '/arm/wrist_cmd', 10)
-        self.pub_left_finger = node.create_publisher(Float64, '/gripper/left_cmd', 10)
-        self.pub_right_finger = node.create_publisher(Float64, '/gripper/right_cmd', 10)
-        self.pub_attach = node.create_publisher(Empty, '/grasp/attach', 10)
-        self.pub_detach = node.create_publisher(Empty, '/grasp/detach', 10)
-
+        self.pub_arm = node.create_publisher(
+            JointTrajectory, '/arm_controller/joint_trajectory', 10
+        )
+        self.pub_gripper = node.create_publisher(
+            JointTrajectory, '/gripper_controller/joint_trajectory', 10
+        )
         self.robot_x = 0.0
         node.create_subscription(Odometry, '/odom', self._on_odom, 10)
 
     def _on_odom(self, msg):
         self.robot_x = msg.pose.pose.position.x
 
-    # ------ command helpers ----------------------------------------------
-    def arm(self, pose):
-        s, e, w = pose
-        self.pub_shoulder.publish(Float64(data=float(s)))
-        self.pub_elbow.publish(Float64(data=float(e)))
-        self.pub_wrist.publish(Float64(data=float(w)))
+    # ---- arm helpers ----
+    def send_arm_angles(self, s, e, w, time_s=ARM_MOVE_TIME_S):
+        self.pub_arm.publish(make_traj_msg(ARM_JOINTS, [s, e, w], time_s))
 
-    def gripper(self, offset):
-        msg = Float64(data=float(offset))
-        # Both fingers driven symmetrically; their joint axes are mirrored
-        # in the URDF so the same positive value opens both.
-        self.pub_left_finger.publish(msg)
-        self.pub_right_finger.publish(msg)
+    def move_arm_to_world(self, x_world, z_world, phi, time_s=ARM_MOVE_TIME_S):
+        """Solve IK from a world-frame target and command the arm."""
+        sx, sz = shoulder_frame(x_world, z_world, self.robot_x)
+        try:
+            s, e, w = ik_solve(sx, sz, phi, elbow_up=True)
+        except IKError as exc:
+            self.logger.error(f'IK failed: {exc}')
+            raise
+        self.logger.info(
+            f'  IK target_world=({x_world:.3f},{z_world:.3f},phi={phi:+.3f}) '
+            f'shoulder=({sx:+.3f},{sz:+.3f}) -> S={s:+.3f} E={e:+.3f} W={w:+.3f}'
+        )
+        self.send_arm_angles(s, e, w, time_s)
 
-    def grasp_attach(self):
-        # Burst-publish to make sure the bridge has time to deliver.
-        for _ in range(5):
-            self.pub_attach.publish(Empty())
-            rclpy.spin_once(self.node, timeout_sec=0.02)
+    def move_arm_to_robot_xz(self, x_robot, z_world, phi, time_s=ARM_MOVE_TIME_S):
+        """Move arm so the gripper is at (robot_x + x_robot, z_world) in world."""
+        self.move_arm_to_world(self.robot_x + x_robot, z_world, phi, time_s)
 
-    def grasp_detach(self):
-        for _ in range(5):
-            self.pub_detach.publish(Empty())
-            rclpy.spin_once(self.node, timeout_sec=0.02)
+    # ---- gripper helpers ----
+    def send_gripper(self, offset, time_s=GRIPPER_CLOSE_TIME_S):
+        self.pub_gripper.publish(
+            make_traj_msg(GRIPPER_JOINTS, [offset, offset], time_s)
+        )
 
 
 def main():
     rclpy.init()
-    # use_sim_time=True so get_clock() reads from /clock (published by
-    # Gazebo via the ros_gz_bridge).
     node = rclpy.create_node(
         'pick_and_place',
         parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)],
@@ -145,68 +179,63 @@ def main():
     logger = pp.logger
 
     # ---- INIT ----
-    logger.info('INIT: detach pre-attached grasp joint so the can rests on the shelf')
-    pp.grasp_detach()
-    pp.arm(POSE_STOW)
-    pp.gripper(GRIPPER_OPEN)
-    logger.info(f'  waiting {STARTUP_DELAY_S:.1f}s (sim) for sim + controllers to settle')
+    logger.info(f'INIT: waiting {STARTUP_DELAY_S:.1f}s (sim) for controllers + sim')
     wait_sim_seconds(node, STARTUP_DELAY_S)
+    pp.send_arm_angles(*STOW_ANGLES, time_s=2.0)
+    pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
+    wait_sim_seconds(node, 2.5)
 
     # ---- STAGE 1: drive forward ----
     logger.info('STAGE 1: driving forward to shelf')
     drive(node, pp.cmd_vel, +DRIVE_SPEED, DRIVE_TIME_S)
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
+    wait_sim_seconds(node, SETTLE_S)
 
-    # ---- STAGE 2: arm to pre-grasp (above the can) ----
-    logger.info('STAGE 2: extending arm to pre-grasp pose (above can)')
-    pp.arm(POSE_PRE_GRASP)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
+    # ---- STAGE 2: pre-grasp ----
+    logger.info('STAGE 2: pre-grasp pose (above can)')
+    pp.move_arm_to_world(*PRE_GRASP_WORLD)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 3: lower arm to grasp pose ----
-    logger.info('STAGE 3: lowering arm so gripper surrounds the can')
-    pp.arm(POSE_GRASP)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
+    # ---- STAGE 3: grasp pose ----
+    logger.info('STAGE 3: grasp pose (gripper at can centre)')
+    pp.move_arm_to_world(*GRASP_WORLD)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 4: close gripper around can ----
-    logger.info('STAGE 4: closing gripper around can')
-    pp.gripper(GRIPPER_GRASP)
-    wait_sim_seconds(node, GRIPPER_MOVE_TIME_S)
+    # ---- STAGE 4: close gripper (friction grasp) ----
+    logger.info(f'STAGE 4: closing gripper (target {GRIPPER_GRASP:.3f} — overshoots can radius)')
+    pp.send_gripper(GRIPPER_GRASP)
+    wait_sim_seconds(node, GRIPPER_CLOSE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 5: attach grasp joint ----
-    logger.info('STAGE 5: attaching grasp joint (can rigidly follows gripper)')
-    pp.grasp_attach()
-    wait_sim_seconds(node, GRASP_SETTLE_S)
+    # ---- STAGE 5: lift can clear of shelf ----
+    logger.info('STAGE 5: lift pose')
+    pp.move_arm_to_world(*LIFT_WORLD)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 6: lift arm above shelf ----
-    logger.info('STAGE 6: lifting arm above the shelf')
-    pp.arm(POSE_LIFT)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
+    # ---- STAGE 6: carry pose (gripper stays horizontal -> can stays vertical) ----
+    logger.info('STAGE 6: carry pose (above tray, gripper horizontal)')
+    pp.move_arm_to_robot_xz(CARRY_ROBOT_XZ[0], CARRY_ROBOT_XZ[1], PHI_HORIZONTAL)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 7: fold arm into carry pose over tray ----
-    logger.info('STAGE 7: folding arm to carry pose')
-    pp.arm(POSE_CARRY)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
-
-    # ---- STAGE 8: drive back to start ----
-    logger.info('STAGE 8: driving back to start (carrying can)')
+    # ---- STAGE 7: drive back ----
+    logger.info('STAGE 7: driving back to start (carrying can)')
     drive(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_TIME_S)
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
+    wait_sim_seconds(node, SETTLE_S)
 
-    # ---- STAGE 9: lower arm over tray ----
-    logger.info('STAGE 9: lowering arm over tray (place pose)')
-    pp.arm(POSE_PLACE)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
+    # ---- STAGE 8: lower arm to place pose ----
+    logger.info('STAGE 8: place pose (just above tray)')
+    pp.move_arm_to_robot_xz(PLACE_ROBOT_XZ[0], PLACE_ROBOT_XZ[1], PHI_HORIZONTAL)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 10: release (detach + open gripper) ----
-    logger.info('STAGE 10: detaching grasp joint + opening gripper — can drops onto tray')
-    pp.grasp_detach()
-    pp.gripper(GRIPPER_OPEN)
-    wait_sim_seconds(node, GRIPPER_MOVE_TIME_S + GRASP_SETTLE_S)
+    # ---- STAGE 9: open gripper -> can drops onto tray ----
+    logger.info('STAGE 9: opening gripper — can drops onto tray')
+    pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
+    wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.5)   # let it settle
 
-    # ---- STAGE 11: stow ----
-    logger.info('STAGE 11: stowing arm')
-    pp.arm(POSE_STOW)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S)
+    # ---- STAGE 10: stow ----
+    logger.info('STAGE 10: stowing arm')
+    pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
+    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
     logger.info('Done.')
     node.destroy_node()

@@ -1,188 +1,190 @@
-# v1_simple_pick — mobile-manipulator pick-and-place
+# v1_simple_pick — mobile-manipulator pick-and-place (Tier 2)
 
-This is the first runnable end-to-end demo of place-items-on-shelf. A
-differential-drive mobile base with an attached 3-DOF arm and parallel-jaw
-gripper drives to a shelf, picks up a standard 355 ml soda can, carries it
-back, and places it on an onboard tray.
+End-to-end demo: a differential-drive mobile base with an attached 3-DOF
+arm and parallel-jaw gripper drives to a shelf, picks up a real-sized
+soda can with a friction grasp, drives back, and places it on its onboard
+tray.
 
-The robot structure is the canonical "mobile manipulator" pairing seen in
-ROS courses (a small diff-drive base + a Robotis-OpenManipulator-X-style 4-link
-arm with a parallel-jaw gripper), built from scratch in URDF so it has
-zero external package dependencies. The target object is a standard
-355 ml soda can (66 mm diameter × 123 mm tall, 355 g) — real-world
-dimensions so the gripper geometry, arm reach, and shelf height are all
-constrained by something physical.
-
-## Architecture
+## Architecture (Tier 2 — switched off the gz-sim per-joint controllers)
 
 ```
-                 ┌────────────┐  /cmd_vel               ┌─────────────────┐
-                 │ task node  │ /arm/{shoulder,elbow,   │  Gazebo Harmonic │
-   logs to T2 ←──│ (Python)   │  wrist}_cmd            ─┤  store.sdf world │
-                 │            │ /gripper/{left,right}_  │   + pos_robot    │
-                 │            │  cmd                    │   (URDF spawned) │
-                 │            │ /grasp/{attach,detach}  │                  │
-                 └────────────┘  /odom (in)             └─────────────────┘
-                       ▲                                       │
-                       └────── ros_gz_bridge (config YAML) ───┘
+       /cmd_vel                              ┌────────────────────┐
+       ─────────►  ros_gz_bridge ────────────►  Gazebo Harmonic    │
+       /odom                                 │   store.sdf world   │
+       ◄─────────                            │   pos_robot (URDF)  │
+                                             │                    │
+       /arm_controller/joint_trajectory      │   ┌──────────────┐ │
+       ──────────────────────────────────────┼──►│gz_ros2_control│ │
+       /gripper_controller/joint_trajectory  │   │ (in-process   │ │
+       ──────────────────────────────────────┼──►│ controller_mgr│ │
+       /joint_states                         │   │ + JTC effort  │ │
+       ◄────────────────────────────────────-┤   │ PID per joint)│ │
+                                             │   └──────────────┘ │
+                                             └────────────────────┘
 ```
 
-The task node sequences nine stages: drive forward → arm pre-grasp → arm
-grasp → close gripper → attach detachable joint → lift → carry-fold →
-drive back → arm place → detach + open gripper. Each arm command is
-absorbed by a `gz-sim-joint-position-controller-system` plugin in the
-URDF, one per joint. The grasp itself uses `gz-sim-detachable-joint-system`:
-the plugin is declared in the robot URDF with the soda can as its child
-model, starts ATTACHED at world load, and the task script publishes
-`/grasp/detach` during startup to release it. At grasp time, the script
-publishes `/grasp/attach` and the joint re-forms at the current
-gripper-to-can offset, so the can rigidly follows the gripper. The release
-publishes detach again and gravity drops the can onto the tray.
-
-## What v1 does NOT do (deferred to later versions)
-
-- **Closed-loop control.** Arm motions are open-loop sequences of
-  hand-tuned joint angles, no trajectory planning, no IK, no MoveIt.
-  Drive distance is sim-time-based, not odometry-feedback-based.
-- **Perception.** The can position is hard-coded; no camera, no detection.
-- **Navigation.** No Nav2 — just straight `cmd_vel` for a fixed sim time.
-- **Friction-based grasp.** The grasp is rigidly held by a Gazebo
-  DetachableJoint, not by friction between the gripper fingers and the
-  can. The fingers visibly close around the can, but the joint is what
-  actually keeps it in the gripper.
+| Subsystem | What changed in Tier 2 |
+|---|---|
+| Arm control | gz-sim per-joint `JointPositionController` plugins → ros2_control + `joint_trajectory_controller` (effort interface, PID gains) hosted in-process by `gz_ros2_control`. |
+| Arm targets | Hand-tuned `POSE_*` joint angles → **3-DOF analytical IK** (`ik.py`) from world-frame Cartesian targets. |
+| Grasp | `DetachableJoint` runtime attach/detach hack → **friction-based grasp**: fingers are commanded to overshoot inside the can (target 0.018 m vs can radius 0.033 m), so the JTC's saturated effort becomes a sustained squeeze. Mu = 2.0 on the finger pads, 1.2 on the can. |
+| Joint states | `gz-sim-joint-state-publisher` → `joint_state_broadcaster` (covers wheels as state-only via ros2_control). |
+| URDF | Plain URDF → xacro (so `$(find pos_v1_bringup)/config/controllers.yaml` can be resolved to an absolute path at launch time). |
+| Base + column | Mass and inertia bumped (12 kg base, 2 kg column) so the cantilevered arm can't pitch the base forward. |
 
 ## Packages
 
 | Package | Role |
 |---|---|
-| `pos_v1_description` | Robot URDF (base + 3-DOF arm + 2-finger gripper, all gz-sim plugins) |
-| `pos_v1_bringup` | Gazebo world (`store.sdf`), launch file, ROS↔Gazebo bridge config |
-| `pos_v1_task` | Python node that sequences the pick-and-place behaviour |
+| `pos_v1_description` | Robot URDF (xacro). Defines the diff-drive base, 3-DOF arm, parallel-jaw gripper, and the `<ros2_control>` hardware block. |
+| `pos_v1_bringup` | Gazebo world (`store.sdf`), launch (`sim.launch.py`), bridge config (`gz_bridge.yaml`), controller config (`controllers.yaml`). |
+| `pos_v1_task` | Python pick-and-place node (`pick_and_place.py`) and the IK helper (`ik.py`). |
 
-## Build (on WSL2 Ubuntu 24.04 with ROS 2 Jazzy)
+## Install / build
 
-Assuming your workspace is `~/ros2_ws` and this repo is cloned at
-`~/ros2_ws/src/place-items-on-shelf/`:
+On WSL2 Ubuntu 24.04 with ROS 2 Jazzy:
 
 ```bash
-# (one-time) symlink so colcon discovers the v1 packages under a short path
-ln -s ~/ros2_ws/src/place-items-on-shelf/v1_simple_pick ~/ros2_ws/src/pos_v1
+# install ros2_control + the Gazebo plugin (only required if you don't have them)
+sudo apt update
+sudo apt install \
+  ros-jazzy-ros2-control \
+  ros-jazzy-ros2-controllers \
+  ros-jazzy-joint-trajectory-controller \
+  ros-jazzy-joint-state-broadcaster \
+  ros-jazzy-gz-ros2-control \
+  ros-jazzy-xacro
+```
 
-# build only the v1 packages
+Then in your workspace root:
+
+```bash
 cd ~/ros2_ws
-rosdep install --from-paths src/pos_v1 --ignore-src -r -y
+rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select pos_v1_description pos_v1_bringup pos_v1_task
 source install/setup.bash
 ```
 
-`colcon build` also works without the symlink — it scans recursively — but
-the symlink keeps the `--packages-select` line short.
+**Always run `colcon build` from the workspace root (`~/ros2_ws`), not
+from inside `src/...`.** Otherwise colcon creates a second install tree
+that Gazebo won't see, and you'll be silently running the old URDF.
 
 ## Run
 
-In **terminal 1**:
+Terminal 1:
 ```bash
-source ~/ros2_ws/install/setup.bash
 ros2 launch pos_v1_bringup sim.launch.py
 ```
 
-You should see Gazebo with: a blue boxy robot (orange arm folded over its
-back, two-finger gripper at the end), a brown shelf in front of it, and a
-single red soda can on the shelf. The arm starts in a stowed pose.
+You should see the spawners load in order: `joint_state_broadcaster
+loaded` → `arm_controller loaded` → `gripper_controller loaded`. If any
+spawner times out, the controllers.yaml or the gz_ros2_control plugin
+isn't being picked up (see "What breaks first" below).
 
-In **terminal 2** (after Gazebo is fully loaded):
+Terminal 2 (after Gazebo is fully up and all three spawners report
+success):
 ```bash
-source ~/ros2_ws/install/setup.bash
 ros2 run pos_v1_task pick_and_place
 ```
 
-Sequence (sim-seconds):
+Stages (sim-time):
 
 | Stage | What you should see |
 |---|---|
-| INIT (3 s) | Arm stows, gripper opens, grasp joint detaches (can stays on shelf) |
-| 1 (7.5 s)  | Robot drives forward to the shelf |
-| 2 (2.5 s)  | Arm extends out forward, gripper above can |
-| 3 (2.5 s)  | Arm lowers so gripper surrounds the can |
-| 4 (1.0 s)  | Gripper fingers close around the can |
-| 5 (0.5 s)  | Grasp joint re-attaches (can is now "held") |
-| 6 (2.5 s)  | Arm lifts can clear of the shelf |
-| 7 (2.5 s)  | Arm folds up over the tray (can goes with it) |
-| 8 (7.5 s)  | Robot drives back to the start, still carrying the can |
-| 9 (2.5 s)  | Arm lowers toward the tray |
-| 10 (1.5 s) | Grasp joint detaches, gripper opens, can drops onto tray |
-| 11 (2.5 s) | Arm stows |
+| INIT (5 + 2.5 s) | Arm settles into the stow pose, gripper opens |
+| 1 (7.5 s)        | Robot drives ~1.5 m forward to the shelf |
+| 2 (3 s)          | IK extends arm above the can (gripper horizontal) |
+| 3 (3 s)          | Arm lowers; gripper surrounds the can |
+| 4 (1.5 s)        | Fingers close — squeeze force builds up against the can |
+| 5 (3 s)          | Arm lifts the can clear of the shelf |
+| 6 (3 s)          | Arm folds back, gripper stays horizontal over the tray |
+| 7 (7.5 s)        | Robot drives back, can held in the gripper by friction |
+| 8 (3 s)          | Arm lowers to just above the tray |
+| 9 (~2 s)         | Gripper opens, can drops a few cm onto the tray |
+| 10 (3 s)         | Arm stows |
 
-Total sim-time ≈ 39 s. Wall-clock will be ~80–90 s on WSL2 + Iris Xe (RTF
-~45%) — that's expected and not a bug.
+Total ≈ 42 sim-s. Wall-clock ≈ 90 s on WSL/Iris Xe (RTF ~0.45).
 
 ## Tunable knobs
 
-Top of `pos_v1_task/pos_v1_task/pick_and_place.py`:
+### Cartesian targets (`pos_v1_task/pos_v1_task/pick_and_place.py`)
 
 | Constant | Default | Meaning |
 |---|---|---|
-| `DRIVE_SPEED` | `0.2` m/s | Linear speed forward and back |
-| `DRIVE_TIME_S` | `7.5` | Sim-s to drive (1.5 m at 0.2 m/s) |
-| `STARTUP_DELAY_S` | `3.0` | Sim-s for sim + controllers + initial detach to settle |
-| `ARM_MOVE_TIME_S` | `2.5` | Sim-s allowed for a single arm joint move |
-| `GRIPPER_MOVE_TIME_S` | `1.0` | Sim-s for fingers to open/close |
-| `POSE_*` | varies | (shoulder, elbow, wrist) target angles in radians |
-| `GRIPPER_*` | varies | Finger offsets in metres (0=closed, 0.045=fully open) |
+| `CAN_X`, `CAN_Z` | `1.88`, `0.5865` | Can centre (world) — keep in sync with `store.sdf` |
+| `PRE_GRASP_WORLD` z | `CAN_Z + 0.06` | Approach height above can |
+| `LIFT_WORLD` z | `CAN_Z + 0.15` | Clearance height after grasp |
+| `CARRY_ROBOT_XZ` | `(0.20, 0.30)` | Gripper position above tray during transport (robot frame) |
+| `PLACE_ROBOT_XZ` | `(0.20, 0.23)` | Drop height — 4.5 cm above tray top |
+| `GRIPPER_GRASP` | `0.018` | Finger target — must be < can radius (0.033) for the friction grasp to grip |
 
-PID gains for each joint controller are in `pos_v1_description/urdf/pos_robot.urdf`
-inside the `<gazebo>` block — one `gz::sim::systems::JointPositionController`
-plugin per joint.
+If a target is unreachable, `ik_solve` raises `IKError` and the script
+logs which target failed. Move the target closer to the shoulder or
+choose a different gripper orientation `phi`.
 
-## What we expect to break first time
+### Controller PID gains (`pos_v1_bringup/config/controllers.yaml`)
 
-This is the first attempt at the proper-arm version and it has not been
-tested on the user's machine. Likely issues:
+Per-joint `p`, `i`, `d`, `i_clamp` for the joint_trajectory_controller's
+internal PID. Symptoms and which knob to turn:
 
-1. **Arm pose tuning.** `POSE_PRE_GRASP` / `POSE_GRASP` assume the robot
-   stops with its base centre at world x ≈ 1.5 and the can at world
-   (1.88, 0, 0.5865). If `git pull` plus a fresh `colcon build` shows the
-   gripper missing the can (too high, too low, too far, too close), nudge
-   `POSE_GRASP`'s shoulder ±0.05 rad (height) or `DRIVE_TIME_S` ±0.5
-   (distance).
-2. **PID gains.** Joint controller P/I/D defaults are conservative. If a
-   joint visibly oscillates or undershoots its target by a lot, edit the
-   `<p_gain>` / `<d_gain>` for that joint in the URDF and rebuild
-   `pos_v1_description`.
-3. **DetachableJoint at world load.** The plugin defaults to ATTACHED, so
-   there's a brief window between Gazebo loading the world and the task
-   script publishing the first `/grasp/detach` where the can is rigidly
-   linked to the gripper 1.5 m away. If `STARTUP_DELAY_S` is too short
-   (or the task is started before Gazebo finishes loading), the can may
-   start in a weird place. The 3-s default and "start the task only after
-   Gazebo is fully up" should handle this; if you see the can floating in
-   mid-air or stuck to the gripper, restart and wait longer before
-   running the task.
-4. **Topic naming mismatch.** Gazebo Harmonic's `DiffDrive` plugin defaults
-   to `/model/<model_name>/cmd_vel`. The bridge assumes the model name is
-   exactly `pos_robot` (matches the launch file's `-name` arg). The
-   joint-state topic name uses both world name (`store`) and model name —
-   if you rename either, update `config/gz_bridge.yaml`.
-5. **`gz` vs `ign` commands.** All commands assume Gazebo Harmonic (`gz`
-   CLI). If you have Gazebo Fortress instead, swap to `ign`.
+- Arm sags under gravity → increase `i_clamp` on the affected joint.
+- Arm overshoots and oscillates → reduce `p`, increase `d`.
+- Gripper can't hold the can (it slips down during the drive back) →
+  increase finger `p` so saturated effort is higher, or lower
+  `GRIPPER_GRASP` (more overshoot → bigger steady-state error → more
+  effort).
+- Joint wobbles even at rest → increase joint `damping` in the URDF.
 
-Report any of these and we'll fix in a follow-up commit.
+### Friction (URDF `<gazebo reference="...">`)
 
-## Where we go next (proposed)
+`mu1`/`mu2` on `left_finger`, `right_finger`, and the soda can's
+collision in `store.sdf`. Higher is grippier; if the can keeps slipping
+out of the gripper even with the squeeze force pinned, raise these.
 
-- **v2_ros2_control** — replace the per-joint gz-sim
-  `JointPositionController` plugins with a proper `ros2_control` hardware
-  interface + `joint_trajectory_controller`. Lets us send trajectories
-  instead of single position setpoints.
-- **v3_friction_grasp** — drop the DetachableJoint, rely on contact-based
-  friction between gripper fingers and the can. Closer to real-world
-  physics.
-- **v4_nav2** — replace open-loop `cmd_vel` with Nav2 navigation to shelf
-  waypoints.
-- **v5_perception** — replace hard-coded can position with OpenCV HSV
-  detection on an RGB-D camera.
-- **v6_moveit** — replace `POSE_*` constants with MoveIt 2 motion planning
-  from current pose to a target Cartesian pose.
+## What still doesn't work / future versions
 
-Each is a separate sibling folder so this v1 stays as a "hello world"
-baseline.
+- **No sensors.** No camera, no IMU, no lidar. The can's pose is
+  hard-coded.
+- **No navigation.** Drive is open-loop `cmd_vel` for a fixed sim
+  duration. Robot would happily plough through an obstacle.
+- **No motion planning.** The arm follows a fixed 9-pose IK script. No
+  obstacle avoidance; if you put the shelf 5 cm closer to the robot,
+  the arm would collide with it on the way down.
+- **No closed-loop grasp.** No force or tactile feedback — we just
+  assume the can is gripped after the trajectory completes.
+
+These are the deferred items in the original Tier 3+ list:
+- **v2_*sensors*** — add camera/lidar/IMU to the URDF.
+- **v3_nav2** — SLAM-toolbox + Nav2 driving the base.
+- **v4_perception** — OpenCV HSV detection of the can on the camera.
+- **v5_moveit** — MoveIt 2 motion planning instead of hand-stitched poses.
+
+## What breaks first time
+
+This Tier-2 rebuild has not been tested on a real Gazebo machine. Watch
+for these failures:
+
+1. **`gz_ros2_control` plugin not found.** Make sure
+   `ros-jazzy-gz-ros2-control` is installed (`apt list --installed | grep
+   gz-ros2-control`). The plugin filename in the URDF is
+   `gz_ros2_control-system`; if your apt-installed name is different,
+   the Gazebo console will say `Could not load plugin library`.
+2. **Controllers fail to spawn.** Symptom: `arm_controller` spawner
+   times out. Cause is usually one of:
+     - `controllers.yaml` path didn't get resolved by xacro — check
+       `ros2 param dump /controller_manager` and confirm that the
+       joint and gain names you expect are listed.
+     - PID gain key names don't match controllers.yaml schema (the
+       schema is `gains.<joint_name>.{p,i,d,i_clamp,ff_velocity_scale}`).
+3. **Arm sags during STOW.** PID integral hasn't built up yet. Increase
+   `i_clamp` on the offending joint (in `controllers.yaml`) or wait
+   longer in INIT.
+4. **Gripper drops the can during the drive back.** Friction grasp is
+   inherently fragile. First try: increase finger `p` to 600,
+   `i_clamp` to 10. Second try: bump `mu1`/`mu2` on the fingers to 3.0.
+   Third try: reduce `DRIVE_SPEED` so accelerations during start-of-drive
+   are gentler.
+5. **Arm IK fails on a target.** The Python log prints `IK failed:
+   ...`. Either the target is out of reach (move it closer) or `phi`
+   forces a wrist angle outside ±2.0 rad (try `phi=0` instead of
+   `-pi/2`, or vice versa).

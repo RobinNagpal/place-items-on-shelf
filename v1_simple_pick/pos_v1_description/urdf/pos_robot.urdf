@@ -1,32 +1,33 @@
 <?xml version="1.0"?>
 <!--
-  pos_robot v1 — mobile manipulator for the place-items-on-shelf demo.
+  pos_robot v1 — mobile manipulator (Tier-2 build).
 
-  Structure (inspired by the Robotis OpenManipulator-X mounted on a small
-  differential-drive base — the canonical mobile-manipulator pairing used in
-  ROS tutorials/courses, simplified to 3-DOF + parallel-jaw gripper):
-
+  Structure:
     base_link (diff-drive box) ── left_wheel, right_wheel, caster, tray_link
                               └── arm_column (vertical post, rear of base)
                                   └── arm_shoulder  (revolute, axis Y)
                                       └── arm_elbow   (revolute, axis Y)
                                           └── arm_wrist  (revolute, axis Y)
                                               └── gripper_base (fixed)
-                                                  ├── left_finger  (prismatic, axis +Y)
-                                                  └── right_finger (prismatic, axis -Y)
+                                                  ├── left_finger  (prismatic +Y)
+                                                  └── right_finger (prismatic -Y)
 
-  Coordinate convention: each arm link's local +X points "out along the
-  link". So at all-zero joint angles the arm points straight forward in
-  world +X. Positive shoulder pitch rotates the arm upward.
+  Control: ros2_control + gz_ros2_control bridge + joint_trajectory_controller.
+  Arm + gripper joints use the EFFORT command interface so the
+  joint_trajectory_controller's PID can do proper torque-based motion
+  (gravity is handled by the integral term) and the gripper can apply
+  a real squeeze force on the can for friction-based grasping. The
+  drive wheels are still driven by gz-sim's diff_drive plugin; they
+  appear in <ros2_control> as state-only so joint_state_broadcaster
+  publishes them too.
 
-  Each arm/gripper joint has a gz-sim JointPositionController plugin
-  commanded by a std_msgs/Float64 (= gz.msgs.Double) topic. The bridge
-  config in pos_v1_bringup maps each Gazebo topic to a ROS topic.
+  This file is xacro — process it through xacro before passing to
+  robot_state_publisher / Gazebo. The launch file does that.
 -->
-<robot name="pos_robot">
+<robot name="pos_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ============================================================
-       BASE
+       BASE  (heavier than before so the arm can't pitch it forward)
        ============================================================ -->
   <link name="base_link">
     <visual>
@@ -37,8 +38,8 @@
       <geometry><box size="0.5 0.4 0.15"/></geometry>
     </collision>
     <inertial>
-      <mass value="5.0"/>
-      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+      <mass value="12.0"/>
+      <inertia ixx="0.40" ixy="0" ixz="0" iyy="0.40" iyz="0" izz="0.50"/>
     </inertial>
   </link>
 
@@ -112,9 +113,7 @@
   </joint>
 
   <!-- ============================================================
-       ONBOARD TRAY (the "shelf attached to the robot")
-       Tray top surface sits at world z ≈ 0.185 when the robot is at
-       its spawn height (z=0.1).
+       ONBOARD TRAY
        ============================================================ -->
   <link name="tray_link">
     <visual>
@@ -136,8 +135,8 @@
   </joint>
 
   <!-- ============================================================
-       ARM COLUMN  (vertical post, length 0.40)
-       Mounted at the rear of the base. Top of column hosts the shoulder.
+       ARM COLUMN  (stiffer + heavier than v1 to resist the moment
+       from the cantilevered arm).
        ============================================================ -->
   <link name="arm_column">
     <visual>
@@ -151,19 +150,18 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0.20"/>
-      <mass value="0.6"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/>
+      <mass value="2.0"/>
+      <inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.005"/>
     </inertial>
   </link>
   <joint name="arm_column_joint" type="fixed">
     <parent link="base_link"/>
     <child link="arm_column"/>
-    <origin xyz="-0.20 0 0.075" rpy="0 0 0"/>
+    <origin xyz="-0.15 0 0.075" rpy="0 0 0"/>
   </joint>
 
   <!-- ============================================================
        ARM SHOULDER  (revolute, axis Y, link length 0.25 along +X)
-       Angle 0 = pointing forward; positive pitch rotates upward.
        ============================================================ -->
   <link name="arm_shoulder">
     <visual>
@@ -186,8 +184,8 @@
     <child link="arm_shoulder"/>
     <origin xyz="0 0 0.40" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.6" upper="1.6" effort="25" velocity="2.0"/>
-    <dynamics damping="0.5"/>
+    <limit lower="-1.6" upper="1.6" effort="40" velocity="2.0"/>
+    <dynamics damping="1.0"/>
   </joint>
 
   <!-- ============================================================
@@ -214,8 +212,8 @@
     <child link="arm_elbow"/>
     <origin xyz="0.25 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.5" upper="2.5" effort="20" velocity="2.0"/>
-    <dynamics damping="0.4"/>
+    <limit lower="-2.5" upper="2.5" effort="30" velocity="2.0"/>
+    <dynamics damping="0.8"/>
   </joint>
 
   <!-- ============================================================
@@ -242,8 +240,8 @@
     <child link="arm_wrist"/>
     <origin xyz="0.20 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.0" upper="2.0" effort="15" velocity="2.0"/>
-    <dynamics damping="0.3"/>
+    <limit lower="-2.0" upper="2.0" effort="20" velocity="2.0"/>
+    <dynamics damping="0.5"/>
   </joint>
 
   <!-- ============================================================
@@ -274,10 +272,13 @@
   <!-- ============================================================
        GRIPPER FINGERS  (prismatic, mirror pair)
        Joint position is the distance of the finger from the gripper
-       centerline. Range 0.0 (closed at center) .. 0.045 (fully open).
-       Target object is a soda can (radius 0.033), so commanding both
-       fingers to ~0.033 puts them flush against the can; commanding
-       0.045 fully opens. Both fingers must be commanded together.
+       centerline. Range 0.005 (closed) .. 0.045 (fully open).
+       Soda can radius = 0.033, so for a friction grasp we command
+       both fingers to overshoot inward (e.g., 0.020) — joint can't
+       reach the target because the can is in the way, and the
+       trajectory PID accumulates the position error into a sustained
+       squeeze effort (up to the joint's effort limit). Real fingers
+       work the same way.
        ============================================================ -->
   <link name="left_finger">
     <visual>
@@ -300,8 +301,8 @@
     <child link="left_finger"/>
     <origin xyz="0.05 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="0.0" upper="0.045" effort="20" velocity="0.2"/>
-    <dynamics damping="2.0"/>
+    <limit lower="0.005" upper="0.045" effort="40" velocity="0.2"/>
+    <dynamics damping="3.0"/>
   </joint>
 
   <link name="right_finger">
@@ -325,15 +326,75 @@
     <child link="right_finger"/>
     <origin xyz="0.05 0 0" rpy="0 0 0"/>
     <axis xyz="0 -1 0"/>
-    <limit lower="0.0" upper="0.045" effort="20" velocity="0.2"/>
-    <dynamics damping="2.0"/>
+    <limit lower="0.005" upper="0.045" effort="40" velocity="0.2"/>
+    <dynamics damping="3.0"/>
   </joint>
+
+  <!-- ============================================================
+       ros2_control HARDWARE BLOCK
+       Effort interfaces on arm + gripper joints (so PID inside
+       joint_trajectory_controller can do gravity-compensating torque
+       control). Wheel joints are state-only — the diff_drive plugin
+       owns the wheel commands.
+       ============================================================ -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="left_wheel_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="arm_shoulder_joint">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="arm_elbow_joint">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="arm_wrist_joint">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="left_finger_joint">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="right_finger_joint">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
 
   <!-- ============================================================
        GAZEBO PLUGINS
        ============================================================ -->
   <gazebo>
-    <!-- Diff-drive base: defaults to /model/pos_robot/cmd_vel + /model/pos_robot/odometry. -->
+    <!-- gz_ros2_control: hosts the controller_manager + all controllers
+         in-process inside Gazebo. The <parameters> path is resolved by
+         xacro at launch time to an absolute share/.../config/controllers.yaml. -->
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find pos_v1_bringup)/config/controllers.yaml</parameters>
+    </plugin>
+
+    <!-- Diff-drive base: still driven by gz-sim, not ros2_control. -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
@@ -344,92 +405,31 @@
       <child_frame_id>base_link</child_frame_id>
     </plugin>
 
-    <!-- Publishes all joint positions on /world/store/model/pos_robot/joint_state -->
-    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
-
-    <!-- One PID position controller per actuated arm/gripper joint. Each
-         subscribes to a gz.msgs.Double topic (bridged from std_msgs/Float64)
-         and drives the joint to the commanded position. PID gains are
-         conservative; if a joint oscillates or undershoots, tune here. -->
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>arm_shoulder_joint</joint_name>
-      <topic>/arm/shoulder_cmd</topic>
-      <p_gain>20.0</p_gain>
-      <i_gain>0.5</i_gain>
-      <d_gain>2.5</d_gain>
-      <i_max>1.0</i_max>
-      <i_min>-1.0</i_min>
-      <cmd_max>25</cmd_max>
-      <cmd_min>-25</cmd_min>
-    </plugin>
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>arm_elbow_joint</joint_name>
-      <topic>/arm/elbow_cmd</topic>
-      <p_gain>15.0</p_gain>
-      <i_gain>0.3</i_gain>
-      <d_gain>1.8</d_gain>
-      <i_max>1.0</i_max>
-      <i_min>-1.0</i_min>
-      <cmd_max>20</cmd_max>
-      <cmd_min>-20</cmd_min>
-    </plugin>
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>arm_wrist_joint</joint_name>
-      <topic>/arm/wrist_cmd</topic>
-      <p_gain>10.0</p_gain>
-      <i_gain>0.2</i_gain>
-      <d_gain>1.0</d_gain>
-      <i_max>1.0</i_max>
-      <i_min>-1.0</i_min>
-      <cmd_max>15</cmd_max>
-      <cmd_min>-15</cmd_min>
-    </plugin>
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>left_finger_joint</joint_name>
-      <topic>/gripper/left_cmd</topic>
-      <p_gain>60.0</p_gain>
-      <i_gain>0.1</i_gain>
-      <d_gain>0.5</d_gain>
-    </plugin>
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>right_finger_joint</joint_name>
-      <topic>/gripper/right_cmd</topic>
-      <p_gain>60.0</p_gain>
-      <i_gain>0.1</i_gain>
-      <d_gain>0.5</d_gain>
-    </plugin>
-
-    <!-- ============================================================
-         GRASP: detachable fixed joint between the wrist and the
-         soda_can model. The DetachableJoint starts ATTACHED at world
-         load, so the task script publishes /grasp/detach during
-         startup to release it (can stays on shelf). At grasp time
-         the script publishes /grasp/attach to re-form the joint at
-         the current relative positions. At release, /grasp/detach
-         breaks it again so gravity drops the can onto the tray.
-
-         parent_link is "arm_wrist" (not "gripper_base") because
-         Gazebo's URDF importer LUMPS links connected by fixed joints
-         into their parent — gripper_base is fixed-joined to
-         arm_wrist, so it collapses into arm_wrist at load time and
-         no longer exists as a separate link. Referencing arm_wrist
-         is kinematically equivalent (gripper_base sits rigidly on
-         the wrist tip) and avoids the URDF→SDF lumping gotcha.
-         ============================================================ -->
-    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-      <parent_link>arm_wrist</parent_link>
-      <child_model>soda_can</child_model>
-      <child_link>link</child_link>
-      <detach_topic>/grasp/detach</detach_topic>
-      <attach_topic>/grasp/attach</attach_topic>
-    </plugin>
+    <!-- NOTE: gz-sim-joint-state-publisher REMOVED.
+         joint_state_broadcaster (in controllers.yaml) publishes /joint_states
+         covering both the diff-drive wheels (state-only) and the arm+gripper. -->
   </gazebo>
 
-  <!-- Reduce caster friction so the fixed sphere slides without
-       resisting rotation. -->
+  <!-- Low friction on caster so the fixed sphere doesn't resist turning. -->
   <gazebo reference="caster">
     <mu1>0.05</mu1>
     <mu2>0.05</mu2>
+  </gazebo>
+
+  <!-- High friction on finger pads so the gripper can hold the can. -->
+  <gazebo reference="left_finger">
+    <mu1>2.0</mu1>
+    <mu2>2.0</mu2>
+    <kp>1e6</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <gazebo reference="right_finger">
+    <mu1>2.0</mu1>
+    <mu2>2.0</mu2>
+    <kp>1e6</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
   </gazebo>
 
 </robot>
