@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<sdf version="1.10">
+  <world name="store">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ============================================================
+         GROUND
+         ============================================================ -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         SHELF — a brown horizontal plate at z=0.5 in front of robot.
+         Robot starts at origin facing +x; shelf center is at x=2.0,
+         shelf extends x=[1.8, 2.2] and z up to 0.525.
+         ============================================================ -->
+    <model name="shelf">
+      <static>true</static>
+      <pose>2.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+          <material>
+            <ambient>0.55 0.35 0.18 1</ambient>
+            <diffuse>0.55 0.35 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Two shelf legs for visual clarity -->
+    <model name="shelf_leg_left">
+      <static>true</static>
+      <pose>2.0 -0.45 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.05 0.05 0.5</size></box></geometry>
+          <material><ambient>0.45 0.28 0.15 1</ambient><diffuse>0.45 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="shelf_leg_right">
+      <static>true</static>
+      <pose>2.0 0.45 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.05 0.05 0.5</size></box></geometry>
+          <material><ambient>0.45 0.28 0.15 1</ambient><diffuse>0.45 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         TARGET OBJECT — standard 355 ml aluminum soda can.
+         Real-world dimensions: 66 mm diameter (radius 0.033 m),
+         123 mm height (length 0.123 m), ~355 g full (using full-can mass
+         since we want a realistic graspable inertia, not an empty shell).
+         Positioned at the front of the shelf so the robot's parallel-jaw
+         gripper can reach it without the base colliding with the shelf.
+         ============================================================ -->
+    <model name="soda_can">
+      <pose>1.88 0 0.5865 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.355</mass>
+          <!-- Cylinder inertia: I_radial = m*(3 r^2 + h^2)/12, I_axial = m*r^2/2 -->
+          <inertia>
+            <ixx>0.000544</ixx>
+            <iyy>0.000544</iyy>
+            <izz>0.000193</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <surface>
+            <friction>
+              <ode><mu>1.2</mu><mu2>1.2</mu2></ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.10 0.10 1</ambient>
+            <diffuse>0.90 0.15 0.15 1</diffuse>
+            <specular>0.4 0.4 0.4 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
