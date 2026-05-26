@@ -68,12 +68,12 @@ Top of `pos_v1_task/pos_v1_task/pick_and_place.py`:
 | Constant | Default | Meaning |
 |---|---|---|
 | `DRIVE_SPEED` | `0.2` | Linear m/s for forward/back motion |
-| `DRIVE_TIME_S` | `7.5` | Seconds to drive forward (and back) |
-| `PICK_PAUSE_S` | `3.0` | Pause at shelf (simulated pick) |
-| `PLACE_PAUSE_S` | `1.0` | Pause at start (simulated place) |
-| `STARTUP_DELAY_S` | `2.0` | Wait for sim to settle before moving |
+| `DRIVE_TIME_S` | `7.5` | **Sim** seconds to drive forward (and back). At 0.2 m/s this is ~1.5 m. |
+| `PICK_PAUSE_S` | `3.0` | **Sim** seconds to pause at shelf (simulated pick) |
+| `PLACE_PAUSE_S` | `1.0` | **Sim** seconds to pause at start (simulated place) |
+| `STARTUP_DELAY_S` | `2.0` | **Sim** seconds to wait before commanding motion |
 
-Adjust if the robot overshoots / undershoots the shelf.
+All durations are in **simulated seconds**, not wall-clock — the task node runs with `use_sim_time=True` so its timing tracks Gazebo's `/clock`. On WSL2 + Iris Xe Gazebo typically runs at 40-60% real-time, so wall-clock timing would leave the robot short of the shelf.
 
 ## What we expect to break first time
 
@@ -81,7 +81,7 @@ Honest list — this scaffolding is unverified (written without a Gazebo Harmoni
 
 1. **Caster scraping.** The caster is a fixed-joint sphere; depending on Gazebo friction defaults the robot may resist turning. If the diff-drive doesn't move smoothly, lower friction in the SDF or replace caster with a free ball-joint sphere.
 2. **Topic naming mismatch.** Gazebo Harmonic's `DiffDrive` plugin defaults the cmd_vel topic to `/model/<model_name>/cmd_vel`. The bridge config assumes the model name is exactly `pos_robot` (matches the launch file's `-name` argument). If you rename the model, update `config/gz_bridge.yaml`.
-3. **`use_sim_time`.** The task node uses wall-clock `time.sleep`, not sim time, so this works regardless. But if you change that, remember to pass `use_sim_time:=true`.
+3. **Sim time clock.** The task node sets `use_sim_time=True` and reads `/clock` from Gazebo via the bridge. If `/clock` is missing for some reason, the task will loop forever on the first `wait_sim_seconds` call. Verify with `ros2 topic hz /clock` — should be ~1000 Hz.
 4. **`gz` vs `ign` commands.** All commands here assume Gazebo Harmonic (`gz` CLI). If you accidentally have Gazebo Fortress installed, swap to `ign`.
 
 Report any of these and we'll fix in a follow-up PR.
