@@ -112,7 +112,10 @@
           <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
           <surface>
             <friction>
-              <ode><mu>1.2</mu><mu2>1.2</mu2></ode>
+              <!-- Bumped 1.2 -> 1.6 so the gripper's squeeze translates into
+                   more tangential holding force; helps the friction grasp
+                   survive the inertia spike at start of STAGE 7 drive-back. -->
+              <ode><mu>1.6</mu><mu2>1.6</mu2></ode>
             </friction>
           </surface>
         </collision>

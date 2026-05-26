@@ -13,20 +13,25 @@ Architecture (changed since previous version):
   the can (overshoot). The joint can't physically reach the target
   because the can is in the way; the trajectory controller's PID
   saturates its effort on that joint and the result is a sustained
-  squeeze force on the can. With high finger/can friction (mu=2.0,1.2)
+  squeeze force on the can. With high finger/can friction (mu=3.0,1.6)
   that's plenty to hold a 355 g object. No DetachableJoint, no
   set_pose teleport hack.
+* Base drive uses a TRAPEZOIDAL velocity profile (`drive_ramped`).
+  A step-input start used to impart enough acceleration to the can in
+  a single tick that the friction grasp couldn't hold it — the can
+  would slide forward out of the gripper and fall to the floor at the
+  beginning of STAGE 7. Bounded acceleration fixes that.
 
 Sequence:
   INIT -> wait for controllers, stow arm + open gripper
-  S1   -> drive forward 1.5 m
+  S1   -> drive forward 1.5 m (ramped)
   S2   -> IK to pre-grasp pose (6 cm above can, gripper horizontal)
   S3   -> IK to grasp pose (gripper at can centre)
-  S4   -> close gripper (command 0.018; can blocks at 0.033 -> squeeze)
+  S4   -> close gripper (command 0.012; can blocks at 0.033 -> squeeze)
   S5   -> IK to lift pose (15 cm above shelf, gripper horizontal)
   S6   -> IK to carry pose (above tray front, gripper still horizontal so
           the can stays vertical between the finger pads)
-  S7   -> drive back 1.5 m (still carrying)
+  S7   -> drive back 1.5 m (ramped, still carrying)
   S8   -> IK to place pose (just above tray top)
   S9   -> open gripper -> can drops onto tray
   S10  -> stow arm
@@ -46,8 +51,16 @@ from pos_v1_task.ik import ik_solve, shoulder_frame, IKError
 # ============================================================================
 # Tunables — durations sim-s, distances metres, angles radians.
 # ============================================================================
-DRIVE_SPEED = 0.2
-DRIVE_TIME_S = 7.5             # 1.5 m at 0.2 m/s
+DRIVE_SPEED = 0.12             # was 0.20 — slower cruise so the inertia
+                               # spike on the can at start-of-drive is
+                               # smaller (the friction grasp couldn't hold
+                               # at 0.20 m/s, the can slipped forward).
+DRIVE_ACCEL = 0.10             # m/s^2 — linear velocity ramp magnitude
+                               # for start-of-drive and end-of-drive. Limits
+                               # the impulse the can has to resist.
+DRIVE_DISTANCE = 1.5           # metres (per leg)
+# Drive time = ramp-up + cruise + ramp-down. Cruise distance =
+# DRIVE_DISTANCE - 2 * (DRIVE_SPEED^2 / (2 * DRIVE_ACCEL)).
 STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
 ARM_MOVE_TIME_S = 3.0          # sim-s for each arm-trajectory point
 GRIPPER_CLOSE_TIME_S = 1.5
@@ -83,8 +96,11 @@ STOW_ANGLES = (-1.30, 2.20, 0.00)   # (shoulder, elbow, wrist)
 
 # ---- Gripper finger positions (per-finger offset from centreline, metres) ----
 GRIPPER_OPEN  = 0.045   # fully open (90 mm fingertip gap)
-GRIPPER_GRASP = 0.018   # OVERSHOOT inside the can (33 mm radius)
-                        # -> joint blocks at ~0.033, PID applies squeeze
+GRIPPER_GRASP = 0.012   # OVERSHOOT inside the can (33 mm radius).
+                        # Tightened 0.018 -> 0.012: bigger steady-state
+                        # position error -> larger saturated squeeze
+                        # effort from the PID -> more normal force ->
+                        # more friction holding the can against inertia.
 
 ARM_JOINTS = ['arm_shoulder_joint', 'arm_elbow_joint', 'arm_wrist_joint']
 GRIPPER_JOINTS = ['left_finger_joint', 'right_finger_joint']
@@ -111,12 +127,51 @@ def wait_sim_seconds(node, duration_s):
         rclpy.spin_once(node, timeout_sec=PUBLISH_PERIOD_S)
 
 
-def drive(node, pub, linear_x, duration_s):
-    cmd = Twist()
-    cmd.linear.x = linear_x
+def drive_ramped(node, pub, target_speed, distance, accel):
+    """Drive a fixed distance with a trapezoidal velocity profile.
+
+    Replaces the previous step-input `drive()` that commanded full
+    `linear_x` immediately. That impulse start was the main reason the
+    soda can slipped forward out of the gripper at the beginning of
+    STAGE 7 — the can's inertia exceeded the friction-grasp holding
+    force during the velocity discontinuity. Ramping linear velocity
+    from 0 -> target over `target_speed / accel` seconds keeps the
+    instantaneous acceleration bounded to `accel`, which is the value
+    the friction grasp is sized against.
+
+    target_speed: m/s, signed (+ forward, - backward).
+    distance: metres, positive magnitude.
+    accel: m/s^2, positive magnitude.
+    """
+    speed_mag = abs(target_speed)
+    direction = 1.0 if target_speed >= 0.0 else -1.0
+    ramp_dist = (speed_mag * speed_mag) / (2.0 * accel)
+    if 2.0 * ramp_dist >= distance:
+        # Triangular profile (never reaches target_speed).
+        peak_speed = (accel * distance) ** 0.5
+        ramp_time = peak_speed / accel
+        cruise_time = 0.0
+    else:
+        peak_speed = speed_mag
+        ramp_time = speed_mag / accel
+        cruise_dist = distance - 2.0 * ramp_dist
+        cruise_time = cruise_dist / speed_mag
+
     clock = node.get_clock()
-    target = clock.now() + Duration(seconds=duration_s)
-    while clock.now() < target:
+    t0 = clock.now()
+    total_time = 2.0 * ramp_time + cruise_time
+    cmd = Twist()
+    while True:
+        t = (clock.now() - t0).nanoseconds * 1e-9
+        if t >= total_time:
+            break
+        if t < ramp_time:
+            v = peak_speed * (t / ramp_time)
+        elif t < ramp_time + cruise_time:
+            v = peak_speed
+        else:
+            v = peak_speed * (1.0 - (t - ramp_time - cruise_time) / ramp_time)
+        cmd.linear.x = direction * v
         pub.publish(cmd)
         rclpy.spin_once(node, timeout_sec=PUBLISH_PERIOD_S)
     pub.publish(Twist())
@@ -186,8 +241,8 @@ def main():
     wait_sim_seconds(node, 2.5)
 
     # ---- STAGE 1: drive forward ----
-    logger.info('STAGE 1: driving forward to shelf')
-    drive(node, pp.cmd_vel, +DRIVE_SPEED, DRIVE_TIME_S)
+    logger.info('STAGE 1: driving forward to shelf (ramped)')
+    drive_ramped(node, pp.cmd_vel, +DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
     wait_sim_seconds(node, SETTLE_S)
 
@@ -217,8 +272,13 @@ def main():
     wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
     # ---- STAGE 7: drive back ----
-    logger.info('STAGE 7: driving back to start (carrying can)')
-    drive(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_TIME_S)
+    # Trapezoidal velocity profile (DRIVE_ACCEL = 0.10 m/s^2). This is the
+    # critical stage for the friction grasp: a step-input start was
+    # imparting ~0.5+ m/s^2 to the can in a single tick, more than the
+    # grasp could resist, and the can would slip forward out of the
+    # gripper and fall to the floor.
+    logger.info('STAGE 7: driving back to start (ramped, carrying can)')
+    drive_ramped(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
     wait_sim_seconds(node, SETTLE_S)
 
