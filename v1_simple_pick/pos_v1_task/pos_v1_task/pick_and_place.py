@@ -17,19 +17,21 @@ Architecture (changed since previous version):
   that's plenty to hold a 355 g object. No DetachableJoint, no
   set_pose teleport hack.
 
-Sequence:
+Sequence (place-at-shelf flow — set up for future multi-pick):
   INIT -> wait for controllers, stow arm + open gripper
   S1   -> drive forward 1.5 m
   S2   -> IK to pre-grasp pose (6 cm above can, gripper horizontal)
   S3   -> IK to grasp pose (gripper at can centre)
   S4   -> close gripper (command 0.018; can blocks at 0.033 -> squeeze)
   S5   -> IK to lift pose (15 cm above shelf, gripper horizontal)
-  S6   -> IK to carry pose (above tray front, gripper still horizontal so
-          the can stays vertical between the finger pads)
-  S7   -> drive back 1.5 m (still carrying)
-  S8   -> IK to place pose (just above tray top)
-  S9   -> open gripper -> can drops onto tray
-  S10  -> stow arm
+  S6   -> IK to carry pose (50 cm world height — well above the shelf
+          so the arm can fold back to the tray without the gripper
+          clipping the shelf during the joint-space interpolation)
+  S7   -> IK to place pose (8 mm above tray top, robot still at shelf)
+  S8   -> open gripper -> can drops a few mm onto tray
+  S9   -> stow arm (so the arm clears the shelf during drive-back)
+  S10  -> drive back 1.5 m (can rides freely on the tray, held by
+          friction)
 """
 
 import rclpy
@@ -51,7 +53,8 @@ DRIVE_TIME_S = 7.5             # 1.5 m at 0.2 m/s
 STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
 ARM_MOVE_TIME_S = 3.0          # sim-s for each arm-trajectory point
 GRIPPER_CLOSE_TIME_S = 1.5
-GRIPPER_OPEN_TIME_S = 0.8
+GRIPPER_OPEN_TIME_S = 1.5     # slow open so the squeeze releases gently
+                              # (sudden release shoves the can sideways)
 SETTLE_S = 0.5                 # post-motion pause
 PUBLISH_PERIOD_S = 0.05
 
@@ -70,13 +73,20 @@ PRE_GRASP_WORLD = (CAN_X, CAN_Z + 0.06, PHI_HORIZONTAL)
 GRASP_WORLD     = (CAN_X, CAN_Z,        PHI_HORIZONTAL)
 LIFT_WORLD      = (CAN_X, CAN_Z + 0.15, PHI_HORIZONTAL)
 
-# Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
-# current robot_x at command time so they track the robot.
-#   tray extends x_robot ∈ [-0.225, 0.225]; top at z_world = 0.185.
-#   gripper x_robot = +0.15 keeps the gripper just forward of the tray
-#   centre — this also keeps the wrist angle within its ±2.0 rad limit.
-CARRY_ROBOT_XZ = (0.20, 0.30)      # 12 cm above tray top, x near tray front
-PLACE_ROBOT_XZ = (0.20, 0.23)      # 4.5 cm above tray top -> short drop
+# Carry / place poses are ROBOT-FRAME (x relative to base_link, z is world).
+# We add the current robot_x at command time so they track the robot.
+#   tray extends x_robot ∈ [-0.225, 0.225]; top at world z = 0.185.
+#   gripper x_robot = +0.20 keeps the gripper near the front of the tray
+#   (this also keeps the wrist angle inside its ±2.0 rad limit).
+# CARRY is held higher than the shelf top (0.525) so the LIFT→CARRY
+# joint-space interpolation doesn't sweep the gripper through the shelf
+# while folding back.
+# PLACE is high enough that the can BOTTOM (z = z_target - 0.0615) stays
+# above the tray top (0.185) -- otherwise the can gets pressed into the
+# tray collision and shoots out when the gripper releases.
+CARRY_ROBOT_XZ = (0.20, 0.50)      # gripper ~33 cm above tray top
+PLACE_ROBOT_XZ = (0.20, 0.27)      # can bottom ≈ 8 mm above tray top
+                                    # (0.27 − 0.0615 ≈ 0.208 > 0.185)
 
 # ---- Stow pose (hand-picked: arm folded back over the column) ----
 STOW_ANGLES = (-1.30, 2.20, 0.00)   # (shoulder, elbow, wrist)
@@ -211,31 +221,44 @@ def main():
     pp.move_arm_to_world(*LIFT_WORLD)
     wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 6: carry pose (gripper stays horizontal -> can stays vertical) ----
-    logger.info('STAGE 6: carry pose (above tray, gripper horizontal)')
+    # ---- STAGE 6: carry pose — fold arm back over the tray.  Robot is
+    # still AT THE SHELF; this just rotates the arm-with-can backwards
+    # so the gripper is now above the tray. Gripper stays horizontal so
+    # the can stays vertical between the finger pads.
+    logger.info('STAGE 6: carry pose (fold arm back, above tray)')
     pp.move_arm_to_robot_xz(CARRY_ROBOT_XZ[0], CARRY_ROBOT_XZ[1], PHI_HORIZONTAL)
     wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 7: drive back ----
-    logger.info('STAGE 7: driving back to start (carrying can)')
-    drive(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_TIME_S)
-    logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
-    wait_sim_seconds(node, SETTLE_S)
-
-    # ---- STAGE 8: lower arm to place pose ----
-    logger.info('STAGE 8: place pose (just above tray)')
+    # ---- STAGE 7: place pose — lower the can to just above the tray.
+    # PLACE z is chosen so the can BOTTOM clears the tray top by ~8 mm;
+    # if the can collides with the tray while still held, the release
+    # in S8 will fling it sideways ("throws toward shelf").
+    logger.info('STAGE 7: place pose (just above tray, robot still at shelf)')
     pp.move_arm_to_robot_xz(PLACE_ROBOT_XZ[0], PLACE_ROBOT_XZ[1], PHI_HORIZONTAL)
     wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 9: open gripper -> can drops onto tray ----
-    logger.info('STAGE 9: opening gripper — can drops onto tray')
+    # ---- STAGE 8: open gripper — can drops a few mm onto the tray.
+    # Slow open (1.5 s) so the saturated squeeze releases gradually
+    # rather than springing the can outward.
+    logger.info('STAGE 8: opening gripper — can drops onto tray')
     pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
-    wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.5)   # let it settle
+    wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.0)
 
-    # ---- STAGE 10: stow ----
-    logger.info('STAGE 10: stowing arm')
+    # ---- STAGE 9: stow arm BEFORE driving — folds it back so it doesn't
+    # clip the shelf on the way out, and so the gripper isn't hovering
+    # over the can if it bounces.
+    logger.info('STAGE 9: stowing arm (clear shelf for drive-back)')
     pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
     wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+
+    # ---- STAGE 10: drive back to start. Can rides on the tray, held
+    # by friction (mu=1.2 on can vs. default tray mu). For this v1 the
+    # acceleration profile of gz-sim DiffDrive is gentle enough that
+    # the can doesn't slide. ----
+    logger.info('STAGE 10: driving back to start (can rides on tray)')
+    drive(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_TIME_S)
+    logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
+    wait_sim_seconds(node, SETTLE_S)
 
     logger.info('Done.')
     node.destroy_node()

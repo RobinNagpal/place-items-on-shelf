@@ -97,11 +97,11 @@ Stages (sim-time):
 | 3 (3 s)          | Arm lowers; gripper surrounds the can |
 | 4 (1.5 s)        | Fingers close — squeeze force builds up against the can |
 | 5 (3 s)          | Arm lifts the can clear of the shelf |
-| 6 (3 s)          | Arm folds back, gripper stays horizontal over the tray |
-| 7 (7.5 s)        | Robot drives back, can held in the gripper by friction |
-| 8 (3 s)          | Arm lowers to just above the tray |
-| 9 (~2 s)         | Gripper opens, can drops a few cm onto the tray |
-| 10 (3 s)         | Arm stows |
+| 6 (3 s)          | Arm folds back, gripper now over the robot's tray (robot STILL at the shelf) |
+| 7 (3 s)          | Arm lowers — can bottom 8 mm above tray top |
+| 8 (2.5 s)        | Gripper opens slowly — can drops gently onto the tray |
+| 9 (3 s)          | Arm stows so it clears the shelf for the drive home |
+| 10 (7.5 s)       | Robot drives back with the can resting on the tray, held by friction |
 
 Total ≈ 42 sim-s. Wall-clock ≈ 90 s on WSL/Iris Xe (RTF ~0.45).
 
