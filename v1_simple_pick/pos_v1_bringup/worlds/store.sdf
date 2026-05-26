@@ -52,6 +52,28 @@
       <link name="link">
         <collision name="collision">
           <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+          <!-- The shelf MUST declare friction explicitly. Without this
+               block, ODE treats the surface as effectively frictionless
+               in contact with the can: the can-shelf effective mu was 0,
+               so the can would drift across the shelf and fall off the
+               edge before the robot could even reach it. With mu=1.5 the
+               can stays put. We also bump contact stiffness (kp) to
+               1e7 so the can doesn't sink/jitter on spawn. -->
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.5</mu>
+                <mu2>1.5</mu2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <kp>1e7</kp>
+                <kd>50</kd>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
         </collision>
         <visual name="visual">
           <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
@@ -96,7 +118,13 @@
          gripper can reach it without the base colliding with the shelf.
          ============================================================ -->
     <model name="soda_can">
-      <pose>1.88 0 0.5865 0 0 0</pose>
+      <!-- Spawn z = 0.5875 (1 mm above the shelf top at z=0.525 + half-can
+           0.0615 = 0.5865). The 1 mm gap lets the can drop and settle on
+           tick 1 with a properly-resolved contact normal instead of starting
+           in flush penetration — which was causing the contact resolver to
+           inject sideways velocity at spawn (visible as the can "drifting
+           north" before the robot ever arrived). -->
+      <pose>1.88 0 0.5875 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.355</mass>
@@ -112,11 +140,18 @@
           <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
           <surface>
             <friction>
-              <!-- Bumped 1.2 -> 1.6 so the gripper's squeeze translates into
-                   more tangential holding force; helps the friction grasp
-                   survive the inertia spike at start of STAGE 7 drive-back. -->
-              <ode><mu>1.6</mu><mu2>1.6</mu2></ode>
+              <ode>
+                <mu>1.8</mu>
+                <mu2>1.8</mu2>
+              </ode>
             </friction>
+            <contact>
+              <ode>
+                <kp>1e7</kp>
+                <kd>50</kd>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
           </surface>
         </collision>
         <visual name="visual">

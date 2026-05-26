@@ -246,58 +246,96 @@ def main():
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
     wait_sim_seconds(node, SETTLE_S)
 
-    # ---- STAGE 2: pre-grasp ----
-    logger.info('STAGE 2: pre-grasp pose (above can)')
-    pp.move_arm_to_world(*PRE_GRASP_WORLD)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+    # ---- STAGES 2-6: pick up the can. ----
+    # Anything in this block can fail (IK error, can has fallen off the
+    # shelf and isn't where we expect, controller goal aborted, ...).
+    # Whatever happens, the robot MUST still drive back home in STAGE 7
+    # so it doesn't get stranded at the shelf. We track grasp_ok and use
+    # it to decide whether to run the place-on-tray stages later.
+    grasp_ok = False
+    try:
+        # ---- STAGE 2: pre-grasp ----
+        logger.info('STAGE 2: pre-grasp pose (above can)')
+        pp.move_arm_to_world(*PRE_GRASP_WORLD)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 3: grasp pose ----
-    logger.info('STAGE 3: grasp pose (gripper at can centre)')
-    pp.move_arm_to_world(*GRASP_WORLD)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+        # ---- STAGE 3: grasp pose ----
+        logger.info('STAGE 3: grasp pose (gripper at can centre)')
+        pp.move_arm_to_world(*GRASP_WORLD)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 4: close gripper (friction grasp) ----
-    logger.info(f'STAGE 4: closing gripper (target {GRIPPER_GRASP:.3f} — overshoots can radius)')
-    pp.send_gripper(GRIPPER_GRASP)
-    wait_sim_seconds(node, GRIPPER_CLOSE_TIME_S + SETTLE_S)
+        # ---- STAGE 4: close gripper (friction grasp) ----
+        logger.info(f'STAGE 4: closing gripper (target {GRIPPER_GRASP:.3f} — overshoots can radius)')
+        pp.send_gripper(GRIPPER_GRASP)
+        wait_sim_seconds(node, GRIPPER_CLOSE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 5: lift can clear of shelf ----
-    logger.info('STAGE 5: lift pose')
-    pp.move_arm_to_world(*LIFT_WORLD)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+        # ---- STAGE 5: lift can clear of shelf ----
+        logger.info('STAGE 5: lift pose')
+        pp.move_arm_to_world(*LIFT_WORLD)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 6: carry pose (gripper stays horizontal -> can stays vertical) ----
-    logger.info('STAGE 6: carry pose (above tray, gripper horizontal)')
-    pp.move_arm_to_robot_xz(CARRY_ROBOT_XZ[0], CARRY_ROBOT_XZ[1], PHI_HORIZONTAL)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+        # ---- STAGE 6: carry pose (gripper stays horizontal -> can stays vertical) ----
+        logger.info('STAGE 6: carry pose (above tray, gripper horizontal)')
+        pp.move_arm_to_robot_xz(CARRY_ROBOT_XZ[0], CARRY_ROBOT_XZ[1], PHI_HORIZONTAL)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-    # ---- STAGE 7: drive back ----
-    # Trapezoidal velocity profile (DRIVE_ACCEL = 0.10 m/s^2). This is the
-    # critical stage for the friction grasp: a step-input start was
-    # imparting ~0.5+ m/s^2 to the can in a single tick, more than the
-    # grasp could resist, and the can would slip forward out of the
-    # gripper and fall to the floor.
-    logger.info('STAGE 7: driving back to start (ramped, carrying can)')
-    drive_ramped(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
+        grasp_ok = True
+    except Exception as exc:
+        logger.error(
+            f'Pick-up sequence failed at some stage: {exc!r}. '
+            f'Aborting pick, opening gripper, and continuing to drive-back '
+            f'so the robot returns home.'
+        )
+        # Open the gripper and try to stow the arm so we don't drag
+        # anything during the drive back. Best-effort — ignore failures here.
+        try:
+            pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
+            wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + SETTLE_S)
+            pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
+            wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+        except Exception as cleanup_exc:
+            logger.warning(f'Cleanup after failed pick also raised: {cleanup_exc!r}')
+
+    # ---- STAGE 7: drive back (ALWAYS runs, even if pick-up failed). ----
+    # Trapezoidal velocity profile (DRIVE_ACCEL = 0.10 m/s^2). A step-input
+    # start was imparting enough acceleration to the can in a single tick
+    # that the friction grasp couldn't hold it, and the can would slip
+    # forward out of the gripper at the start of this drive.
+    logger.info(
+        f'STAGE 7: driving back to start ({"carrying can" if grasp_ok else "no can — pick-up failed"})'
+    )
+    try:
+        drive_ramped(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
+    except Exception as exc:
+        logger.error(f'Drive-back failed: {exc!r}')
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
     wait_sim_seconds(node, SETTLE_S)
 
-    # ---- STAGE 8: lower arm to place pose ----
-    logger.info('STAGE 8: place pose (just above tray)')
-    pp.move_arm_to_robot_xz(PLACE_ROBOT_XZ[0], PLACE_ROBOT_XZ[1], PHI_HORIZONTAL)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+    if grasp_ok:
+        # ---- STAGE 8: lower arm to place pose ----
+        logger.info('STAGE 8: place pose (just above tray)')
+        try:
+            pp.move_arm_to_robot_xz(PLACE_ROBOT_XZ[0], PLACE_ROBOT_XZ[1], PHI_HORIZONTAL)
+            wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+        except Exception as exc:
+            logger.error(f'Place pose failed: {exc!r}')
 
-    # ---- STAGE 9: open gripper -> can drops onto tray ----
-    logger.info('STAGE 9: opening gripper — can drops onto tray')
-    pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
-    wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.5)   # let it settle
+        # ---- STAGE 9: open gripper -> can drops onto tray ----
+        logger.info('STAGE 9: opening gripper — can drops onto tray')
+        pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
+        wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.5)   # let it settle
+    else:
+        logger.info('STAGES 8-9 skipped — no can was grasped, nothing to place.')
 
     # ---- STAGE 10: stow ----
     logger.info('STAGE 10: stowing arm')
-    pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
-    wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+    try:
+        pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+    except Exception as exc:
+        logger.error(f'Stow failed: {exc!r}')
 
-    logger.info('Done.')
+    logger.info(f'Done. Grasp success: {grasp_ok}.')
     node.destroy_node()
     rclpy.shutdown()
 
