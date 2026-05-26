@@ -25,7 +25,7 @@ tray.
 
 | Subsystem | What changed in Tier 2 |
 |---|---|
-| Arm control | gz-sim per-joint `JointPositionController` plugins → ros2_control + `joint_trajectory_controller` (effort interface, PID gains) hosted in-process by `gz_ros2_control`. |
+| Arm control | gz-sim per-joint `JointPositionController` plugins → ros2_control + `joint_trajectory_controller` hosted in-process by `gz_ros2_control`. The ARM uses the POSITION command interface (gz_ros2_control writes commanded angles directly; JTC interpolates trajectories at 100 Hz for visually smooth motion, no PID tuning needed). The GRIPPER uses the EFFORT command interface with per-joint PID, so the finger PID can apply a sustained squeeze force on the can. |
 | Arm targets | Hand-tuned `POSE_*` joint angles → **3-DOF analytical IK** (`ik.py`) from world-frame Cartesian targets. |
 | Grasp | `DetachableJoint` runtime attach/detach hack → **friction-based grasp**: fingers are commanded to overshoot inside the can (target 0.018 m vs can radius 0.033 m), so the JTC's saturated effort becomes a sustained squeeze. Mu = 2.0 on the finger pads, 1.2 on the can. |
 | Joint states | `gz-sim-joint-state-publisher` → `joint_state_broadcaster` (covers wheels as state-only via ros2_control). |
@@ -124,16 +124,17 @@ choose a different gripper orientation `phi`.
 
 ### Controller PID gains (`pos_v1_bringup/config/controllers.yaml`)
 
-Per-joint `p`, `i`, `d`, `i_clamp` for the joint_trajectory_controller's
-internal PID. Symptoms and which knob to turn:
+Only the **gripper** has PID gains now — arm joints use the position
+command interface (gz_ros2_control writes the commanded angle each
+control step, no PID needed).
 
-- Arm sags under gravity → increase `i_clamp` on the affected joint.
-- Arm overshoots and oscillates → reduce `p`, increase `d`.
+For the gripper, per-joint `p`, `i`, `d`, `i_clamp`. Symptoms:
+
 - Gripper can't hold the can (it slips down during the drive back) →
-  increase finger `p` so saturated effort is higher, or lower
-  `GRIPPER_GRASP` (more overshoot → bigger steady-state error → more
-  effort).
-- Joint wobbles even at rest → increase joint `damping` in the URDF.
+  increase finger `p` so the PID's saturated effort is higher, or
+  lower `GRIPPER_GRASP` (more overshoot → bigger steady-state error
+  → more effort).
+- Fingers visibly oscillate around the can → reduce `p`, increase `d`.
 
 ### Friction (URDF `<gazebo reference="...">`)
 
@@ -176,9 +177,11 @@ for these failures:
        joint and gain names you expect are listed.
      - PID gain key names don't match controllers.yaml schema (the
        schema is `gains.<joint_name>.{p,i,d,i_clamp,ff_velocity_scale}`).
-3. **Arm sags during STOW.** PID integral hasn't built up yet. Increase
-   `i_clamp` on the offending joint (in `controllers.yaml`) or wait
-   longer in INIT.
+3. **Arm "goal_time_tolerance exceeded" errors.** With the position
+   command interface this should not happen — `goal_time: 0.0` in
+   controllers.yaml disables that check. If you see it, you're probably
+   running an old build that still has the arm on the effort interface;
+   rebuild `pos_v1_description` + `pos_v1_bringup`.
 4. **Gripper drops the can during the drive back.** Friction grasp is
    inherently fragile. First try: increase finger `p` to 600,
    `i_clamp` to 10. Second try: bump `mu1`/`mu2` on the fingers to 3.0.

@@ -332,42 +332,38 @@
 
   <!-- ============================================================
        ros2_control HARDWARE BLOCK
-       Effort interfaces on arm + gripper joints (so PID inside
-       joint_trajectory_controller can do gravity-compensating torque
-       control). Wheel joints are state-only — the diff_drive plugin
-       owns the wheel commands.
+       Arm: POSITION command interface. gz_ros2_control writes the
+       commanded joint position directly each control step; JTC's
+       trajectory interpolation at 100 Hz makes that visually smooth
+       AND removes the need to tune effort-PID gains against gravity
+       (the earlier effort setup oscillated at the velocity limit).
+       Gripper: EFFORT command interface. Needed so the finger PID
+       can apply a sustained squeeze force against the can — position
+       interface would teleport the fingers through the can.
+       Wheels: NOT listed here. The diff_drive plugin owns their
+       commands; joint_state_broadcaster therefore won't publish
+       wheel state and the visual wheels will not appear to rotate.
+       That's fine for v1 — the robot still translates.
        ============================================================ -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
-    <joint name="left_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="right_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-
     <joint name="arm_shoulder_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_elbow_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_wrist_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="left_finger_joint">
       <command_interface name="effort"/>
