@@ -160,21 +160,23 @@
        GAZEBO PLUGINS
        ============================================================ -->
   <gazebo>
+    <!-- DiffDrive: subscribes to /model/pos_robot/cmd_vel and publishes
+         /model/pos_robot/odometry by default in Gazebo Harmonic. The bridge
+         in pos_v1_bringup/config/gz_bridge.yaml is wired to those exact paths,
+         so we deliberately do NOT override <topic>/<odom_topic> here. -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
       <wheel_separation>0.43</wheel_separation>
       <wheel_radius>0.05</wheel_radius>
       <odom_publish_frequency>30</odom_publish_frequency>
-      <topic>cmd_vel</topic>
-      <odom_topic>odometry</odom_topic>
       <frame_id>odom</frame_id>
       <child_frame_id>base_link</child_frame_id>
     </plugin>
 
-    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
-      <topic>joint_states</topic>
-    </plugin>
+    <!-- JointStatePublisher default topic is /world/<world>/model/<name>/joint_state
+         which matches the bridge config; no override here. -->
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
   </gazebo>
 
   <!-- Reduce caster friction so the fixed sphere slides without
