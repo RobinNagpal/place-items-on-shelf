@@ -1,31 +1,90 @@
-# ROS 2 ↔ Gazebo Harmonic bridge config for v1.
+# ROS 2 <-> Gazebo Harmonic bridge config for v1.
 # Used by `ros_gz_bridge parameter_bridge --config-file`.
 # Gazebo topic names assume model name "pos_robot" and world name "store".
 
-# Sim clock: Gazebo → ROS
+# Sim clock: Gazebo -> ROS
 - ros_topic_name: "/clock"
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
 
-# Velocity commands: ROS → Gazebo (driven by the DiffDrive plugin)
+# Velocity commands: ROS -> Gazebo (driven by the DiffDrive plugin)
 - ros_topic_name: "/cmd_vel"
   gz_topic_name: "/model/pos_robot/cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
   direction: ROS_TO_GZ
 
-# Odometry: Gazebo → ROS
+# Odometry: Gazebo -> ROS
 - ros_topic_name: "/odom"
   gz_topic_name: "/model/pos_robot/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
   direction: GZ_TO_ROS
 
-# Joint states: Gazebo → ROS
+# Joint states (all joints): Gazebo -> ROS
 - ros_topic_name: "/joint_states"
   gz_topic_name: "/world/store/model/pos_robot/joint_state"
   ros_type_name: "sensor_msgs/msg/JointState"
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
+
+# ---- Arm position commands: ROS -> Gazebo ----
+# Each topic accepts std_msgs/Float64 = target joint angle in radians.
+# Gazebo's JointPositionController plugins (see URDF <gazebo> block)
+# subscribe to these topic names and drive the joints with PID control.
+
+- ros_topic_name: "/arm/shoulder_cmd"
+  gz_topic_name: "/arm/shoulder_cmd"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/arm/elbow_cmd"
+  gz_topic_name: "/arm/elbow_cmd"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/arm/wrist_cmd"
+  gz_topic_name: "/arm/wrist_cmd"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+# ---- Gripper position commands: ROS -> Gazebo ----
+# Float64 = finger offset from gripper centerline, in metres.
+# 0.0 = closed (finger at centerline), 0.045 = fully open.
+# Publish the same value to both topics for symmetric gripper motion.
+
+- ros_topic_name: "/gripper/left_cmd"
+  gz_topic_name: "/gripper/left_cmd"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/gripper/right_cmd"
+  gz_topic_name: "/gripper/right_cmd"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+# ---- Grasp control: ROS -> Gazebo ----
+# Any std_msgs/Empty message triggers detach (break the fixed joint
+# between gripper_base and soda_can) or attach (re-create the joint at
+# current relative positions). The DetachableJoint plugin lives in the
+# robot URDF and starts attached, so the task script publishes one
+# detach at startup to release the can onto the shelf.
+
+- ros_topic_name: "/grasp/detach"
+  gz_topic_name: "/grasp/detach"
+  ros_type_name: "std_msgs/msg/Empty"
+  gz_type_name: "gz.msgs.Empty"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/grasp/attach"
+  gz_topic_name: "/grasp/attach"
+  ros_type_name: "std_msgs/msg/Empty"
+  gz_type_name: "gz.msgs.Empty"
+  direction: ROS_TO_GZ

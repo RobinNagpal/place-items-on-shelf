@@ -42,8 +42,9 @@
     </model>
 
     <!-- ============================================================
-         SHELF — a brown horizontal plate at z=0.5 in front of robot
-         The robot starts at origin facing +x; shelf is at x=2.0.
+         SHELF — a brown horizontal plate at z=0.5 in front of robot.
+         Robot starts at origin facing +x; shelf center is at x=2.0,
+         shelf extends x=[1.8, 2.2] and z up to 0.525.
          ============================================================ -->
     <model name="shelf">
       <static>true</static>
@@ -87,47 +88,41 @@
     </model>
 
     <!-- ============================================================
-         BOTTLES — three red cylinders on the shelf
+         TARGET OBJECT — standard 355 ml aluminum soda can.
+         Real-world dimensions: 66 mm diameter (radius 0.033 m),
+         123 mm height (length 0.123 m), ~355 g full (using full-can mass
+         since we want a realistic graspable inertia, not an empty shell).
+         Positioned at the front of the shelf so the robot's parallel-jaw
+         gripper can reach it without the base colliding with the shelf.
          ============================================================ -->
-    <model name="bottle_0">
-      <pose>2.0 -0.3 0.625 0 0 0</pose>
+    <model name="soda_can">
+      <pose>1.88 0 0.5865 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.3</mass>
-          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+          <mass>0.355</mass>
+          <!-- Cylinder inertia: I_radial = m*(3 r^2 + h^2)/12, I_axial = m*r^2/2 -->
+          <inertia>
+            <ixx>0.000544</ixx>
+            <iyy>0.000544</iyy>
+            <izz>0.000193</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
         </inertial>
-        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <surface>
+            <friction>
+              <ode><mu>1.2</mu><mu2>1.2</mu2></ode>
+            </friction>
+          </surface>
+        </collision>
         <visual name="visual">
-          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
-          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
-        </visual>
-      </link>
-    </model>
-    <model name="bottle_1">
-      <pose>2.0 0 0.625 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.3</mass>
-          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
-        </inertial>
-        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
-        <visual name="visual">
-          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
-          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
-        </visual>
-      </link>
-    </model>
-    <model name="bottle_2">
-      <pose>2.0 0.3 0.625 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.3</mass>
-          <inertia><ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
-        </inertial>
-        <collision name="collision"><geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry></collision>
-        <visual name="visual">
-          <geometry><cylinder><radius>0.04</radius><length>0.2</length></cylinder></geometry>
-          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.10 0.10 1</ambient>
+            <diffuse>0.90 0.15 0.15 1</diffuse>
+            <specular>0.4 0.4 0.4 1</specular>
+          </material>
         </visual>
       </link>
     </model>

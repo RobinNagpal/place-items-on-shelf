@@ -1,4 +1,28 @@
 <?xml version="1.0"?>
+<!--
+  pos_robot v1 — mobile manipulator for the place-items-on-shelf demo.
+
+  Structure (inspired by the Robotis OpenManipulator-X mounted on a small
+  differential-drive base — the canonical mobile-manipulator pairing used in
+  ROS tutorials/courses, simplified to 3-DOF + parallel-jaw gripper):
+
+    base_link (diff-drive box) ── left_wheel, right_wheel, caster, tray_link
+                              └── arm_column (vertical post, rear of base)
+                                  └── arm_shoulder  (revolute, axis Y)
+                                      └── arm_elbow   (revolute, axis Y)
+                                          └── arm_wrist  (revolute, axis Y)
+                                              └── gripper_base (fixed)
+                                                  ├── left_finger  (prismatic, axis +Y)
+                                                  └── right_finger (prismatic, axis -Y)
+
+  Coordinate convention: each arm link's local +X points "out along the
+  link". So at all-zero joint angles the arm points straight forward in
+  world +X. Positive shoulder pitch rotates the arm upward.
+
+  Each arm/gripper joint has a gz-sim JointPositionController plugin
+  commanded by a std_msgs/Float64 (= gz.msgs.Double) topic. The bridge
+  config in pos_v1_bringup maps each Gazebo topic to a ROS topic.
+-->
 <robot name="pos_robot">
 
   <!-- ============================================================
@@ -19,9 +43,7 @@
   </link>
 
   <!-- ============================================================
-       DRIVE WHEELS
-       Wheel separation = 0.43 m (matches DiffDrive plugin below)
-       Wheel radius     = 0.05 m
+       DRIVE WHEELS  (wheel separation 0.43, radius 0.05)
        ============================================================ -->
   <link name="left_wheel">
     <visual>
@@ -91,6 +113,8 @@
 
   <!-- ============================================================
        ONBOARD TRAY (the "shelf attached to the robot")
+       Tray top surface sits at world z ≈ 0.185 when the robot is at
+       its spawn height (z=0.1).
        ============================================================ -->
   <link name="tray_link">
     <visual>
@@ -112,58 +136,204 @@
   </joint>
 
   <!-- ============================================================
-       COSMETIC ARM (non-functional in v1; replaced in v2)
-       A column at the back of the base with a horizontal segment.
-       Purely visual — there are no movable joints here yet.
+       ARM COLUMN  (vertical post, length 0.40)
+       Mounted at the rear of the base. Top of column hosts the shoulder.
        ============================================================ -->
   <link name="arm_column">
     <visual>
-      <geometry><cylinder radius="0.03" length="0.4"/></geometry>
+      <origin xyz="0 0 0.20"/>
+      <geometry><cylinder radius="0.035" length="0.40"/></geometry>
       <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
     </visual>
     <collision>
-      <geometry><cylinder radius="0.03" length="0.4"/></geometry>
+      <origin xyz="0 0 0.20"/>
+      <geometry><cylinder radius="0.035" length="0.40"/></geometry>
     </collision>
     <inertial>
-      <mass value="0.5"/>
-      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+      <origin xyz="0 0 0.20"/>
+      <mass value="0.6"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/>
     </inertial>
   </link>
   <joint name="arm_column_joint" type="fixed">
     <parent link="base_link"/>
     <child link="arm_column"/>
-    <origin xyz="-0.2 0 0.285" rpy="0 0 0"/>
+    <origin xyz="-0.20 0 0.075" rpy="0 0 0"/>
   </joint>
 
-  <link name="arm_segment">
+  <!-- ============================================================
+       ARM SHOULDER  (revolute, axis Y, link length 0.25 along +X)
+       Angle 0 = pointing forward; positive pitch rotates upward.
+       ============================================================ -->
+  <link name="arm_shoulder">
     <visual>
-      <origin xyz="0.15 0 0"/>
-      <geometry><box size="0.3 0.04 0.04"/></geometry>
-      <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+      <origin xyz="0.125 0 0"/>
+      <geometry><box size="0.25 0.045 0.045"/></geometry>
+      <material name="orange"><color rgba="0.95 0.55 0.10 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.15 0 0"/>
-      <geometry><box size="0.3 0.04 0.04"/></geometry>
+      <origin xyz="0.125 0 0"/>
+      <geometry><box size="0.25 0.045 0.045"/></geometry>
     </collision>
     <inertial>
-      <mass value="0.3"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+      <origin xyz="0.125 0 0"/>
+      <mass value="0.30"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
     </inertial>
   </link>
-  <joint name="arm_segment_joint" type="fixed">
+  <joint name="arm_shoulder_joint" type="revolute">
     <parent link="arm_column"/>
-    <child link="arm_segment"/>
-    <origin xyz="0 0 0.18" rpy="0 0 0"/>
+    <child link="arm_shoulder"/>
+    <origin xyz="0 0 0.40" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.6" upper="1.6" effort="25" velocity="2.0"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <!-- ============================================================
+       ARM ELBOW  (revolute, axis Y, link length 0.20 along +X)
+       ============================================================ -->
+  <link name="arm_elbow">
+    <visual>
+      <origin xyz="0.10 0 0"/>
+      <geometry><box size="0.20 0.04 0.04"/></geometry>
+      <material name="orange"><color rgba="0.95 0.55 0.10 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.10 0 0"/>
+      <geometry><box size="0.20 0.04 0.04"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.10 0 0"/>
+      <mass value="0.20"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+    </inertial>
+  </link>
+  <joint name="arm_elbow_joint" type="revolute">
+    <parent link="arm_shoulder"/>
+    <child link="arm_elbow"/>
+    <origin xyz="0.25 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.5" upper="2.5" effort="20" velocity="2.0"/>
+    <dynamics damping="0.4"/>
+  </joint>
+
+  <!-- ============================================================
+       ARM WRIST  (revolute, axis Y, link length 0.05 along +X)
+       ============================================================ -->
+  <link name="arm_wrist">
+    <visual>
+      <origin xyz="0.025 0 0"/>
+      <geometry><box size="0.05 0.04 0.04"/></geometry>
+      <material name="orange"><color rgba="0.95 0.55 0.10 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.025 0 0"/>
+      <geometry><box size="0.05 0.04 0.04"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.025 0 0"/>
+      <mass value="0.08"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0005"/>
+    </inertial>
+  </link>
+  <joint name="arm_wrist_joint" type="revolute">
+    <parent link="arm_elbow"/>
+    <child link="arm_wrist"/>
+    <origin xyz="0.20 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="15" velocity="2.0"/>
+    <dynamics damping="0.3"/>
+  </joint>
+
+  <!-- ============================================================
+       GRIPPER BASE (palm)  — fixed to the wrist
+       ============================================================ -->
+  <link name="gripper_base">
+    <visual>
+      <origin xyz="0.025 0 0"/>
+      <geometry><box size="0.05 0.06 0.04"/></geometry>
+      <material name="dark_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.025 0 0"/>
+      <geometry><box size="0.05 0.06 0.04"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.025 0 0"/>
+      <mass value="0.10"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0005"/>
+    </inertial>
+  </link>
+  <joint name="gripper_base_joint" type="fixed">
+    <parent link="arm_wrist"/>
+    <child link="gripper_base"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================================================
+       GRIPPER FINGERS  (prismatic, mirror pair)
+       Joint position is the distance of the finger from the gripper
+       centerline. Range 0.0 (closed at center) .. 0.045 (fully open).
+       Target object is a soda can (radius 0.033), so commanding both
+       fingers to ~0.033 puts them flush against the can; commanding
+       0.045 fully opens. Both fingers must be commanded together.
+       ============================================================ -->
+  <link name="left_finger">
+    <visual>
+      <origin xyz="0.03 0 0"/>
+      <geometry><box size="0.06 0.005 0.05"/></geometry>
+      <material name="dark_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.03 0 0"/>
+      <geometry><box size="0.06 0.005 0.05"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.03 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+    </inertial>
+  </link>
+  <joint name="left_finger_joint" type="prismatic">
+    <parent link="gripper_base"/>
+    <child link="left_finger"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="0.0" upper="0.045" effort="20" velocity="0.2"/>
+    <dynamics damping="2.0"/>
+  </joint>
+
+  <link name="right_finger">
+    <visual>
+      <origin xyz="0.03 0 0"/>
+      <geometry><box size="0.06 0.005 0.05"/></geometry>
+      <material name="dark_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.03 0 0"/>
+      <geometry><box size="0.06 0.005 0.05"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.03 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+    </inertial>
+  </link>
+  <joint name="right_finger_joint" type="prismatic">
+    <parent link="gripper_base"/>
+    <child link="right_finger"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="0.0" upper="0.045" effort="20" velocity="0.2"/>
+    <dynamics damping="2.0"/>
   </joint>
 
   <!-- ============================================================
        GAZEBO PLUGINS
        ============================================================ -->
   <gazebo>
-    <!-- DiffDrive: subscribes to /model/pos_robot/cmd_vel and publishes
-         /model/pos_robot/odometry by default in Gazebo Harmonic. The bridge
-         in pos_v1_bringup/config/gz_bridge.yaml is wired to those exact paths,
-         so we deliberately do NOT override <topic>/<odom_topic> here. -->
+    <!-- Diff-drive base: defaults to /model/pos_robot/cmd_vel + /model/pos_robot/odometry. -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
@@ -174,13 +344,87 @@
       <child_frame_id>base_link</child_frame_id>
     </plugin>
 
-    <!-- JointStatePublisher default topic is /world/<world>/model/<name>/joint_state
-         which matches the bridge config; no override here. -->
+    <!-- Publishes all joint positions on /world/store/model/pos_robot/joint_state -->
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+
+    <!-- One PID position controller per actuated arm/gripper joint. Each
+         subscribes to a gz.msgs.Double topic (bridged from std_msgs/Float64)
+         and drives the joint to the commanded position. PID gains are
+         conservative; if a joint oscillates or undershoots, tune here. -->
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>arm_shoulder_joint</joint_name>
+      <topic>/arm/shoulder_cmd</topic>
+      <p_gain>20.0</p_gain>
+      <i_gain>0.5</i_gain>
+      <d_gain>2.5</d_gain>
+      <i_max>1.0</i_max>
+      <i_min>-1.0</i_min>
+      <cmd_max>25</cmd_max>
+      <cmd_min>-25</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>arm_elbow_joint</joint_name>
+      <topic>/arm/elbow_cmd</topic>
+      <p_gain>15.0</p_gain>
+      <i_gain>0.3</i_gain>
+      <d_gain>1.8</d_gain>
+      <i_max>1.0</i_max>
+      <i_min>-1.0</i_min>
+      <cmd_max>20</cmd_max>
+      <cmd_min>-20</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>arm_wrist_joint</joint_name>
+      <topic>/arm/wrist_cmd</topic>
+      <p_gain>10.0</p_gain>
+      <i_gain>0.2</i_gain>
+      <d_gain>1.0</d_gain>
+      <i_max>1.0</i_max>
+      <i_min>-1.0</i_min>
+      <cmd_max>15</cmd_max>
+      <cmd_min>-15</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>left_finger_joint</joint_name>
+      <topic>/gripper/left_cmd</topic>
+      <p_gain>60.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.5</d_gain>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>right_finger_joint</joint_name>
+      <topic>/gripper/right_cmd</topic>
+      <p_gain>60.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.5</d_gain>
+    </plugin>
+
+    <!-- ============================================================
+         GRASP: detachable fixed joint between gripper_base and the
+         soda_can model. Gazebo Harmonic's DetachableJoint starts
+         ATTACHED at world load, so the task script publishes to
+         /grasp/detach during startup to release it (can stays on
+         shelf). At grasp time the script publishes to /grasp/attach
+         to re-form the joint at the current relative positions of
+         gripper and can. At release, /grasp/detach breaks the joint
+         again so gravity drops the can.
+
+         The plugin must live in the model that owns parent_link
+         (pos_robot), so cross-model attachment via a separately
+         spawned anchor model doesn't work in Gazebo 8 — that's why
+         this is in the robot URDF.
+         ============================================================ -->
+    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+      <parent_link>gripper_base</parent_link>
+      <child_model>soda_can</child_model>
+      <child_link>link</child_link>
+      <detach_topic>/grasp/detach</detach_topic>
+      <attach_topic>/grasp/attach</attach_topic>
+    </plugin>
   </gazebo>
 
   <!-- Reduce caster friction so the fixed sphere slides without
-       resisting rotation. Gazebo per-link friction. -->
+       resisting rotation. -->
   <gazebo reference="caster">
     <mu1>0.05</mu1>
     <mu2>0.05</mu2>
