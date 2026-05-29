@@ -97,7 +97,8 @@ SETTLE_S = 0.5                 # post-motion pause
 PUBLISH_PERIOD_S = 0.05
 
 # ---- Target object (from store.sdf) ----
-CAN_X = 1.88
+CAN_X = 1.85       # was 1.88 — pulled 3 cm forward (closer to robot). See
+                   # GRASP_X_OFFSET below for the rest of the story.
 CAN_Z = 0.5865     # can centre height (shelf top 0.525 + half can 0.0615)
 CAN_TOP_Z = 0.648  # shelf top + can height
 
@@ -106,10 +107,20 @@ PHI_HORIZONTAL = 0.0       # gripper pointing forward — fingers vertical,
                            # can held vertically between them
 
 # ---- Arm targets ----
-# Above-can poses are world-frame (the can sits at a known world pose).
-PRE_GRASP_WORLD = (CAN_X, CAN_Z + 0.06, PHI_HORIZONTAL)
-GRASP_WORLD     = (CAN_X, CAN_Z,        PHI_HORIZONTAL)
-LIFT_WORLD      = (CAN_X, CAN_Z + 0.15, PHI_HORIZONTAL)
+# Forward bias on the GRASP X target to compensate for diff-drive odom
+# drift. Symptom: on WSL the wheels rotate slightly more than the base
+# actually translates each step, so /odom reports "robot stopped at 1.54"
+# while the base is physically a few cm short. The IK then computes shoulder
+# at (false_robot_x - 0.15), and the gripper ends up a few cm short of the
+# can — the pads visibly missed by ~3 cm on the user's last run. Targeting
+# the gripper at can_x + GRASP_X_OFFSET in /odom space pushes the actual
+# gripper onto the can. Combined with the can being moved 3 cm closer
+# (CAN_X above), the gripper now lands ON the can across the expected
+# range of odom drift.
+GRASP_X_OFFSET = 0.04
+PRE_GRASP_WORLD = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.06, PHI_HORIZONTAL)
+GRASP_WORLD     = (CAN_X + GRASP_X_OFFSET, CAN_Z,        PHI_HORIZONTAL)
+LIFT_WORLD      = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.15, PHI_HORIZONTAL)
 
 # Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
 # current robot_x at command time so they track the robot.

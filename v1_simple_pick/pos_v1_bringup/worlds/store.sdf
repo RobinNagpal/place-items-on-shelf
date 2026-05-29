@@ -126,8 +126,13 @@
          Real-world dimensions: 66 mm diameter (radius 0.033 m),
          123 mm height (length 0.123 m), ~355 g full (using full-can mass
          since we want a realistic graspable inertia, not an empty shell).
-         Positioned at the front of the shelf so the robot's parallel-jaw
-         gripper can reach it without the base colliding with the shelf.
+         Positioned 3 cm back from where it used to be (x=1.85 instead of
+         x=1.88). The earlier x=1.88 made the arm reach to 89% of A1+A2
+         from the shoulder, which combined with /odom drift on the diff
+         drive (wheels rotate slightly more than the base actually moves
+         on the WSL Gazebo step) made the gripper land ~3 cm SHORT of the
+         can — the pads visibly missed it on the grasp pose. Pulling the
+         can forward gives the arm 3 cm more reach margin.
          ============================================================ -->
     <model name="soda_can">
       <!-- Spawn z = 0.5875 (1 mm above the shelf top at z=0.525 + half-can
@@ -136,7 +141,7 @@
            in flush penetration — which was causing the contact resolver to
            inject sideways velocity at spawn (visible as the can "drifting
            north" before the robot ever arrived). -->
-      <pose>1.88 0 0.5875 0 0 0</pose>
+      <pose>1.85 0 0.5875 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.355</mass>
