@@ -50,28 +50,67 @@ The three pallet racks each have four steel uprights at the corners
 (0.08 × 0.08 m square posts) and three horizontal decks at z = 0.10, 1.10,
 and 2.10 m — typical low / mid / top tiers for storing bulk product cases.
 
+## The robot
+
+`pos_v2_description/` defines a small differential-drive AGV that spawns
+at the yellow home marker, facing the racks. It carries a 2D lidar and an
+IMU — enough sensing for SLAM and Nav2 in the next iteration. No arm yet;
+placement on the shelf will be modelled as a payload-drop interaction.
+
+| Spec               | Value                                  |
+| ------------------ | -------------------------------------- |
+| Base                | 0.40 × 0.40 × 0.20 m, ~5 kg            |
+| Drive               | Two-wheel differential + front caster  |
+| Wheel radius        | 0.08 m                                 |
+| Wheel separation    | 0.44 m                                 |
+| Lidar               | 360° 2D, 12 m range, 10 Hz (`gpu_lidar`) |
+| IMU                 | 100 Hz                                 |
+| Sim plugin          | `gz::sim::systems::DiffDrive`          |
+| Control interface   | `geometry_msgs/Twist` on `/cmd_vel`    |
+
+Topics bridged to ROS 2 (see `pos_v2_description/config/bridge.yaml`):
+`/cmd_vel` (in), `/odom`, `/scan`, `/imu`, `/joint_states`, `/tf`,
+`/clock`.
+
 ## Files
 
 - `pos_v2_bringup/worlds/backroom.sdf` — the world definition.
-- `pos_v2_bringup/launch/backroom.launch.py` — launches Gazebo Harmonic with
-  the world (no robot spawned yet).
-- `pos_v2_bringup/package.xml`, `CMakeLists.txt` — ROS 2 (ament_cmake)
-  package metadata so `colcon build` installs the world and launch file
-  into the workspace share directory.
+- `pos_v2_bringup/launch/backroom.launch.py` — launches Gazebo Harmonic
+  with the world only.
+- `pos_v2_description/urdf/robot.urdf.xacro` — the v2 robot URDF/xacro.
+- `pos_v2_description/config/bridge.yaml` — `ros_gz_bridge` topic map.
+- `pos_v2_description/launch/spawn_robot.launch.py` — launches the world
+  + spawns the robot + starts `robot_state_publisher` and the bridge.
+- `pos_v2_bringup/package.xml`, `CMakeLists.txt` — ament_cmake metadata.
+- `pos_v2_description/package.xml`, `CMakeLists.txt` — ament_cmake
+  metadata for the robot package.
 
 ## How to view it
 
-After `colcon build` from the workspace root and sourcing the install:
+After `colcon build --symlink-install` from the workspace root and
+sourcing the install:
 
 ```bash
+# World only (no robot):
 ros2 launch pos_v2_bringup backroom.launch.py
+
+# World + robot + bridge (the normal one):
+ros2 launch pos_v2_description spawn_robot.launch.py
+```
+
+To drive the robot, from a second sourced terminal:
+
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+# (or, lower-level: ros2 topic pub /cmd_vel geometry_msgs/Twist ...)
 ```
 
 ## Next steps (not in this commit)
 
-1. Add a `pos_v2_description/` package with the v2 robot URDF/xacro. We
-   may start from v1's robot and improve it, but no code from v1 is being
-   copied over yet.
-2. Add a `pos_v2_task/` package with the planning/control nodes — closed
-   loop, not the hardcoded sequence used in v1.
-3. Populate the shelves with parameterised product models.
+1. Verify teleop drives the robot around the world without falling over.
+2. Add `pos_v2_navigation/` — `slam_toolbox` config to build a map, then
+   `nav2_bringup` for goal-pose navigation against the saved map.
+3. Add `pos_v2_task/` — a behaviour-tree task that drives home → shelf →
+   drop → home as closed-loop ROS 2 actions (no hardcoded waypoints).
+4. Populate the shelves with parameterised product models and add a
+   payload-drop interaction at the drop station.
