@@ -82,7 +82,12 @@ def generate_launch_description():
             '-topic', 'robot_description',
             '-x', '0.0',
             '-y', '0.0',
-            '-z', '0.1',
+            # Wheel bottoms sit 0.125 m below base_link's origin (see
+            # pos_robot.urdf). Spawning at z=0.15 leaves the robot
+            # 2.5 cm above the ground; it then drops and settles on
+            # the wheels and caster. Anything <0.125 would spawn with
+            # the wheels already inside the ground.
+            '-z', '0.15',
         ],
         output='screen',
     )

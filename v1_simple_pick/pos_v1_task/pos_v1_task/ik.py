@@ -13,15 +13,16 @@ Lengths come from the URDF (`pos_v1_description/urdf/pos_robot.urdf`):
                                               + 0.05 gripper_base
                                               + 0.03 finger half-length)
 
-The shoulder joint sits at world (R_x - 0.15, 0, 0.575) when the robot
-is at world x = R_x and its spawn z = 0.1 — the arm column is mounted
-at base_link x = -0.15 and extends 0.40 m up from base top z = 0.175.
+The shoulder joint sits at world (R_x - 0.15, 0, 0.600) when the robot
+is at world x = R_x and resting on its wheels — the arm column is
+mounted at base_link x = -0.15 and extends 0.40 m up from base top
+z = 0.20 (base_link world z = 0.125 at rest, see explanation below).
 
 `ik_solve(x, z, phi)` returns (S, E, W) joint angles such that the
 end-effector reaches `(x, z)` in the shoulder frame (NOT world frame)
 with the last link pointing at angle `phi` from the +X axis. The caller
 is responsible for the world->shoulder-frame transform — typically
-``x_shoulder = x_world - (R_x - 0.15)`` and ``z_shoulder = z_world - 0.575``.
+``x_shoulder = x_world - (R_x - 0.15)`` and ``z_shoulder = z_world - 0.600``.
 """
 
 import math
@@ -38,11 +39,15 @@ A3 = 0.13
 SHOULDER_X_IN_BASE = -0.15
 SHOULDER_Z_IN_BASE = 0.075 + 0.40    # = 0.475
 
-# Robot spawn z is 0.10 (see launch file -z arg). With base_link centred on
-# its inertial origin, base_link frame z = 0 is at world z = 0.10.
-ROBOT_SPAWN_Z = 0.10
+# Settled base_link world z. The wheel bottoms sit 0.125 m below the
+# base_link origin (wheel joint z=-0.075 + wheel radius 0.05), so when
+# the robot is at rest with wheel bottoms on the ground, base_link's
+# origin is at world z = 0.125. (Spawn z in the launch file is 0.15 —
+# the extra 0.025 m is just so the robot doesn't spawn with its wheels
+# clipping the ground.)
+ROBOT_BASE_Z_AT_REST = 0.125
 
-SHOULDER_Z_WORLD = ROBOT_SPAWN_Z + SHOULDER_Z_IN_BASE   # = 0.575
+SHOULDER_Z_WORLD = ROBOT_BASE_Z_AT_REST + SHOULDER_Z_IN_BASE   # = 0.600
 
 
 class IKError(ValueError):
