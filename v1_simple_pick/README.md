@@ -24,6 +24,12 @@ The robot parts (base, arm, gripper, tray) are defined in URDF/xacro and
 loaded through ROS 2; Gazebo reads that description to build the robot in
 the simulator.
 
+## v1_simple_pick folders
+
+- pos_v1_bringup: launch files, Gazebo world, and bridge/controller configs.
+- pos_v1_description: robot URDF/xacro description.
+- pos_v1_task: the ROS 2 node that runs the pick-and-place workflow.
+
 ## What the robot does (workflow)
 
 1. Drive forward to the shelf.
