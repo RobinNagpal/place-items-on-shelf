@@ -352,18 +352,38 @@
 
   <!-- ============================================================
        ros2_control HARDWARE BLOCK
-       Effort interfaces on arm + gripper joints (so PID inside
-       joint_trajectory_controller can do gravity-compensating torque
-       control).
 
-       DELIBERATELY OMITTED: the drive wheels. Earlier versions had
-       left_wheel_joint and right_wheel_joint here as state-only "so
-       joint_state_broadcaster publishes them too", but that broke
-       motion: once gz_ros2_control loaded its hardware interface, it
-       claimed the wheel actuators every tick and the DiffDrive
-       plugin's JointVelocityCmd was overridden. The robot would sit
-       still no matter what was published on /cmd_vel. The wheels are
-       owned exclusively by the gz-sim DiffDrive plugin now.
+       ARM: POSITION interface (kinematic).
+         The arm needs to track scripted joint targets through high
+         gravity moments (the gripper end-effector is 0.5 m forward of
+         the shoulder, and the carry pose holds a 0.355 kg can out at
+         that lever). Earlier this block used effort interfaces with
+         per-joint PID gains in controllers.yaml, but tracking under
+         that load was unreliable: depending on the integrator state
+         the actual joint would settle several centimetres short of
+         the IK target, leaving a visible gap between gripper and can
+         and the friction grasp closing on air.
+         POSITION interface bypasses the integrator entirely — the
+         gz_ros2_control plugin writes the commanded joint angle into
+         the Gazebo joint each tick, so there is no gravity sag and
+         no PID tuning to maintain. The trajectory is a tiny bit less
+         physically faithful (the arm "snaps" to each waypoint at the
+         JTC-interpolated rate) but for a scripted demo that's the
+         right trade.
+
+       GRIPPER: EFFORT interface (deliberately kept).
+         The friction grasp depends on the finger PID accumulating
+         force against an unreachable position target. Position
+         interface would just teleport the fingers to the commanded
+         position, ignoring the can in between — so the gripper would
+         pinch THROUGH the can without applying squeeze. Keep effort
+         for the fingers.
+
+       DELIBERATELY OMITTED: the drive wheels. When the wheel joints
+       were listed here (even state-only) gz_ros2_control's hardware
+       interface claimed their actuators every tick and the DiffDrive
+       plugin's JointVelocityCmd got clobbered. The wheels are owned
+       exclusively by the gz-sim DiffDrive plugin.
        ============================================================ -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
@@ -371,22 +391,19 @@
     </hardware>
 
     <joint name="arm_shoulder_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_elbow_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_wrist_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="left_finger_joint">
       <command_interface name="effort"/>
