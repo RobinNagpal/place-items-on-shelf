@@ -27,158 +27,18 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
-    <!-- ============================================================
-         GUI
-         The room is fully enclosed by 3 m walls, so the default
-         Gazebo Harmonic camera (which spawns at ~(-6, 0, 6) looking
-         +X) ends up staring at the OUTSIDE of a wall — looks like
-         "nothing loaded". We override the camera pose to start above
-         and outside the south-west corner, looking diagonally down
-         into the room so the door, the three pallet racks, and the
-         floor markers are all in frame from frame zero.
-
-         The remaining plugins are the standard gz-sim GUI set
-         (interactive view control for mouse orbit/pan/zoom, scene
-         manager, world play/pause, world stats). Including them here
-         keeps the usual UI behaviour even though we are overriding
-         <gui> in the SDF.
+    <!-- NOTE on the camera
+         The room is fully enclosed by 3 m walls, so Gazebo Harmonic's
+         default initial camera (~(-6, 0, 6) looking +X) ends up just
+         outside the west wall. We DO NOT add a <gui> block here to
+         override it — doing so requires re-declaring every default
+         GUI plugin, and any plugin-name mismatch with the local
+         gz-sim build silently strips the entire UI (blank window).
+         To see the room on first launch: middle-mouse-drag to orbit
+         the camera up and over the wall, or scroll out and rotate.
+         The camera can also be set per-shell via the GUI's
+         "View Angle" panel.
          ============================================================ -->
-    <gui fullscreen="0">
-      <plugin filename="MinimalScene" name="3D View">
-        <gz-gui>
-          <title>3D View</title>
-          <property type="bool" key="showTitleBar">false</property>
-          <property type="string" key="state">docked</property>
-        </gz-gui>
-        <engine>ogre2</engine>
-        <scene>scene</scene>
-        <ambient_light>0.4 0.4 0.4</ambient_light>
-        <background_color>0.8 0.8 0.85</background_color>
-        <!-- pos (x y z) = (-8, -8, 7) — outside SW corner, above wall top (3 m).
-             rot (roll pitch yaw) = (0, 0.52, 0.785) — yaw 45 deg toward NE,
-             pitch ~30 deg down so the room interior fills the frame. -->
-        <camera_pose>-8 -8 7 0 0.52 0.785</camera_pose>
-      </plugin>
-
-      <plugin filename="EntityContextMenuPlugin" name="Entity context menu">
-        <gz-gui>
-          <property key="state" type="string">floating</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="GzSceneManager" name="Scene Manager">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="InteractiveViewControl" name="Interactive view control">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="CameraTracking" name="Camera Tracking">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="MarkerManager" name="Marker manager">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="SelectEntities" name="Select Entities">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="VisualizationCapabilities" name="Visualization Capabilities">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="Spawn" name="Spawn Entities">
-        <gz-gui>
-          <property key="resizable" type="bool">false</property>
-          <property key="width" type="double">5</property>
-          <property key="height" type="double">5</property>
-          <property key="state" type="string">floating</property>
-          <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
-      </plugin>
-
-      <plugin filename="WorldControl" name="World control">
-        <gz-gui>
-          <title>World control</title>
-          <property type="bool" key="showTitleBar">false</property>
-          <property type="bool" key="resizable">false</property>
-          <property type="double" key="height">72</property>
-          <property type="double" key="width">121</property>
-          <property type="double" key="z">1</property>
-          <property type="string" key="state">floating</property>
-          <anchors target="3D View">
-            <line own="left" target="left"/>
-            <line own="bottom" target="bottom"/>
-          </anchors>
-        </gz-gui>
-        <play_pause>true</play_pause>
-        <step>true</step>
-        <start_paused>false</start_paused>
-        <use_event>true</use_event>
-      </plugin>
-
-      <plugin filename="WorldStats" name="World stats">
-        <gz-gui>
-          <title>World stats</title>
-          <property type="bool" key="showTitleBar">false</property>
-          <property type="bool" key="resizable">false</property>
-          <property type="double" key="height">110</property>
-          <property type="double" key="width">290</property>
-          <property type="double" key="z">1</property>
-          <property type="string" key="state">floating</property>
-          <anchors target="3D View">
-            <line own="right" target="right"/>
-            <line own="bottom" target="bottom"/>
-          </anchors>
-        </gz-gui>
-        <sim_time>true</sim_time>
-        <real_time>true</real_time>
-        <real_time_factor>true</real_time_factor>
-        <iterations>true</iterations>
-      </plugin>
-    </gui>
 
     <!-- ============================================================
          LIGHTING
