@@ -133,21 +133,28 @@ PHI_HORIZONTAL = 0.0       # gripper pointing forward — fingers vertical,
 # plenty for the friction grasp.
 GRASP_X_OFFSET = -0.01
 
-# Z target for the pre-grasp pose. Raised from CAN_Z + 0.06 (= 0.6465,
-# i.e. only 1.5 mm below the can top) to a height that is WELL ABOVE
-# the can top. The previous low pre-grasp made the joint-space
-# trajectory from STOW to PRE_GRASP arc through the can's collision
-# volume at the midpoint (gripper-base z ≈ 0.65 → exactly can-top
-# height while still inside the can's x range). Approaching from
-# z = 0.85 means the gripper-base midpoint sits 4.5 cm above the can
-# top — completely clear — and only the descent PRE_GRASP → GRASP
-# brings the gripper down to grasp height, by which point the base
-# x has settled BEHIND the can (no x-overlap during the descent).
-PRE_GRASP_Z = 0.85
+# Z targets for the descent over the cube. The descent is broken into
+# TWO joint-space moves with an intermediate stop at APPROACH_Z. Reason:
+# joint_trajectory_controller interpolates linearly in JOINT space.
+# Even though PRE_GRASP and GRASP have the same world X (= can-x), the
+# Cartesian path of a single linear-in-joint-space move between them is
+# a forward-arching curve — pad-centre overshoots to ≈ x = 1.88 at the
+# midpoint and only returns to x = 1.84 at the very end. The gripper
+# BASE (3 cm behind pad-centre, full 6 cm wide in Y) follows the same
+# arc, and on the last 10% of the descent it clips the cube's back-top
+# corner by about 1 cm × 1 cm — enough for Gazebo's contact resolver to
+# shove the cube off the shelf. Cutting the move in half at z = 0.65
+# halves the joint-space delta on each segment, which shrinks each
+# Cartesian arc to a few millimetres of overshoot — never enough to
+# reach the cube. Verified with FK along 21 samples of each transition;
+# no collision with cube or shelf anywhere along the path.
+PRE_GRASP_Z = 0.85   # well above cube — clears STOW->PRE_GRASP swing
+APPROACH_Z  = 0.65   # half-way down — splits the descent into 2 arcs
 
-PRE_GRASP_WORLD = (CAN_X + GRASP_X_OFFSET, PRE_GRASP_Z,    PHI_HORIZONTAL)
-GRASP_WORLD     = (CAN_X + GRASP_X_OFFSET, CAN_Z,          PHI_HORIZONTAL)
-LIFT_WORLD      = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.15,   PHI_HORIZONTAL)
+PRE_GRASP_WORLD = (CAN_X + GRASP_X_OFFSET, PRE_GRASP_Z, PHI_HORIZONTAL)
+APPROACH_WORLD  = (CAN_X + GRASP_X_OFFSET, APPROACH_Z,  PHI_HORIZONTAL)
+GRASP_WORLD     = (CAN_X + GRASP_X_OFFSET, CAN_Z,       PHI_HORIZONTAL)
+LIFT_WORLD      = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.15, PHI_HORIZONTAL)
 
 # Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
 # current robot_x at command time so they track the robot.
@@ -351,13 +358,23 @@ def main():
     # it to decide whether to run the place-on-tray stages later.
     grasp_ok = False
     try:
-        # ---- STAGE 2: pre-grasp ----
-        logger.info('STAGE 2: pre-grasp pose (above can)')
+        # ---- STAGE 2: pre-grasp (high above cube, fingers already open) ----
+        logger.info('STAGE 2: pre-grasp pose (high above cube)')
         pp.move_arm_to_world(*PRE_GRASP_WORLD)
         wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
+        # ---- STAGE 2.5: approach pose (halfway down — splits the descent) ----
+        # Required because joint-space interpolation makes the Cartesian
+        # path bow forward at the trajectory midpoint; on a single big
+        # descent PRE_GRASP -> GRASP the gripper-base would clip the
+        # cube's back-top corner at t ~ 0.85. Stopping halfway down
+        # cuts each segment's arc to a few millimetres of overshoot.
+        logger.info('STAGE 2.5: approach pose (halfway down)')
+        pp.move_arm_to_world(*APPROACH_WORLD)
+        wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
+
         # ---- STAGE 3: grasp pose ----
-        logger.info('STAGE 3: grasp pose (gripper at can centre)')
+        logger.info('STAGE 3: grasp pose (gripper at cube centre)')
         pp.move_arm_to_world(*GRASP_WORLD)
         wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
