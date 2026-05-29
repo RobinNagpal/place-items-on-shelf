@@ -28,8 +28,10 @@ def generate_launch_description():
     xacro_file = os.path.join(pkg_description, 'urdf', 'robot.urdf.xacro')
     bridge_config = os.path.join(pkg_description, 'config', 'bridge.yaml')
 
+    # on_stderr='warn' so a benign xacro warning (e.g. deprecation) just
+    # logs instead of aborting the whole launch.
     robot_description = ParameterValue(
-        Command(['xacro ', xacro_file]),
+        Command(['xacro ', xacro_file], on_stderr='warn'),
         value_type=str,
     )
 

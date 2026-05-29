@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pos_v2_robot">
 
-  <xacro:property name="pi" value="3.14159265359"/>
+  <!-- ${pi} is a xacro built-in; do not redefine it (xacro warns -> launch.Command treats stderr as fatal). -->
 
   <!-- Base dimensions: small AGV, fits aisles and door easily. -->
   <xacro:property name="base_length" value="0.4"/>
