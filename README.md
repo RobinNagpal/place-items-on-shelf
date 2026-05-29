@@ -1,7 +1,5 @@
 # place-items-on-shelf
 
-A project for placing items on shelves.
-
-## Status
-
-This repository is in its early stages. Tooling, build setup, and project structure will be added in future commits.
+v1_simple_pick is a small ROS 2 + Gazebo Harmonic scripted pick-and-place demo.
+The robot uses hardcoded poses to pick one item from a shelf and place it on its tray.
+See v1_simple_pick/README.md for details.

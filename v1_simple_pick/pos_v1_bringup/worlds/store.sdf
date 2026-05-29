@@ -30,6 +30,18 @@
       <link name="link">
         <collision name="collision">
           <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <!-- Explicit ground friction so the diff-drive wheels can get
+               traction. Without a surface block, the default contact
+               friction can be effectively zero and the wheels spin in
+               place. -->
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>1.0</mu2>
+              </ode>
+            </friction>
+          </surface>
         </collision>
         <visual name="visual">
           <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
@@ -52,6 +64,28 @@
       <link name="link">
         <collision name="collision">
           <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
+          <!-- The shelf MUST declare friction explicitly. Without this
+               block, ODE treats the surface as effectively frictionless
+               in contact with the can: the can-shelf effective mu was 0,
+               so the can would drift across the shelf and fall off the
+               edge before the robot could even reach it. With mu=1.5 the
+               can stays put. We also bump contact stiffness (kp) to
+               1e7 so the can doesn't sink/jitter on spawn. -->
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.5</mu>
+                <mu2>1.5</mu2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <kp>1e7</kp>
+                <kd>50</kd>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
         </collision>
         <visual name="visual">
           <geometry><box><size>0.4 1.0 0.05</size></box></geometry>
@@ -88,36 +122,62 @@
     </model>
 
     <!-- ============================================================
-         TARGET OBJECT — standard 355 ml aluminum soda can.
-         Real-world dimensions: 66 mm diameter (radius 0.033 m),
-         123 mm height (length 0.123 m), ~355 g full (using full-can mass
-         since we want a realistic graspable inertia, not an empty shell).
-         Positioned at the front of the shelf so the robot's parallel-jaw
-         gripper can reach it without the base colliding with the shelf.
+         TARGET OBJECT — a 6 cm cube (red).
+         Was a 355 ml soda can (cylinder, 66 mm diameter, 123 mm tall)
+         but the parallel-jaw gripper kept dropping it because:
+           (a) the curved surface only contacts the pads on a single
+               line (vertical generatrix). Off-centre by a centimetre
+               and the contact patch collapses to nothing.
+           (b) the IK-targeted pad-centre vs the gripper-base geometry
+               leaves no X-tolerance: pulling the IK back to clear the
+               gripper-base from the can means the pad-centre falls
+               BEHIND can-centre and the closing pads only catch the
+               can's back edge — the can rolls forward out of the grip.
+         A cube gives flat-on-flat contact (large area, friction force
+         doesn't depend on perfect centring), is 6 cm wide in X (so
+         the pads can be off-centre by up to 3 cm and still cover most
+         of the cube), and lets the gripper-base sit cleanly behind
+         the back face with positive clearance. Model name is still
+         "soda_can" because pick_and_place.py and the world bridge both
+         look for that model id; the geometry is just different now.
          ============================================================ -->
     <model name="soda_can">
-      <pose>1.88 0 0.5865 0 0 0</pose>
+      <!-- Spawn z = 0.5555 (1 mm above the shelf top at z=0.525 + half-cube
+           0.030 = 0.555). The 1 mm gap lets the cube drop and settle on
+           tick 1 with a properly-resolved contact normal instead of starting
+           in flush penetration. -->
+      <pose>1.85 0 0.5555 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.355</mass>
-          <!-- Cylinder inertia: I_radial = m*(3 r^2 + h^2)/12, I_axial = m*r^2/2 -->
+          <mass>0.15</mass>
+          <!-- Cube inertia: I = m * a^2 / 6 with a = 0.06 -->
           <inertia>
-            <ixx>0.000544</ixx>
-            <iyy>0.000544</iyy>
-            <izz>0.000193</izz>
+            <ixx>0.00009</ixx>
+            <iyy>0.00009</iyy>
+            <izz>0.00009</izz>
             <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
           </inertia>
         </inertial>
         <collision name="collision">
-          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
           <surface>
             <friction>
-              <ode><mu>1.2</mu><mu2>1.2</mu2></ode>
+              <ode>
+                <mu>1.8</mu>
+                <mu2>1.8</mu2>
+              </ode>
             </friction>
+            <contact>
+              <ode>
+                <kp>1e7</kp>
+                <kd>50</kd>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
           </surface>
         </collision>
         <visual name="visual">
-          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
           <material>
             <ambient>0.85 0.10 0.10 1</ambient>
             <diffuse>0.90 0.15 0.15 1</diffuse>

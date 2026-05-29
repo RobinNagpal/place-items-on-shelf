@@ -17,9 +17,13 @@
   joint_trajectory_controller's PID can do proper torque-based motion
   (gravity is handled by the integral term) and the gripper can apply
   a real squeeze force on the can for friction-based grasping. The
-  drive wheels are still driven by gz-sim's diff_drive plugin; they
-  appear in <ros2_control> as state-only so joint_state_broadcaster
-  publishes them too.
+  drive wheels are driven by gz-sim's DiffDrive plugin and are
+  DELIBERATELY NOT listed in <ros2_control>: when wheel joints are
+  registered with gz_ros2_control (even as state-only), the plugin's
+  hardware interface claims their actuators and the DiffDrive
+  velocity commands get clobbered every tick. /joint_states therefore
+  doesn't include the wheels — that's fine, the pick_and_place task
+  uses /odom (from DiffDrive) for the base, not joint states.
 
   This file is xacro — process it through xacro before passing to
   robot_state_publisher / Gazebo. The launch file does that.
@@ -44,7 +48,20 @@
   </link>
 
   <!-- ============================================================
-       DRIVE WHEELS  (wheel separation 0.43, radius 0.05)
+       DRIVE WHEELS  (separation 0.43, radius 0.05)
+
+       Wheel joint z = -0.075 in base frame: base_link's bottom is at
+       z=-0.075 (15 cm tall, centered at link origin), and the wheel
+       cylinder extends 0.05 m below the wheel link origin. With joint
+       z=-0.075 the wheel BOTTOM sits at z=-0.125 in base frame —
+       i.e. 5 cm BELOW base_link. The robot rests on its wheels,
+       base_link clears the ground by 5 cm.
+
+       Earlier the joint z was -0.025, which put wheel bottom at the
+       same height as base_link's bottom. The robot's belly touched
+       the ground at the same instant the wheels did, so the wheels
+       carried near-zero normal force, μN ≈ 0, and the wheels spun
+       without traction (robot stationary regardless of /cmd_vel).
        ============================================================ -->
   <link name="left_wheel">
     <visual>
@@ -64,7 +81,7 @@
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="0 0.215 -0.025" rpy="0 0 0"/>
+    <origin xyz="0 0.215 -0.075" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -86,7 +103,7 @@
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0 -0.215 -0.025" rpy="0 0 0"/>
+    <origin xyz="0 -0.215 -0.075" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -109,7 +126,10 @@
   <joint name="caster_joint" type="fixed">
     <parent link="base_link"/>
     <child link="caster"/>
-    <origin xyz="0.20 0 -0.05" rpy="0 0 0"/>
+    <!-- z=-0.10 matches the lowered wheel bottoms: caster center at
+         base_link_z-0.10, sphere radius 0.025, caster bottom at
+         base_link_z-0.125 (same z as wheel bottoms). -->
+    <origin xyz="0.20 0 -0.10" rpy="0 0 0"/>
   </joint>
 
   <!-- ============================================================
@@ -332,42 +352,58 @@
 
   <!-- ============================================================
        ros2_control HARDWARE BLOCK
-       Effort interfaces on arm + gripper joints (so PID inside
-       joint_trajectory_controller can do gravity-compensating torque
-       control). Wheel joints are state-only — the diff_drive plugin
-       owns the wheel commands.
+
+       ARM: POSITION interface (kinematic).
+         The arm needs to track scripted joint targets through high
+         gravity moments (the gripper end-effector is 0.5 m forward of
+         the shoulder, and the carry pose holds a 0.355 kg can out at
+         that lever). Earlier this block used effort interfaces with
+         per-joint PID gains in controllers.yaml, but tracking under
+         that load was unreliable: depending on the integrator state
+         the actual joint would settle several centimetres short of
+         the IK target, leaving a visible gap between gripper and can
+         and the friction grasp closing on air.
+         POSITION interface bypasses the integrator entirely — the
+         gz_ros2_control plugin writes the commanded joint angle into
+         the Gazebo joint each tick, so there is no gravity sag and
+         no PID tuning to maintain. The trajectory is a tiny bit less
+         physically faithful (the arm "snaps" to each waypoint at the
+         JTC-interpolated rate) but for a scripted demo that's the
+         right trade.
+
+       GRIPPER: EFFORT interface (deliberately kept).
+         The friction grasp depends on the finger PID accumulating
+         force against an unreachable position target. Position
+         interface would just teleport the fingers to the commanded
+         position, ignoring the can in between — so the gripper would
+         pinch THROUGH the can without applying squeeze. Keep effort
+         for the fingers.
+
+       DELIBERATELY OMITTED: the drive wheels. When the wheel joints
+       were listed here (even state-only) gz_ros2_control's hardware
+       interface claimed their actuators every tick and the DiffDrive
+       plugin's JointVelocityCmd got clobbered. The wheels are owned
+       exclusively by the gz-sim DiffDrive plugin.
        ============================================================ -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
-    <joint name="left_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="right_wheel_joint">
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-
     <joint name="arm_shoulder_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_elbow_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="arm_wrist_joint">
-      <command_interface name="effort"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
-      <state_interface name="effort"/>
     </joint>
     <joint name="left_finger_joint">
       <command_interface name="effort"/>
@@ -416,17 +452,36 @@
     <mu2>0.05</mu2>
   </gazebo>
 
-  <!-- High friction on finger pads so the gripper can hold the can. -->
+  <!-- Explicit high friction on the drive wheels. Without an explicit
+       surface, ODE/DART can fall back to near-zero friction and the
+       wheels spin without traction. -->
+  <gazebo reference="left_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>50</kd>
+  </gazebo>
+  <gazebo reference="right_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>50</kd>
+  </gazebo>
+
+  <!-- High friction on finger pads so the gripper can hold the can.
+       Bumped from 2.0 -> 3.0: at 2.0 the can slipped forward out of the
+       gripper during the drive-back (the squeeze force alone wasn't
+       enough to overcome the can's inertia at start-of-drive). -->
   <gazebo reference="left_finger">
-    <mu1>2.0</mu1>
-    <mu2>2.0</mu2>
+    <mu1>3.0</mu1>
+    <mu2>3.0</mu2>
     <kp>1e6</kp>
     <kd>100.0</kd>
     <minDepth>0.001</minDepth>
   </gazebo>
   <gazebo reference="right_finger">
-    <mu1>2.0</mu1>
-    <mu2>2.0</mu2>
+    <mu1>3.0</mu1>
+    <mu2>3.0</mu2>
     <kp>1e6</kp>
     <kd>100.0</kd>
     <minDepth>0.001</minDepth>
