@@ -107,20 +107,36 @@ PHI_HORIZONTAL = 0.0       # gripper pointing forward — fingers vertical,
                            # can held vertically between them
 
 # ---- Arm targets ----
-# Forward bias on the GRASP X target to compensate for diff-drive odom
-# drift. Symptom: on WSL the wheels rotate slightly more than the base
-# actually translates each step, so /odom reports "robot stopped at 1.54"
-# while the base is physically a few cm short. The IK then computes shoulder
-# at (false_robot_x - 0.15), and the gripper ends up a few cm short of the
-# can — the pads visibly missed by ~3 cm on the user's last run. Targeting
-# the gripper at can_x + GRASP_X_OFFSET in /odom space pushes the actual
-# gripper onto the can. Combined with the can being moved 3 cm closer
-# (CAN_X above), the gripper now lands ON the can across the expected
-# range of odom drift.
-GRASP_X_OFFSET = 0.04
-PRE_GRASP_WORLD = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.06, PHI_HORIZONTAL)
-GRASP_WORLD     = (CAN_X + GRASP_X_OFFSET, CAN_Z,        PHI_HORIZONTAL)
-LIFT_WORLD      = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.15, PHI_HORIZONTAL)
+# X offset on the GRASP target relative to the can centre. NEGATIVE here
+# (pull the gripper centre BEHIND the can centre) — the reason is that
+# the IK targets the pad-centre, but the GRIPPER BASE (the 5 cm × 6 cm
+# palm block between the wrist and the fingers) sits 3 cm BEHIND the
+# pad-centre. With pad-centre at can-centre (offset = 0) the gripper
+# base front face is at can_back + 3 mm — barely poking inside the
+# can's collision volume. With the previous +0.04 offset the base
+# front was 4 cm INSIDE the can and physically pushed it off the shelf
+# before the fingers even closed (that was the screenshot of the can
+# lying on its side). With -0.01 here, gripper-base front sits 7 mm
+# CLEAR of can-back. The pads (6 cm long in X) still cover the can
+# from x ∈ [1.81, 1.87] vs can ∈ [1.817, 1.883] → 5.3 cm overlap —
+# plenty for the friction grasp.
+GRASP_X_OFFSET = -0.01
+
+# Z target for the pre-grasp pose. Raised from CAN_Z + 0.06 (= 0.6465,
+# i.e. only 1.5 mm below the can top) to a height that is WELL ABOVE
+# the can top. The previous low pre-grasp made the joint-space
+# trajectory from STOW to PRE_GRASP arc through the can's collision
+# volume at the midpoint (gripper-base z ≈ 0.65 → exactly can-top
+# height while still inside the can's x range). Approaching from
+# z = 0.85 means the gripper-base midpoint sits 4.5 cm above the can
+# top — completely clear — and only the descent PRE_GRASP → GRASP
+# brings the gripper down to grasp height, by which point the base
+# x has settled BEHIND the can (no x-overlap during the descent).
+PRE_GRASP_Z = 0.85
+
+PRE_GRASP_WORLD = (CAN_X + GRASP_X_OFFSET, PRE_GRASP_Z,    PHI_HORIZONTAL)
+GRASP_WORLD     = (CAN_X + GRASP_X_OFFSET, CAN_Z,          PHI_HORIZONTAL)
+LIFT_WORLD      = (CAN_X + GRASP_X_OFFSET, CAN_Z + 0.15,   PHI_HORIZONTAL)
 
 # Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
 # current robot_x at command time so they track the robot.
