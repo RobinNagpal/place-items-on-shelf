@@ -3,7 +3,7 @@ project(pos_v2_bringup)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY launch worlds config
+install(DIRECTORY launch worlds
   DESTINATION share/${PROJECT_NAME}
 )
 
