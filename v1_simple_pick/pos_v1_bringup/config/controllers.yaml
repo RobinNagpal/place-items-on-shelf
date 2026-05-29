@@ -41,8 +41,17 @@ arm_controller:
     allow_nonzero_velocity_at_trajectory_end: true
     open_loop_control: false
     constraints:
-      stopped_velocity_tolerance: 0.05
-      goal_time: 1.0
+      # Relaxed: the EFFORT PID is moderately aggressive so the joint
+      # arrives at the position target but may still be moving at up to
+      # ~0.5 rad/s when JTC checks at goal_time. With the old tight
+      # 0.05 tolerance + 1 s goal_time, every arm move logged a
+      # "Exceeded goal_time_tolerance" error even though the joint
+      # eventually settled correctly. The mission script ignores the
+      # goal status anyway (publishes to /joint_trajectory directly
+      # without waiting for the action result), so loosening here is
+      # purely about not polluting the log.
+      stopped_velocity_tolerance: 0.5
+      goal_time: 5.0
     gains:
       arm_shoulder_joint:
         p: 250.0

@@ -16,11 +16,12 @@ Architecture (changed since previous version):
   squeeze force on the can. With high finger/can friction (mu=3.0,1.6)
   that's plenty to hold a 355 g object. No DetachableJoint, no
   set_pose teleport hack.
-* Base drive uses a TRAPEZOIDAL velocity profile (`drive_ramped`).
-  A step-input start used to impart enough acceleration to the can in
-  a single tick that the friction grasp couldn't hold it — the can
-  would slide forward out of the gripper and fall to the floor at the
-  beginning of STAGE 7. Bounded acceleration fixes that.
+* Base drive uses CLOSED-LOOP odometry feedback (`drive_to_x`) with a
+  bounded-acceleration trapezoidal profile. Earlier the drive was
+  open-loop time-based — but with even small wheel slip the robot
+  under-shot by 5-15 cm, leaving the can outside arm reach. Now the
+  drive ramps up to cruise speed, then decelerates based on remaining
+  distance from /odom, stopping exactly where the IK expects.
 
 Sequence:
   INIT -> wait for controllers, stow arm + open gripper
@@ -58,9 +59,20 @@ DRIVE_SPEED = 0.12             # was 0.20 — slower cruise so the inertia
 DRIVE_ACCEL = 0.10             # m/s^2 — linear velocity ramp magnitude
                                # for start-of-drive and end-of-drive. Limits
                                # the impulse the can has to resist.
-DRIVE_DISTANCE = 1.5           # metres (per leg)
-# Drive time = ramp-up + cruise + ramp-down. Cruise distance =
-# DRIVE_DISTANCE - 2 * (DRIVE_SPEED^2 / (2 * DRIVE_ACCEL)).
+
+# Closed-loop drive targets (world x). The previous version drove for a
+# fixed time and trusted v*t to give the distance — but with even small
+# wheel slip the robot under-shot by ~5-15 cm, leaving the can outside
+# arm reach (arm max reach = 0.58 m; can horizontal from shoulder at
+# robot_x=1.40 is 0.63 m — unreachable). drive_to_x() below uses odom
+# feedback to stop at the target x exactly.
+APPROACH_X = 1.52              # robot_x to stop at when approaching shelf.
+                               # Front edge = APPROACH_X + 0.25 = 1.77, shelf
+                               # front at 1.80, so 3 cm clearance. Shoulder
+                               # at 1.37, can at 1.88 -> horizontal reach
+                               # 0.51 m, well inside arm max 0.58 m.
+HOME_X = 0.0                   # robot_x to stop at when returning home.
+
 STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
 ARM_MOVE_TIME_S = 3.0          # sim-s for each arm-trajectory point
 GRIPPER_CLOSE_TIME_S = 1.5
@@ -127,51 +139,55 @@ def wait_sim_seconds(node, duration_s):
         rclpy.spin_once(node, timeout_sec=PUBLISH_PERIOD_S)
 
 
-def drive_ramped(node, pub, target_speed, distance, accel):
-    """Drive a fixed distance with a trapezoidal velocity profile.
+def drive_to_x(node, pub, get_x, target_x, max_speed, accel,
+               timeout_s=45.0, tolerance=0.015):
+    """Drive straight until odom reports robot x near target_x.
 
-    Replaces the previous step-input `drive()` that commanded full
-    `linear_x` immediately. That impulse start was the main reason the
-    soda can slipped forward out of the gripper at the beginning of
-    STAGE 7 — the can's inertia exceeded the friction-grasp holding
-    force during the velocity discontinuity. Ramping linear velocity
-    from 0 -> target over `target_speed / accel` seconds keeps the
-    instantaneous acceleration bounded to `accel`, which is the value
-    the friction grasp is sized against.
+    Closed-loop trapezoidal velocity profile: accelerate to max_speed,
+    cruise, then decelerate based on current odom remaining-distance,
+    stop within `tolerance` metres of target_x.
 
-    target_speed: m/s, signed (+ forward, - backward).
-    distance: metres, positive magnitude.
-    accel: m/s^2, positive magnitude.
+    Replaces the previous time-based drive_ramped, which trusted
+    v*t to give the distance. With even small wheel slip / dart
+    integration drift the robot under-shot by several cm — enough to
+    leave the can outside arm reach. Odom-based feedback closes the
+    loop and stops exactly where the IK math expects.
+
+    Direction is inferred from the sign of (target_x - current_x), so
+    the SAME function handles the approach-shelf and the return-home
+    legs.
+
+    Acceleration is still bounded to `accel` so the friction grasp on
+    the can isn't broken by an inertia spike at start-of-drive (this
+    was the reason for the ramp in the first place).
     """
-    speed_mag = abs(target_speed)
-    direction = 1.0 if target_speed >= 0.0 else -1.0
-    ramp_dist = (speed_mag * speed_mag) / (2.0 * accel)
-    if 2.0 * ramp_dist >= distance:
-        # Triangular profile (never reaches target_speed).
-        peak_speed = (accel * distance) ** 0.5
-        ramp_time = peak_speed / accel
-        cruise_time = 0.0
-    else:
-        peak_speed = speed_mag
-        ramp_time = speed_mag / accel
-        cruise_dist = distance - 2.0 * ramp_dist
-        cruise_time = cruise_dist / speed_mag
-
     clock = node.get_clock()
-    t0 = clock.now()
-    total_time = 2.0 * ramp_time + cruise_time
+    start_x = get_x()
+    sign = 1.0 if target_x >= start_x else -1.0
+    speed = 0.0
     cmd = Twist()
-    while True:
-        t = (clock.now() - t0).nanoseconds * 1e-9
-        if t >= total_time:
+    t_start = clock.now()
+    last_t = t_start
+    while (clock.now() - t_start) < Duration(seconds=timeout_s):
+        now = clock.now()
+        dt = (now - last_t).nanoseconds * 1e-9
+        if dt <= 0.0:
+            dt = PUBLISH_PERIOD_S
+        last_t = now
+
+        current_x = get_x()
+        remaining = sign * (target_x - current_x)
+        if remaining <= tolerance:
             break
-        if t < ramp_time:
-            v = peak_speed * (t / ramp_time)
-        elif t < ramp_time + cruise_time:
-            v = peak_speed
-        else:
-            v = peak_speed * (1.0 - (t - ramp_time - cruise_time) / ramp_time)
-        cmd.linear.x = direction * v
+
+        brake_dist = (speed * speed) / (2.0 * accel)
+        if brake_dist + 0.5 * speed * dt >= remaining:
+            speed = max(0.0, speed - accel * dt)
+        elif speed < max_speed:
+            speed = min(max_speed, speed + accel * dt)
+        # else cruise at max_speed
+
+        cmd.linear.x = sign * speed
         pub.publish(cmd)
         rclpy.spin_once(node, timeout_sec=PUBLISH_PERIOD_S)
     pub.publish(Twist())
@@ -240,9 +256,10 @@ def main():
     pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
     wait_sim_seconds(node, 2.5)
 
-    # ---- STAGE 1: drive forward ----
-    logger.info('STAGE 1: driving forward to shelf (ramped)')
-    drive_ramped(node, pp.cmd_vel, +DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
+    # ---- STAGE 1: drive forward (closed-loop on odom) ----
+    logger.info(f'STAGE 1: driving forward until robot_x ≈ {APPROACH_X:.2f}')
+    drive_to_x(node, pp.cmd_vel, lambda: pp.robot_x,
+               APPROACH_X, DRIVE_SPEED, DRIVE_ACCEL)
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
     wait_sim_seconds(node, SETTLE_S)
 
@@ -297,15 +314,16 @@ def main():
             logger.warning(f'Cleanup after failed pick also raised: {cleanup_exc!r}')
 
     # ---- STAGE 7: drive back (ALWAYS runs, even if pick-up failed). ----
-    # Trapezoidal velocity profile (DRIVE_ACCEL = 0.10 m/s^2). A step-input
-    # start was imparting enough acceleration to the can in a single tick
-    # that the friction grasp couldn't hold it, and the can would slip
-    # forward out of the gripper at the start of this drive.
+    # Closed-loop on odom (drive_to_x infers direction from current vs
+    # target). Bounded acceleration so the friction grasp on the can
+    # isn't broken by an inertia spike at start-of-drive.
     logger.info(
-        f'STAGE 7: driving back to start ({"carrying can" if grasp_ok else "no can — pick-up failed"})'
+        f'STAGE 7: driving back to robot_x ≈ {HOME_X:.2f} '
+        f'({"carrying can" if grasp_ok else "no can — pick-up failed"})'
     )
     try:
-        drive_ramped(node, pp.cmd_vel, -DRIVE_SPEED, DRIVE_DISTANCE, DRIVE_ACCEL)
+        drive_to_x(node, pp.cmd_vel, lambda: pp.robot_x,
+                   HOME_X, DRIVE_SPEED, DRIVE_ACCEL)
     except Exception as exc:
         logger.error(f'Drive-back failed: {exc!r}')
     logger.info(f'  stopped at robot x ≈ {pp.robot_x:.2f}')
