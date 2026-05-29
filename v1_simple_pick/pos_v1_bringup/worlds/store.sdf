@@ -122,39 +122,44 @@
     </model>
 
     <!-- ============================================================
-         TARGET OBJECT — standard 355 ml aluminum soda can.
-         Real-world dimensions: 66 mm diameter (radius 0.033 m),
-         123 mm height (length 0.123 m), ~355 g full (using full-can mass
-         since we want a realistic graspable inertia, not an empty shell).
-         Positioned 3 cm back from where it used to be (x=1.85 instead of
-         x=1.88). The earlier x=1.88 made the arm reach to 89% of A1+A2
-         from the shoulder, which combined with /odom drift on the diff
-         drive (wheels rotate slightly more than the base actually moves
-         on the WSL Gazebo step) made the gripper land ~3 cm SHORT of the
-         can — the pads visibly missed it on the grasp pose. Pulling the
-         can forward gives the arm 3 cm more reach margin.
+         TARGET OBJECT — a 6 cm cube (red).
+         Was a 355 ml soda can (cylinder, 66 mm diameter, 123 mm tall)
+         but the parallel-jaw gripper kept dropping it because:
+           (a) the curved surface only contacts the pads on a single
+               line (vertical generatrix). Off-centre by a centimetre
+               and the contact patch collapses to nothing.
+           (b) the IK-targeted pad-centre vs the gripper-base geometry
+               leaves no X-tolerance: pulling the IK back to clear the
+               gripper-base from the can means the pad-centre falls
+               BEHIND can-centre and the closing pads only catch the
+               can's back edge — the can rolls forward out of the grip.
+         A cube gives flat-on-flat contact (large area, friction force
+         doesn't depend on perfect centring), is 6 cm wide in X (so
+         the pads can be off-centre by up to 3 cm and still cover most
+         of the cube), and lets the gripper-base sit cleanly behind
+         the back face with positive clearance. Model name is still
+         "soda_can" because pick_and_place.py and the world bridge both
+         look for that model id; the geometry is just different now.
          ============================================================ -->
     <model name="soda_can">
-      <!-- Spawn z = 0.5875 (1 mm above the shelf top at z=0.525 + half-can
-           0.0615 = 0.5865). The 1 mm gap lets the can drop and settle on
+      <!-- Spawn z = 0.5555 (1 mm above the shelf top at z=0.525 + half-cube
+           0.030 = 0.555). The 1 mm gap lets the cube drop and settle on
            tick 1 with a properly-resolved contact normal instead of starting
-           in flush penetration — which was causing the contact resolver to
-           inject sideways velocity at spawn (visible as the can "drifting
-           north" before the robot ever arrived). -->
-      <pose>1.85 0 0.5875 0 0 0</pose>
+           in flush penetration. -->
+      <pose>1.85 0 0.5555 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.355</mass>
-          <!-- Cylinder inertia: I_radial = m*(3 r^2 + h^2)/12, I_axial = m*r^2/2 -->
+          <mass>0.15</mass>
+          <!-- Cube inertia: I = m * a^2 / 6 with a = 0.06 -->
           <inertia>
-            <ixx>0.000544</ixx>
-            <iyy>0.000544</iyy>
-            <izz>0.000193</izz>
+            <ixx>0.00009</ixx>
+            <iyy>0.00009</iyy>
+            <izz>0.00009</izz>
             <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
           </inertia>
         </inertial>
         <collision name="collision">
-          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
           <surface>
             <friction>
               <ode>
@@ -172,7 +177,7 @@
           </surface>
         </collision>
         <visual name="visual">
-          <geometry><cylinder><radius>0.033</radius><length>0.123</length></cylinder></geometry>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
           <material>
             <ambient>0.85 0.10 0.10 1</ambient>
             <diffuse>0.90 0.15 0.15 1</diffuse>

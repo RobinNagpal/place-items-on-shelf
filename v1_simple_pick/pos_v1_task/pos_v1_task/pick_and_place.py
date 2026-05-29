@@ -91,16 +91,27 @@ HOME_X = 0.0                   # robot_x to stop at when returning home.
 
 STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
 ARM_MOVE_TIME_S = 3.0          # sim-s for each arm-trajectory point
-GRIPPER_CLOSE_TIME_S = 1.5
+GRIPPER_CLOSE_TIME_S = 2.5     # was 1.5 — give the effort PID enough time
+                               # to fully build the squeeze force against
+                               # the cube's flat side before STAGE 5 lifts.
+                               # User report: the lift was starting before
+                               # the grasp had finished, so the cube fell
+                               # out of the gripper.
 GRIPPER_OPEN_TIME_S = 0.8
-SETTLE_S = 0.5                 # post-motion pause
+SETTLE_S = 1.0                 # post-motion pause. Bumped from 0.5 -> 1.0
+                               # so each pose holds long enough to settle
+                               # fully (most relevant after STAGE 4 close
+                               # gripper, but applies to every stage).
 PUBLISH_PERIOD_S = 0.05
 
 # ---- Target object (from store.sdf) ----
-CAN_X = 1.85       # was 1.88 — pulled 3 cm forward (closer to robot). See
-                   # GRASP_X_OFFSET below for the rest of the story.
-CAN_Z = 0.5865     # can centre height (shelf top 0.525 + half can 0.0615)
-CAN_TOP_Z = 0.648  # shelf top + can height
+# It is a 6 cm cube now, not a soda can. See store.sdf for the full
+# why; short version: parallel-jaw grippers grip flat-on-flat way more
+# reliably than they grip cylinders, and the cube is wide enough in X
+# that the gripper has 3 cm of tolerance on the GRASP target.
+CAN_X = 1.85       # cube centre X (world)
+CAN_Z = 0.555      # cube centre Z (shelf top 0.525 + half cube 0.030)
+CAN_TOP_Z = 0.585  # shelf top + cube height (= 0.525 + 0.060)
 
 # ---- Gripper orientations ----
 PHI_HORIZONTAL = 0.0       # gripper pointing forward — fingers vertical,
