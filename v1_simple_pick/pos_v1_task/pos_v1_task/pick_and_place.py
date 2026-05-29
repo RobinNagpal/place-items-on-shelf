@@ -43,7 +43,6 @@ from rclpy.duration import Duration
 from rclpy.parameter import Parameter
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Empty
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration as RosDuration
 
@@ -292,12 +291,6 @@ class PickAndPlace:
         self.pub_gripper = node.create_publisher(
             JointTrajectory, '/gripper_controller/joint_trajectory', 10
         )
-        # DetachableJoint control. /grasp/attach creates a fixed joint
-        # between arm_wrist and the cube at the current relative pose;
-        # /grasp/detach breaks it. See the DetachableJoint plugin block
-        # in pos_robot.urdf for the parent/child wiring.
-        self.pub_attach = node.create_publisher(Empty, '/grasp/attach', 10)
-        self.pub_detach = node.create_publisher(Empty, '/grasp/detach', 10)
         self.robot_x = 0.0
         node.create_subscription(Odometry, '/odom', self._on_odom, 10)
 
@@ -332,20 +325,6 @@ class PickAndPlace:
             make_traj_msg(GRIPPER_JOINTS, [offset, offset], time_s)
         )
 
-    # ---- DetachableJoint helpers ----
-    # Burst-publish a few times because the gz->ros bridge can drop a
-    # single Empty before its subscription is fully wired up. Five
-    # frames at 50 ms each gives the plugin plenty of chances to see it.
-    def grasp_attach(self):
-        for _ in range(5):
-            self.pub_attach.publish(Empty())
-            rclpy.spin_once(self.node, timeout_sec=0.02)
-
-    def grasp_detach(self):
-        for _ in range(5):
-            self.pub_detach.publish(Empty())
-            rclpy.spin_once(self.node, timeout_sec=0.02)
-
 
 def main():
     rclpy.init()
@@ -358,13 +337,8 @@ def main():
     logger = pp.logger
 
     # ---- INIT ----
-    # DetachableJoint starts ATTACHED at world load, so the cube would be
-    # glued to the wrist from t=0. Publish /grasp/detach during INIT so
-    # the cube falls to the shelf BEFORE the robot drives anywhere.
     logger.info(f'INIT: waiting {STARTUP_DELAY_S:.1f}s (sim) for controllers + sim')
     wait_sim_seconds(node, STARTUP_DELAY_S)
-    pp.grasp_detach()
-    logger.info('  /grasp/detach published — cube released onto the shelf')
     pp.send_arm_angles(*STOW_ANGLES, time_s=2.0)
     pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
     wait_sim_seconds(node, 2.5)
@@ -404,20 +378,10 @@ def main():
         pp.move_arm_to_world(*GRASP_WORLD)
         wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-        # ---- STAGE 4: close gripper + ATTACH the magnetic grasp joint ----
-        # The fingers close visually around the cube, AND the
-        # DetachableJoint plugin re-creates a fixed joint between the
-        # wrist and the cube at their current relative pose. From this
-        # point on the cube rigidly tracks the wrist — no friction
-        # tuning, no contact-resolution surprises, no chance for the
-        # cube to slip during STAGE 5 lift / STAGE 6 carry / STAGE 7
-        # drive-back. The fingers closing is purely visual at this point.
-        logger.info(f'STAGE 4: closing gripper (target {GRIPPER_GRASP:.3f}) + /grasp/attach')
+        # ---- STAGE 4: close gripper (friction grasp) ----
+        logger.info(f'STAGE 4: closing gripper (target {GRIPPER_GRASP:.3f} — overshoots can radius)')
         pp.send_gripper(GRIPPER_GRASP)
         wait_sim_seconds(node, GRIPPER_CLOSE_TIME_S + SETTLE_S)
-        pp.grasp_attach()
-        logger.info('  /grasp/attach published — cube is now rigidly bonded to the wrist')
-        wait_sim_seconds(node, SETTLE_S)
 
         # ---- STAGE 5: lift can clear of shelf ----
         logger.info('STAGE 5: lift pose')
@@ -442,13 +406,8 @@ def main():
             f'so the robot returns home.'
         )
         # Open the gripper and try to stow the arm so we don't drag
-        # anything during the drive back. Also detach the grasp joint
-        # in case STAGE 4 had already published /grasp/attach before
-        # a later stage failed — without this the cube would be glued
-        # to the wrist for the rest of the run. Best-effort — ignore
-        # any failures here.
+        # anything during the drive back. Best-effort — ignore failures here.
         try:
-            pp.grasp_detach()
             pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
             wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + SETTLE_S)
             pp.send_arm_angles(*STOW_ANGLES, time_s=ARM_MOVE_TIME_S)
@@ -481,14 +440,8 @@ def main():
         except Exception as exc:
             logger.error(f'Place pose failed: {exc!r}')
 
-        # ---- STAGE 9: DETACH the magnetic grasp + open gripper ----
-        # /grasp/detach FIRST so the cube becomes a free body again at
-        # its current pose (just above the tray), THEN open the fingers.
-        # If we opened first the fingers would just pass through the
-        # cube without releasing it (the DetachableJoint, not the
-        # fingers, is what's actually holding it).
-        logger.info('STAGE 9: /grasp/detach + opening gripper — cube drops onto tray')
-        pp.grasp_detach()
+        # ---- STAGE 9: open gripper -> can drops onto tray ----
+        logger.info('STAGE 9: opening gripper — can drops onto tray')
         pp.send_gripper(GRIPPER_OPEN, time_s=GRIPPER_OPEN_TIME_S)
         wait_sim_seconds(node, GRIPPER_OPEN_TIME_S + 1.5)   # let it settle
     else:

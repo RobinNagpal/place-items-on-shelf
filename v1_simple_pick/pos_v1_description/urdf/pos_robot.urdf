@@ -444,39 +444,6 @@
     <!-- NOTE: gz-sim-joint-state-publisher REMOVED.
          joint_state_broadcaster (in controllers.yaml) publishes /joint_states
          covering both the diff-drive wheels (state-only) and the arm+gripper. -->
-
-    <!-- ============================================================
-         DETACHABLE GRASP JOINT
-         "Magnetic" pickup: a fixed joint between the gripper wrist and
-         the cube model, attached / detached at runtime from /grasp/attach
-         and /grasp/detach. The plugin lets us bypass the friction-grasp
-         tuning headache for this scripted Tier-2 demo: when the script
-         publishes attach, the cube is rigidly bonded to the wrist
-         wherever they happen to be; when it publishes detach, gravity
-         takes over again.
-
-         parent_link is "arm_wrist" (NOT "gripper_base") because the
-         Gazebo URDF importer lumps fixed-jointed child links into their
-         parent at load time. gripper_base is fixed-jointed to arm_wrist
-         so it collapses into arm_wrist and no longer exists as a
-         separate link at runtime — referencing it here would make the
-         plugin abort with "Link with name gripper_base not found" and
-         /grasp/attach would silently do nothing. arm_wrist is
-         kinematically identical for our purposes (gripper_base sits
-         rigidly on the wrist tip).
-
-         The plugin STARTS ATTACHED at world load (it's how DetachableJoint
-         is built), so the script publishes /grasp/detach once during INIT
-         to release the cube — that way the cube rests on the shelf at the
-         start of the run instead of being glued to the gripper.
-         ============================================================ -->
-    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-      <parent_link>arm_wrist</parent_link>
-      <child_model>soda_can</child_model>
-      <child_link>link</child_link>
-      <detach_topic>/grasp/detach</detach_topic>
-      <attach_topic>/grasp/attach</attach_topic>
-    </plugin>
   </gazebo>
 
   <!-- Low friction on caster so the fixed sphere doesn't resist turning. -->

@@ -1,13 +1,14 @@
 # ROS 2 <-> Gazebo Harmonic bridge config for v1 (Tier 2).
 # Used by `ros_gz_bridge parameter_bridge --config-file`.
 #
-# What crosses the bridge:
-#   - /clock                          (sim time, Gazebo -> ROS)
-#   - /cmd_vel + /odom                (diff drive, both directions)
-#   - /grasp/attach + /grasp/detach   (DetachableJoint grasp, ROS -> Gazebo)
-# ros2_control handles ALL joint commands and joint-state publishing
-# internally via the gz_ros2_control plugin, so per-joint /arm/* and
-# /gripper/* topics + /joint_states do NOT need to cross.
+# With Tier 2, ros2_control handles ALL joint commands and joint-state
+# publishing internally (via the gz_ros2_control plugin running inside
+# Gazebo), so the bridge no longer carries:
+#   - per-joint /arm/*_cmd or /gripper/*_cmd topics  (moved to JTC)
+#   - /joint_states                                  (joint_state_broadcaster)
+#   - /grasp/{attach,detach}                         (friction grasp, no joint)
+#
+# Only the diff-drive base and the sim clock still cross the bridge.
 
 # Sim clock: Gazebo -> ROS
 - ros_topic_name: "/clock"
@@ -29,21 +30,3 @@
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
   direction: GZ_TO_ROS
-
-# DetachableJoint grasp control: ROS -> Gazebo.
-# Publishing an Empty msg on /grasp/detach breaks the fixed joint
-# between the wrist and the cube; publishing on /grasp/attach
-# re-creates it at the current relative pose. See the
-# gz-sim-detachable-joint-system plugin block in pos_robot.urdf for
-# why parent_link is arm_wrist and not gripper_base.
-- ros_topic_name: "/grasp/detach"
-  gz_topic_name: "/grasp/detach"
-  ros_type_name: "std_msgs/msg/Empty"
-  gz_type_name: "gz.msgs.Empty"
-  direction: ROS_TO_GZ
-
-- ros_topic_name: "/grasp/attach"
-  gz_topic_name: "/grasp/attach"
-  ros_type_name: "std_msgs/msg/Empty"
-  gz_type_name: "gz.msgs.Empty"
-  direction: ROS_TO_GZ
