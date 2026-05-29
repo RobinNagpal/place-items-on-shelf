@@ -66,11 +66,27 @@ DRIVE_ACCEL = 0.10             # m/s^2 — linear velocity ramp magnitude
 # arm reach (arm max reach = 0.58 m; can horizontal from shoulder at
 # robot_x=1.40 is 0.63 m — unreachable). drive_to_x() below uses odom
 # feedback to stop at the target x exactly.
-APPROACH_X = 1.52              # robot_x to stop at when approaching shelf.
-                               # Front edge = APPROACH_X + 0.25 = 1.77, shelf
-                               # front at 1.80, so 3 cm clearance. Shoulder
-                               # at 1.37, can at 1.88 -> horizontal reach
-                               # 0.51 m, well inside arm max 0.58 m.
+APPROACH_X = 1.54              # robot_x to stop at when approaching shelf.
+                               # Why 1.54 and not "further from the shelf":
+                               #   base half-length X = 0.25, so robot's front
+                               #   face at x_world = APPROACH_X + 0.25 = 1.79.
+                               #   Shelf front at 1.80 -> 1 cm clearance, as
+                               #   close as is safe without the base touching.
+                               # Why "as close as possible" matters:
+                               #   shoulder world x = APPROACH_X - 0.15 = 1.39.
+                               #   Can world x = 1.88. Horizontal shoulder->can
+                               #   distance 0.49 m. Arm max end-effector reach
+                               #   A1+A2+A3 = 0.58 m -> 9 cm margin.
+                               # The previous value (1.52) left only 5 cm of
+                               # reach margin, and combined with the closed-loop
+                               # tolerance below the robot was stopping 1-2 cm
+                               # SHORT of target, so by STAGE 3 the wrist was
+                               # at 89% of A1+A2, the arm couldn't take up the
+                               # last bit under gravity sag, and the gripper
+                               # came up ~3 cm short of the can. Visible
+                               # symptom: "robot's hand has a gap to the can,
+                               # so it never grips it." Closing this margin
+                               # (and shrinking the tolerance) fixes that.
 HOME_X = 0.0                   # robot_x to stop at when returning home.
 
 STARTUP_DELAY_S = 5.0          # let controllers load + sim settle
@@ -97,11 +113,37 @@ LIFT_WORLD      = (CAN_X, CAN_Z + 0.15, PHI_HORIZONTAL)
 
 # Carry / place poses are ROBOT-FRAME (relative to base_link). We add the
 # current robot_x at command time so they track the robot.
-#   tray extends x_robot ∈ [-0.225, 0.225]; top at z_world = 0.185.
-#   gripper x_robot = +0.15 keeps the gripper just forward of the tray
-#   centre — this also keeps the wrist angle within its ±2.0 rad limit.
-CARRY_ROBOT_XZ = (0.20, 0.30)      # 12 cm above tray top, x near tray front
-PLACE_ROBOT_XZ = (0.20, 0.23)      # 4.5 cm above tray top -> short drop
+#
+# Tray geometry (from URDF):
+#   base_link rest world z       = 0.125  (wheel bottom 5 cm below base bottom)
+#   tray_joint origin (in base)  = (0, 0, 0.08)
+#   tray plate half-thickness    = 0.005
+#   -> tray top world z          = 0.125 + 0.08 + 0.005 = 0.210
+#   tray extends x_robot ∈ [-0.225, +0.225].
+#
+# CARRY pose: arm pulled BACK above the tray but STILL AT LIFT HEIGHT.
+# The previous CARRY pose at z=0.30 had the gripper centre descend straight
+# from LIFT z=0.7365 to z=0.30 while the robot was still parked at the
+# shelf. Joint-space interpolation of that move swept the gripper (and
+# the can held inside it) through z ≈ 0.49 at world x ≈ 1.87 — right
+# through the shelf collision volume (shelf top z=0.525, shelf x ∈
+# [1.80, 2.20]). The shelf either snagged the can or stalled the arm.
+# Keeping CARRY at LIFT z means every point of the LIFT->CARRY arc stays
+# above z=0.74, well clear of the shelf top. The actual descent over the
+# tray happens AFTER drive-back, when the shelf is no longer in the way.
+CARRY_ROBOT_XZ = (0.20, CAN_Z + 0.15)   # x near tray front, z = LIFT height
+
+# PLACE pose: descend over the tray to a height where the can held in the
+# gripper just clears the tray top before release.
+#   pad centre at z = 0.29  ->  can centre at 0.29
+#                            -> can bottom at 0.29 - 0.0615 = 0.2285
+#                            -> clearance above tray top = 0.0185 = 1.85 cm
+# The previous z=0.23 (with comment "4.5 cm above tray top") was computed
+# against an incorrect tray-top estimate of 0.185 m. Actual tray top is
+# 0.210, so z=0.23 would have put the can BOTTOM at 0.169 — 4 cm BELOW
+# the tray surface. Gazebo would resolve that as the can being pushed
+# back up by the tray, fighting the wrist PID, before the gripper opened.
+PLACE_ROBOT_XZ = (0.20, 0.29)
 
 # ---- Stow pose (hand-picked: arm folded back over the column) ----
 STOW_ANGLES = (-1.30, 2.20, 0.00)   # (shoulder, elbow, wrist)
@@ -140,7 +182,7 @@ def wait_sim_seconds(node, duration_s):
 
 
 def drive_to_x(node, pub, get_x, target_x, max_speed, accel,
-               timeout_s=45.0, tolerance=0.015):
+               timeout_s=45.0, tolerance=0.005):
     """Drive straight until odom reports robot x near target_x.
 
     Closed-loop trapezoidal velocity profile: accelerate to max_speed,
@@ -291,8 +333,13 @@ def main():
         pp.move_arm_to_world(*LIFT_WORLD)
         wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 
-        # ---- STAGE 6: carry pose (gripper stays horizontal -> can stays vertical) ----
-        logger.info('STAGE 6: carry pose (above tray, gripper horizontal)')
+        # ---- STAGE 6: carry pose (above tray at LIFT height — clears shelf top) ----
+        # NOT the previous "low carry" pose (z=0.30). That swept the can
+        # through the shelf during joint-space interpolation. Holding at
+        # LIFT height for the duration of drive-back keeps the gripper
+        # safely above the shelf top throughout the transition; the actual
+        # descent over the tray happens in STAGE 8 after we're home.
+        logger.info('STAGE 6: carry pose (above tray, still at lift height)')
         pp.move_arm_to_robot_xz(CARRY_ROBOT_XZ[0], CARRY_ROBOT_XZ[1], PHI_HORIZONTAL)
         wait_sim_seconds(node, ARM_MOVE_TIME_S + SETTLE_S)
 

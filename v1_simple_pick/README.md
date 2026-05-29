@@ -97,9 +97,9 @@ Stages (sim-time):
 | 3 (3 s)          | Arm lowers; gripper surrounds the can |
 | 4 (1.5 s)        | Fingers close — squeeze force builds up against the can |
 | 5 (3 s)          | Arm lifts the can clear of the shelf |
-| 6 (3 s)          | Arm folds back, gripper stays horizontal over the tray |
-| 7 (7.5 s)        | Robot drives back, can held in the gripper by friction |
-| 8 (3 s)          | Arm lowers to just above the tray |
+| 6 (3 s)          | Arm folds back over the tray, **still at lift height** (clears shelf top during the swing) |
+| 7 (7.5 s)        | Robot drives back, can held in the gripper by friction (arm stays at lift height for the whole drive) |
+| 8 (3 s)          | Arm lowers to just above the tray (now safe — shelf is far behind us) |
 | 9 (~2 s)         | Gripper opens, can drops a few cm onto the tray |
 | 10 (3 s)         | Arm stows |
 
@@ -112,11 +112,12 @@ Total ≈ 42 sim-s. Wall-clock ≈ 90 s on WSL/Iris Xe (RTF ~0.45).
 | Constant | Default | Meaning |
 |---|---|---|
 | `CAN_X`, `CAN_Z` | `1.88`, `0.5865` | Can centre (world) — keep in sync with `store.sdf` |
-| `PRE_GRASP_WORLD` z | `CAN_Z + 0.06` | Approach height above can |
-| `LIFT_WORLD` z | `CAN_Z + 0.15` | Clearance height after grasp |
-| `CARRY_ROBOT_XZ` | `(0.20, 0.30)` | Gripper position above tray during transport (robot frame) |
-| `PLACE_ROBOT_XZ` | `(0.20, 0.23)` | Drop height — 4.5 cm above tray top |
-| `GRIPPER_GRASP` | `0.018` | Finger target — must be < can radius (0.033) for the friction grasp to grip |
+| `APPROACH_X` | `1.54` | Robot stop-x at shelf. Front face ends ~1 cm short of the shelf at x=1.80; shoulder ends 0.49 m from the can (arm max reach 0.58 m, so 9 cm margin). |
+| `PRE_GRASP_WORLD` z | `CAN_Z + 0.06` | Approach height; with open fingers (gap 0.090 m vs can dia 0.066 m) the pads can be at can-top height without contact. |
+| `LIFT_WORLD` z | `CAN_Z + 0.15` | Clearance height after grasp — 21 cm above shelf top. |
+| `CARRY_ROBOT_XZ` | `(0.20, CAN_Z + 0.15)` | Above tray, **still at LIFT height**. Required for the LIFT→CARRY interp to clear the shelf top during drive-back. |
+| `PLACE_ROBOT_XZ` | `(0.20, 0.29)` | Drop height — pad centre 8 cm above tray top, so can bottom clears tray by ~1.85 cm before release. |
+| `GRIPPER_GRASP` | `0.012` | Finger target — must be < can radius (0.033) for the friction grasp to grip |
 
 If a target is unreachable, `ik_solve` raises `IKError` and the script
 logs which target failed. Move the target closer to the shoulder or
