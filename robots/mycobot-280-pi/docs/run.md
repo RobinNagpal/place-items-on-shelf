@@ -19,6 +19,24 @@ You have cloned this repo into a ROS 2 workspace, like the example you mentioned
 
 If you cloned it somewhere else, replace `~/ros2_ws` with your actual workspace path everywhere below.
 
+## 0. Make sure you are on a branch that has this folder
+
+If this folder is brand new and the PR introducing it has **not** been merged to `main` yet, then `git switch main && git pull` will leave you in a tree where this folder does not exist on disk. The symptom is:
+
+- `git submodule update --init --recursive` returns silently with no output.
+- `colcon build --packages-select mycobot_description` prints `ignoring unknown package 'mycobot_description'`.
+- `ros2 launch <path>/view_in_rviz.launch.py` ends with `... is not a valid package name`. (ROS 2 falls back to package-name resolution when the file path doesn't exist on disk.)
+
+Fix: get on the branch that has the folder. From the repo root:
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+git fetch origin
+git switch add-elephant-robotics-best-option-task    # or whichever branch this PR is on
+```
+
+Once the PR merges to `main`, `git switch main && git pull` will pick it up and you can skip this step.
+
 ## 1. First-time only — initialise the submodule
 
 If you cloned the repo with `git clone --recurse-submodules`, skip to step 2.
@@ -37,21 +55,37 @@ ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_description/urdf/mycobot_280_p
 # Expected: the path is printed back.
 ```
 
-## 2. Build `mycobot_description`
+## 2. Source ROS 2
+
+Use whichever distro you actually installed (see `docs/install.md`):
+
+```bash
+source /opt/ros/jazzy/setup.bash      # Ubuntu 24.04
+# or
+source /opt/ros/humble/setup.bash     # Ubuntu 22.04
+```
+
+> **If you see warnings about `~/ros2_ws/src/place-items-on-shelf/robots/rebot-arm-b601-dm/install` (or any other stale path) on the next `colcon build` step**, your environment is carrying leftovers from a previous workspace. Clear them in this shell:
+>
+> ```bash
+> unset AMENT_PREFIX_PATH COLCON_PREFIX_PATH CMAKE_PREFIX_PATH
+> source /opt/ros/jazzy/setup.bash     # or humble — re-source after unsetting
+> ```
+
+## 3. Build `mycobot_description`
 
 From the workspace root (not the repo root):
 
 ```bash
 cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
 colcon build --packages-select mycobot_description --symlink-install
 ```
 
 `--symlink-install` means edits to URDFs / meshes show up without a rebuild. `--packages-select mycobot_description` keeps the build focused — we are **not** building MoveIt, Gazebo, the hardware driver, etc. for this step.
 
-If the build finishes with `Summary: 1 package finished`, you are good.
+If the build finishes with `Summary: 1 package finished`, you are good. If it says `0 packages finished` or `ignoring unknown package 'mycobot_description'`, go back to step 0 — the submodule isn't on disk.
 
-## 3. Source the workspace
+## 4. Source the workspace
 
 ```bash
 source ~/ros2_ws/install/setup.bash
@@ -59,7 +93,7 @@ source ~/ros2_ws/install/setup.bash
 
 You need to do this in every fresh terminal where you want to run the launch file. (Or add it to `~/.bashrc`.)
 
-## 4. Launch the viewer
+## 5. Launch the viewer
 
 ```bash
 ros2 launch ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/launch/view_in_rviz.launch.py
@@ -76,16 +110,19 @@ Use the sliders to sanity-check:
 - Joints stop at roughly ±165° on joints 1–5 and ±175° on joint 6.
 - Meshes load — you should see the grey/silver myCobot links, not just bounding boxes.
 
-## 5. Stopping it
+## 6. Stopping it
 
 `Ctrl-C` in the terminal kills RViz, the slider GUI, and the publisher in one shot.
 
 ## Common issues
 
+- **`... is not a valid package name`** at the end of `ros2 launch` — the file path doesn't exist on disk. Almost always: you are on a branch that doesn't have this folder yet (step 0).
+- **`ignoring unknown package 'mycobot_description'`** during `colcon build` — same cause: the submodule isn't checked out (steps 0 + 1).
+- **`/opt/ros/<distro>/setup.bash: No such file or directory`** — you tried to source a distro you don't have installed. Check with `ls /opt/ros/` — whatever's there is what you should source.
+- **WARNINGs about `.../install` paths during `colcon build`** — leftover env vars from a previous workspace. Use the `unset` block in step 2.
 - **"Fixed Frame [g_base] does not exist"** in RViz — `robot_state_publisher` hasn't published the URDF yet. Wait a second; if it persists, check the terminal for a URDF parse error.
 - **Meshes appear as untextured grey shapes** — that's fine. The `.dae` files don't have textures.
 - **No arm appears, just empty space** — almost always means the workspace wasn't sourced. Re-run `source ~/ros2_ws/install/setup.bash` in *this* terminal and re-launch.
-- **`Package 'mycobot_description' not found`** — the `colcon build` step was skipped or failed. Re-run step 2.
 
 ## What this does NOT do
 

@@ -6,17 +6,21 @@ Quick checks to make sure the install actually worked before you spend time on `
 
 ```bash
 ros2 --version
-# Expected: ros2 cli version: 0.18.x (or similar)
+# Expected: ros2 cli version: 0.x.x
 
 echo $ROS_DISTRO
-# Expected: humble
+# Expected: jazzy   (or: humble)
 ```
 
-If `ros2` is not found, source the setup file:
+If `ros2` is not found, source the setup file matching whichever distro you installed:
 
 ```bash
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash      # Ubuntu 24.04
+# or
+source /opt/ros/humble/setup.bash     # Ubuntu 22.04
 ```
+
+> If `$ROS_DISTRO` is empty after sourcing, your `~/.bashrc` may be sourcing the wrong distro or none at all. Check it and re-source.
 
 ## 2. The packages we need are installed
 
@@ -33,19 +37,29 @@ rviz2
 xacro
 ```
 
-If any are missing, re-run the `sudo apt install` block in [`install.md`](install.md).
+If any are missing, re-run the `sudo apt install` block in [`install.md`](install.md) — make sure you used the right `ros-<distro>-...` prefix for your ROS 2 distro.
 
-## 3. The submodule is checked out
+## 3. You are on a branch that has this folder
 
-From the **repo root** (the `place-items-on-shelf/` folder):
+If you cloned the repo before this folder existed (or you switched back to `main` before it was merged), the launch file won't be on disk yet. From the repo root:
+
+```bash
+ls robots/mycobot-280-pi/launch/view_in_rviz.launch.py
+```
+
+If that prints `No such file or directory`, you are on the wrong branch. See [`run.md`](run.md) step 0 for how to fix it.
+
+## 4. The submodule is checked out
+
+From the repo root:
 
 ```bash
 ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_description/urdf/mycobot_280_pi/mycobot_280_pi.urdf
 ```
 
-Expected: the file path is printed back. If you get `No such file or directory`, the submodule is not initialised — see [the repo root README](../../README.md) for `git submodule update --init --recursive`.
+Expected: the file path is printed back. If you get `No such file or directory`, the submodule is not initialised — see [`run.md`](run.md) step 0.
 
-## 4. WSL GUI passthrough (WSL only)
+## 5. WSL GUI passthrough (WSL only)
 
 ```bash
 xeyes
@@ -57,4 +71,4 @@ If `xeyes` is missing: `sudo apt install -y x11-apps`. If it installs but the wi
 
 ## What's next
 
-If all four checks pass, go to [`docs/run.md`](run.md) to build and launch the viewer.
+If all five checks pass, go to [`docs/run.md`](run.md) to build and launch the viewer.

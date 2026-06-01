@@ -1,18 +1,19 @@
 # Install — myCobot 280 Pi (no hardware required)
 
-Target environment, matching Elephant Robotics' officially supported stack for `mycobot_ros2`:
+Two supported environments. Pick whichever matches the Ubuntu version you already have on your machine / in WSL. You do **not** need both.
 
-- **OS:** Ubuntu 22.04 LTS (native or WSL 2 on Windows 11)
-- **ROS 2:** Humble
-- **Python:** 3.10 (system Python; do **not** use conda)
+| Ubuntu | ROS 2 | Python | Notes |
+|---|---|---|---|
+| **24.04 LTS** | **Jazzy** (recommended for new installs) | 3.12 | What you get on a fresh WSL 2 Ubuntu install in 2026. |
+| 22.04 LTS | Humble | 3.10 | Matches Elephant Robotics' nominally tested branch. |
 
-> The `mycobot_ros2` repo's `humble` branch is what Elephant Robotics ships and tests against. Ubuntu 24.04 + ROS 2 Jazzy is reported to work with the same branch (see Elephant Robotics docs), but Humble is the safer default for a first pass.
+The `mycobot_description` package we build for this step is just URDF + meshes + `ament_cmake`. It has no distro-specific code, so it works equally well on either. Pick the one that matches your OS — don't try to install both side by side.
 
-If you already have ROS 2 Humble installed, skip to step 2.
+> If you already have one of these installed, run `ros2 --version` and `echo $ROS_DISTRO` to confirm which. Then skip to step 2.
 
-## 1. Install ROS 2 Humble
+## 1a. Install ROS 2 Jazzy (Ubuntu 24.04 — recommended)
 
-Follow the official guide: <https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html>. The condensed version:
+Official guide: <https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html>. Condensed:
 
 ```bash
 sudo apt update && sudo apt install -y software-properties-common curl
@@ -23,20 +24,31 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
   http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
   | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 sudo apt update
+sudo apt install -y ros-jazzy-ros-base
+```
+
+## 1b. Install ROS 2 Humble (Ubuntu 22.04 — alternative)
+
+Same commands as above, but swap `jazzy` for `humble`:
+
+```bash
 sudo apt install -y ros-humble-ros-base
 ```
 
 ## 2. Install the dev tools we need
 
+Replace `<distro>` with `jazzy` or `humble` to match what you installed:
+
 ```bash
+DISTRO=jazzy   # or: humble
 sudo apt install -y \
   python3-colcon-common-extensions \
   python3-rosdep \
   python3-vcstool \
-  ros-humble-rviz2 \
-  ros-humble-robot-state-publisher \
-  ros-humble-joint-state-publisher-gui \
-  ros-humble-xacro
+  ros-${DISTRO}-rviz2 \
+  ros-${DISTRO}-robot-state-publisher \
+  ros-${DISTRO}-joint-state-publisher-gui \
+  ros-${DISTRO}-xacro
 
 # First-time rosdep init (skip the init line if it complains it's already done)
 sudo rosdep init 2>/dev/null || true
@@ -46,7 +58,8 @@ rosdep update
 ## 3. Make sourcing automatic (optional but convenient)
 
 ```bash
-echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
+DISTRO=jazzy   # or: humble
+echo "source /opt/ros/${DISTRO}/setup.bash" >> ~/.bashrc
 ```
 
 Open a fresh terminal afterwards.

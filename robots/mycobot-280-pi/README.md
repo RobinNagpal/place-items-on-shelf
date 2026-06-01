@@ -38,16 +38,20 @@ We pin to `mycobot_280_pi.urdf` to match the hardware we'll actually order. If w
 
 ## Quick start
 
-The condensed version of `docs/run.md`:
+The condensed version of `docs/run.md`. Use `jazzy` if you are on Ubuntu 24.04, `humble` if you are on 22.04.
 
 ```bash
-# 1. Init the submodule (only needed once, after the first clone)
+# 0. Make sure you are on a branch that actually has this folder
 cd ~/ros2_ws/src/place-items-on-shelf
+git fetch origin
+git switch add-elephant-robotics-best-option-task   # or `main` once this PR is merged
+
+# 1. Init the submodule (only needed once, after the first clone)
 git submodule update --init --recursive
 
 # 2. Build only what we need
 cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash        # or /opt/ros/humble/setup.bash
 colcon build --packages-select mycobot_description --symlink-install
 
 # 3. Source the workspace
