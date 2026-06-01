@@ -1,4 +1,4 @@
-# Verify your environment — myCobot 280 Pi viewer
+# Verify your environment — myCobot 280 Pi (using addison's stack)
 
 Quick checks to make sure the install actually worked before you spend time on `colcon build`.
 
@@ -20,55 +20,70 @@ source /opt/ros/jazzy/setup.bash      # Ubuntu 24.04
 source /opt/ros/humble/setup.bash     # Ubuntu 22.04
 ```
 
-> If `$ROS_DISTRO` is empty after sourcing, your `~/.bashrc` may be sourcing the wrong distro or none at all. Check it and re-source.
+## 2. You are on a branch that has this folder
 
-## 2. The packages we need are installed
+If you cloned the repo before this folder existed (or you switched back to `main` before it was merged), the submodule pointer won't be on disk. From the repo root:
 
 ```bash
-ros2 pkg list | grep -E '^(rviz2|robot_state_publisher|joint_state_publisher_gui|xacro)$'
+ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_gazebo/launch/mycobot.gazebo.launch.py
 ```
 
-Expected output (order may differ):
+If that prints `No such file or directory`, you are on the wrong branch or the submodule isn't checked out. See [`run.md`](run.md) step 0.
+
+## 3. addison's packages are visible to colcon
+
+From the workspace root:
+
+```bash
+cd ~/ros2_ws
+colcon list --packages-up-to mycobot_gazebo 2>/dev/null | sort
+```
+
+Expected (order may vary): `mycobot_bringup`, `mycobot_description`, `mycobot_gazebo`, `mycobot_interfaces`, `mycobot_moveit_config`. If colcon prints nothing, the submodule isn't initialised — see [`run.md`](run.md) step 0.
+
+## 4. Gazebo Sim is installed (Jazzy only — skip for pure RViz)
+
+```bash
+gz sim --version
+# Expected (Jazzy): Gazebo Sim, version 8.x.x   (Harmonic)
+```
+
+If not found, re-run the `gz-harmonic` apt install in [`install.md`](install.md) step 3.
+
+## 5. addison's runtime dependencies are present
+
+```bash
+ros2 pkg list | grep -E '^(rviz2|robot_state_publisher|joint_state_publisher_gui|xacro|ros_gz_sim|ros_gz_bridge|gz_ros2_control|joint_trajectory_controller|joint_state_broadcaster|moveit_ros_planning|moveit_task_constructor_core|control_msgs)$' | sort
+```
+
+Expected (order may vary):
 
 ```
+control_msgs
+gz_ros2_control
+joint_state_broadcaster
 joint_state_publisher_gui
+joint_trajectory_controller
+moveit_ros_planning
+moveit_task_constructor_core
 robot_state_publisher
+ros_gz_bridge
+ros_gz_sim
 rviz2
 xacro
 ```
 
-If any are missing, re-run the `sudo apt install` block in [`install.md`](install.md) — make sure you used the right `ros-<distro>-...` prefix for your ROS 2 distro.
+Anything missing means `rosdep install ...` in [`install.md`](install.md) step 4 didn't finish — rerun it.
 
-## 3. You are on a branch that has this folder
-
-If you cloned the repo before this folder existed (or you switched back to `main` before it was merged), the launch file won't be on disk yet. From the repo root:
-
-```bash
-ls robots/mycobot-280-pi/launch/view_in_rviz.launch.py
-```
-
-If that prints `No such file or directory`, you are on the wrong branch. See [`run.md`](run.md) step 0 for how to fix it.
-
-## 4. The submodule is checked out
-
-From the repo root:
-
-```bash
-ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_description/urdf/mycobot_280_pi/mycobot_280_pi.urdf
-```
-
-Expected: the file path is printed back. If you get `No such file or directory`, the submodule is not initialised — see [`run.md`](run.md) step 0.
-
-## 5. WSL GUI passthrough (WSL only)
+## 6. WSL GUI passthrough (WSL only)
 
 ```bash
 xeyes
 ```
 
-A pair of cartoon eyes should appear. Close them.
-
-If `xeyes` is missing: `sudo apt install -y x11-apps`. If it installs but the window does not appear, you are on Windows 10 or an older WSL build — upgrade to WSL 2 on Windows 11 (WSLg ships built-in), or install a third-party X server (VcXsrv) and export `DISPLAY` manually.
+A pair of cartoon eyes should appear. Close them. If `xeyes` is missing: `sudo apt install -y x11-apps`.
 
 ## What's next
 
-If all five checks pass, go to [`docs/run.md`](run.md) to build and launch the viewer.
+If checks 1–3 + 6 pass, go to [`docs/run.md`](run.md) for Step 1 (URDF in RViz).
+If 4 and 5 also pass, go to [`docs/run_sim.md`](run_sim.md) for Step 2 (Gazebo simulation).

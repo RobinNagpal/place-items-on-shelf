@@ -1,15 +1,15 @@
 # Install — myCobot 280 Pi (no hardware required)
 
-Two supported environments. Pick whichever matches the Ubuntu version you already have on your machine / in WSL. You do **not** need both.
+The repo now leans on the **`automaticaddison/mycobot_ros2`** stack as upstream — it ships a working URDF, Gazebo simulation, MoveIt 2 config, MoveIt Task Constructor demos, and a pick-and-place example for this exact arm. Our job is to point at it correctly and add the HPLC-specific scene later.
+
+## Target environment
 
 | Ubuntu | ROS 2 | Python | Notes |
 |---|---|---|---|
-| **24.04 LTS** | **Jazzy** (recommended for new installs) | 3.12 | What you get on a fresh WSL 2 Ubuntu install in 2026. |
-| 22.04 LTS | Humble | 3.10 | Matches Elephant Robotics' nominally tested branch. |
+| **24.04 LTS** | **Jazzy** (recommended) | 3.12 | Default for fresh WSL 2 in 2026. |
+| 22.04 LTS | Humble | 3.10 | Also supported by addison's repo. |
 
-The `mycobot_description` package we build for this step is just URDF + meshes + `ament_cmake`. It has no distro-specific code, so it works equally well on either. Pick the one that matches your OS — don't try to install both side by side.
-
-> If you already have one of these installed, run `ros2 --version` and `echo $ROS_DISTRO` to confirm which. Then skip to step 2.
+If you already have ROS 2 installed, run `ros2 --version` and `echo $ROS_DISTRO` to confirm which, then skip to step 2.
 
 ## 1a. Install ROS 2 Jazzy (Ubuntu 24.04 — recommended)
 
@@ -29,15 +29,13 @@ sudo apt install -y ros-jazzy-ros-base
 
 ## 1b. Install ROS 2 Humble (Ubuntu 22.04 — alternative)
 
-Same commands as above, but swap `jazzy` for `humble`:
+Same idea, swap `jazzy` for `humble`:
 
 ```bash
 sudo apt install -y ros-humble-ros-base
 ```
 
-## 2. Install the dev tools we need
-
-Replace `<distro>` with `jazzy` or `humble` to match what you installed:
+## 2. Install build tools
 
 ```bash
 DISTRO=jazzy   # or: humble
@@ -45,17 +43,39 @@ sudo apt install -y \
   python3-colcon-common-extensions \
   python3-rosdep \
   python3-vcstool \
-  ros-${DISTRO}-rviz2 \
-  ros-${DISTRO}-robot-state-publisher \
-  ros-${DISTRO}-joint-state-publisher-gui \
-  ros-${DISTRO}-xacro
-
-# First-time rosdep init (skip the init line if it complains it's already done)
+  build-essential \
+  git
 sudo rosdep init 2>/dev/null || true
 rosdep update
 ```
 
-## 3. Make sourcing automatic (optional but convenient)
+## 3. Install Gazebo Harmonic (Jazzy only)
+
+Required for Step 2 and beyond. Skip if you are stopping at Step 1.
+
+```bash
+sudo apt install -y gz-harmonic
+gz sim --version
+# Expected: Gazebo Sim, version 8.x.x   (Harmonic)
+```
+
+(On Humble, the equivalent is Gazebo Fortress — `sudo apt install ros-humble-ros-gz` and `gz-fortress`. Not covered in detail here.)
+
+## 4. Install addison's stack dependencies via rosdep
+
+The cleanest way to install everything `automaticaddison/mycobot_ros2` needs is to let `rosdep` read its `package.xml` files and fetch system packages automatically. From the workspace root, **after** the submodule is checked out (see [`run.md`](run.md) step 0):
+
+```bash
+DISTRO=jazzy
+cd ~/ros2_ws
+rosdep install --from-paths src --ignore-src -r -y --rosdistro ${DISTRO}
+```
+
+That pulls in MoveIt 2, MoveIt Task Constructor, ros2_control, ros2_controllers, ros_gz_sim, ros_gz_bridge, ros_gz_image, gz_ros2_control, joint_state_publisher_gui, xacro, rviz2 — basically everything Steps 1 through 6 need in one shot.
+
+If `rosdep` complains about unknown keys, that's a sign your `${DISTRO}` is wrong or `rosdep update` was skipped — fix and rerun.
+
+## 5. Make sourcing automatic (optional)
 
 ```bash
 DISTRO=jazzy   # or: humble
@@ -64,9 +84,9 @@ echo "source /opt/ros/${DISTRO}/setup.bash" >> ~/.bashrc
 
 Open a fresh terminal afterwards.
 
-## 4. WSL only — GUI passthrough
+## 6. WSL only — GUI passthrough
 
-WSL 2 on Windows 11 has built-in WSLg, so RViz windows open natively with no extra setup. Verify with:
+WSL 2 on Windows 11 has built-in WSLg, so RViz and Gazebo windows open natively with no extra setup. Quick smoke test:
 
 ```bash
 sudo apt install -y x11-apps
