@@ -51,16 +51,29 @@ Open a fresh terminal afterwards.
 
 ## 4. Clone this monorepo with submodules
 
+The Seeed ROS 2 SDK is pulled in as a git submodule. **You must initialize it, or colcon will find zero packages to build.**
+
+Fresh clone (recommended):
+
 ```bash
 git clone --recurse-submodules https://github.com/RobinNagpal/place-items-on-shelf.git
-cd place-items-on-shelf/robots/rebot-arm-b601-dm
+cd place-items-on-shelf
 ```
 
-If you already cloned without `--recurse-submodules`:
+If you already cloned without `--recurse-submodules`, or you switched branches with `git switch`/`git checkout` (which updates the submodule pointer but does NOT update the working tree), run this from the repo root:
 
 ```bash
 git submodule update --init --recursive
 ```
+
+Verify the submodule actually has content:
+
+```bash
+ls robots/rebot-arm-b601-dm/src/rebotarm_ros2/src
+# Expect: rebotarm_bringup  rebotarm_msgs  rebotarmcontroller
+```
+
+If that directory is empty, the submodule init did not happen — re-run the command above.
 
 ## 5. Build the colcon workspace
 
@@ -70,6 +83,8 @@ source /opt/ros/jazzy/setup.bash
 colcon build --symlink-install
 source install/setup.bash
 ```
+
+The build should report **3 packages finished** (`rebotarm_msgs`, `rebotarm_bringup`, `rebotarmcontroller`). If it says `0 packages finished`, the submodule is not initialized — go back to step 4.
 
 The build will warn (loudly) that the controller node expects hardware. That is expected — we are not running the controller, only the URDF viewer.
 

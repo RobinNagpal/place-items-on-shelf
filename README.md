@@ -22,10 +22,23 @@ To add another arm later, create a new sibling folder under `robots/` with its o
 
 ## Cloning
 
-This repo uses git submodules. After cloning:
+This repo uses git submodules. **You must initialize them or builds will find zero packages.**
+
+Fresh clone:
 
 ```bash
 git clone --recurse-submodules https://github.com/RobinNagpal/place-items-on-shelf.git
-# or, if already cloned:
+```
+
+If you already cloned, or you switched branches with `git switch` / `git checkout` (which updates the submodule pointer but does NOT update the working tree), run from the repo root:
+
+```bash
 git submodule update --init --recursive
+```
+
+Verify it worked:
+
+```bash
+ls robots/rebot-arm-b601-dm/src/rebotarm_ros2/src
+# Expect: rebotarm_bringup  rebotarm_msgs  rebotarmcontroller
 ```

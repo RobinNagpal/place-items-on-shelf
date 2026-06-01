@@ -41,7 +41,25 @@ For physics-accurate simulation, wait for Seeed's Isaac Sim drop (~2026-06-20) â
 ## Troubleshooting
 
 **`Package 'rebotarm_bringup' not found`**
-You forgot to source the local workspace. Run `source install/setup.bash` from `robots/rebot-arm-b601-dm/` after building.
+
+Two possible causes:
+
+1. **Submodule not initialized** (most common when you reached this branch via `git switch` or `git checkout` instead of `git clone --recurse-submodules`). Check:
+   ```bash
+   ls $(git rev-parse --show-toplevel)/robots/rebot-arm-b601-dm/src/rebotarm_ros2/src
+   ```
+   If that directory is empty, fix it:
+   ```bash
+   cd $(git rev-parse --show-toplevel)
+   git submodule update --init --recursive
+   cd robots/rebot-arm-b601-dm
+   rm -rf build install log
+   colcon build --symlink-install
+   source install/setup.bash
+   ```
+   The build should now report **3 packages finished**.
+
+2. **Forgot to source the local workspace.** Run `source install/setup.bash` from `robots/rebot-arm-b601-dm/` after building.
 
 **`cannot open display` / no windows appear (WSL)**
 WSLg is not working. See the WSL section of [`verify-env.md`](verify-env.md).
