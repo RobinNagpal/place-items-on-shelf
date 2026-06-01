@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+  Simulation wrapper around the vendor URDF.
+
+  This file does three things and nothing else:
+    1. xacro:include the upstream mycobot_280_pi.urdf so we inherit links,
+       joints, joint limits, meshes, and the kinematic chain unchanged.
+    2. Declare a <ros2_control> system for all 6 revolute joints, backed
+       by the gz_ros2_control GazeboSimSystem hardware interface.
+    3. Attach the gz_ros2_control plugin to Gazebo Sim so it can drive
+       the joints when the simulation runs.
+
+  KNOWN LIMITATION: the vendor URDF ships without <inertial> tags. In a
+  gravity-enabled world that would produce a wobbly / falling arm. We
+  side-step this in worlds/empty.sdf by disabling gravity, which lets us
+  run a kinematic-only simulation (the controller commands joint
+  positions, Gazebo renders them). A follow-up step will add proper
+  inertials and switch to a gravity-enabled world.
+-->
+<robot name="mycobot_280_pi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Path to controllers.yaml is passed in at launch time so the gz plugin can find it. -->
+  <xacro:arg name="controllers_yaml" default=""/>
+
+  <!-- Pull in the manufacturer URDF (xacro:include inlines its <link> / <joint> children). -->
+  <xacro:include filename="$(find mycobot_description)/urdf/mycobot_280_pi/mycobot_280_pi.urdf"/>
+
+  <!-- 6 revolute joints exposed to ros2_control. Joint names match the vendor URDF. -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="joint2_to_joint1">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="joint3_to_joint2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="joint4_to_joint3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="joint5_to_joint4">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="joint6_to_joint5">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="joint6output_to_joint6">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Gazebo Sim plugin that owns the controller_manager inside the sim process. -->
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(arg controllers_yaml)</parameters>
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+    </plugin>
+  </gazebo>
+
+</robot>

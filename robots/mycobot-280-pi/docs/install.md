@@ -75,6 +75,25 @@ xeyes
 
 If a pair of eyes appears, GUI passthrough is working. Close it and continue.
 
+## 5. (Step 2 only — Jazzy) Gazebo Harmonic + ros2_control
+
+You only need this section if you are moving on to the **Gazebo simulation** step. For just the RViz viewer (Step 1), skip it.
+
+```bash
+DISTRO=jazzy
+sudo apt install -y \
+  ros-${DISTRO}-ros-gz \
+  ros-${DISTRO}-gz-ros2-control \
+  ros-${DISTRO}-ros2-control \
+  ros-${DISTRO}-ros2-controllers \
+  ros-${DISTRO}-joint-state-broadcaster \
+  ros-${DISTRO}-joint-trajectory-controller \
+  ros-${DISTRO}-control-msgs \
+  gz-harmonic
+```
+
+The Humble path (Ubuntu 22.04, Gazebo Fortress + `ign_ros2_control`) is not documented yet — open an issue if you need it.
+
 ## What's next
 
 When this is done, go to [`docs/verify-env.md`](verify-env.md) to confirm everything is wired up before building.
