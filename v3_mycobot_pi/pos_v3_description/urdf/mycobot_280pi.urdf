@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<!--
+  myCobot 280 Pi — first-pass URDF (Step 1 of v3).
+
+  Link lengths come from Elephant Robotics' published spec sheet for the
+  myCobot 280 family. Working radius = 280 mm; manufacturer-listed joint
+  limits used below (±165° on J1–J5, ±175° on J6). Total mass of the real
+  arm is ~850 g.
+
+  Visuals are simple primitives (cylinders + a base disc). Step 2 of v3
+  will vendor in Elephant Robotics' official STL meshes from
+  mycobot_description so the rendered arm looks like the real robot.
+  Dimensions here are accurate; only the appearance is approximate.
+
+  Kinematic chain:
+    world ── base_link  (fixed mounting disc, 14 mm thick)
+              └── joint1  (revolute, Z)  ── link1   (vertical, d1)
+                  └── joint2 (revolute, Y) ── link2 (upper arm, a2)
+                      └── joint3 (revolute, Y) ── link3 (forearm, a3)
+                          └── joint4 (revolute, Y) ── link4 (wrist 1, d4)
+                              └── joint5 (revolute, Z) ── link5 (wrist 2, d5)
+                                  └── joint6 (revolute, Y) ── link6 (flange, d6)
+                                      └── tool0 (frame at flange tip)
+
+  This file is xacro — process it through xacro before passing to
+  robot_state_publisher / RViz. The launch file does that.
+-->
+<robot name="mycobot_280pi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============================================================
+       DIMENSIONS  (meters; from myCobot 280 spec sheet)
+       ============================================================ -->
+  <xacro:property name="base_radius"  value="0.054"/>
+  <xacro:property name="base_height"  value="0.014"/>
+  <xacro:property name="d1"           value="0.13156"/>
+  <xacro:property name="a2"           value="0.1104"/>
+  <xacro:property name="a3"           value="0.096"/>
+  <xacro:property name="d4"           value="0.06639"/>
+  <xacro:property name="d5"           value="0.07318"/>
+  <xacro:property name="d6"           value="0.0436"/>
+
+  <xacro:property name="link_radius"  value="0.022"/>
+  <xacro:property name="joint_radius" value="0.026"/>
+
+  <!-- Joint limits (radians).  ±165° = ±2.879, ±175° = ±3.054. -->
+  <xacro:property name="lim_165"      value="2.879"/>
+  <xacro:property name="lim_175"      value="3.054"/>
+
+  <!-- Effort (Nm) and velocity (rad/s) are conservative placeholders;
+       they're tightened up in Step 3 when ros2_control comes in. -->
+  <xacro:property name="effort_max"   value="2.0"/>
+  <xacro:property name="vel_max"      value="2.0"/>
+
+  <material name="mycobot_white"><color rgba="0.96 0.96 0.96 1.0"/></material>
+  <material name="mycobot_dark" ><color rgba="0.15 0.15 0.15 1.0"/></material>
+  <material name="mycobot_flange"><color rgba="0.95 0.45 0.05 1.0"/></material>
+
+  <!-- ============================================================
+       WORLD anchor + BASE mounting disc
+       ============================================================ -->
+  <link name="world"/>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base_height/2}"/>
+      <geometry><cylinder radius="${base_radius}" length="${base_height}"/></geometry>
+      <material name="mycobot_dark"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${base_height/2}"/>
+      <geometry><cylinder radius="${base_radius}" length="${base_height}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${base_height/2}"/>
+      <mass value="0.30"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0008"/>
+    </inertial>
+  </link>
+
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 1  (vertical column to joint 2)
+       ============================================================ -->
+  <link name="link1">
+    <visual>
+      <origin xyz="0 0 ${d1/2}"/>
+      <geometry><cylinder radius="${joint_radius}" length="${d1}"/></geometry>
+      <material name="mycobot_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${d1/2}"/>
+      <geometry><cylinder radius="${joint_radius}" length="${d1}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${d1/2}"/>
+      <mass value="0.15"/>
+      <inertia ixx="0.0004" ixy="0" ixz="0" iyy="0.0004" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link1"/>
+    <origin xyz="0 0 ${base_height}"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${lim_165}" upper="${lim_165}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 2  (upper arm, extends along +X at zero pose)
+       ============================================================ -->
+  <link name="link2">
+    <visual>
+      <origin xyz="${a2/2} 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry><cylinder radius="${link_radius}" length="${a2}"/></geometry>
+      <material name="mycobot_white"/>
+    </visual>
+    <collision>
+      <origin xyz="${a2/2} 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry><cylinder radius="${link_radius}" length="${a2}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="${a2/2} 0 0"/>
+      <mass value="0.13"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0003" iyz="0" izz="0.0003"/>
+    </inertial>
+  </link>
+
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <origin xyz="0 0 ${d1}"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-${lim_165}" upper="${lim_165}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 3  (forearm)
+       ============================================================ -->
+  <link name="link3">
+    <visual>
+      <origin xyz="${a3/2} 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry><cylinder radius="${link_radius}" length="${a3}"/></geometry>
+      <material name="mycobot_white"/>
+    </visual>
+    <collision>
+      <origin xyz="${a3/2} 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry><cylinder radius="${link_radius}" length="${a3}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="${a3/2} 0 0"/>
+      <mass value="0.10"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+
+  <joint name="joint3" type="revolute">
+    <parent link="link2"/>
+    <child link="link3"/>
+    <origin xyz="${a2} 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-${lim_165}" upper="${lim_165}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 4  (wrist 1 — short vertical segment)
+       ============================================================ -->
+  <link name="link4">
+    <visual>
+      <origin xyz="0 0 ${d4/2}"/>
+      <geometry><cylinder radius="${link_radius}" length="${d4}"/></geometry>
+      <material name="mycobot_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${d4/2}"/>
+      <geometry><cylinder radius="${link_radius}" length="${d4}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${d4/2}"/>
+      <mass value="0.08"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="joint4" type="revolute">
+    <parent link="link3"/>
+    <child link="link4"/>
+    <origin xyz="${a3} 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-${lim_165}" upper="${lim_165}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 5  (wrist 2 — yaw)
+       ============================================================ -->
+  <link name="link5">
+    <visual>
+      <origin xyz="0 0 ${d5/2}"/>
+      <geometry><cylinder radius="${link_radius}" length="${d5}"/></geometry>
+      <material name="mycobot_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${d5/2}"/>
+      <geometry><cylinder radius="${link_radius}" length="${d5}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${d5/2}"/>
+      <mass value="0.06"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="joint5" type="revolute">
+    <parent link="link4"/>
+    <child link="link5"/>
+    <origin xyz="0 0 ${d4}"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${lim_165}" upper="${lim_165}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       LINK 6  (tool flange — orange disc for visibility)
+       ============================================================ -->
+  <link name="link6">
+    <visual>
+      <origin xyz="0 0 ${d6/2}"/>
+      <geometry><cylinder radius="${link_radius - 0.004}" length="${d6}"/></geometry>
+      <material name="mycobot_flange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${d6/2}"/>
+      <geometry><cylinder radius="${link_radius - 0.004}" length="${d6}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${d6/2}"/>
+      <mass value="0.04"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+    </inertial>
+  </link>
+
+  <joint name="joint6" type="revolute">
+    <parent link="link5"/>
+    <child link="link6"/>
+    <origin xyz="0 0 ${d5}"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-${lim_175}" upper="${lim_175}" effort="${effort_max}" velocity="${vel_max}"/>
+  </joint>
+
+  <!-- ============================================================
+       TOOL0  (zero-length frame at the flange face — what the
+       gripper / camera mount attaches to in Step 2)
+       ============================================================ -->
+  <link name="tool0"/>
+  <joint name="flange_to_tool0" type="fixed">
+    <parent link="link6"/>
+    <child link="tool0"/>
+    <origin xyz="0 0 ${d6}"/>
+  </joint>
+
+</robot>
