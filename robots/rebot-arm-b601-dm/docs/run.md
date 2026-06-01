@@ -72,4 +72,7 @@ ls src/rebotarm_ros2/src/rebotarm_bringup/description/urdf/reBot-DevArm_fixend.u
 ```
 
 **Joint sliders move but RViz doesn't update**
-The `Fixed Frame` in RViz might not be set. In the RViz left panel, set `Global Options → Fixed Frame` to `base_link`.
+The `Fixed Frame` in RViz might not be set. In the RViz left panel, set `Global Options → Fixed Frame` to `base_link`. (Our shipped `rviz/view.rviz` already sets this; if you somehow loaded the Seeed-shipped `rebotarm.rviz` stub instead, re-launch with our `view_in_rviz.launch.py`.)
+
+**RViz opens but the arm is a tiny dot, mouse won't pan/zoom, no Displays panel on the left**
+You're looking at Seeed's `rebotarm.rviz` stub — it declares no Tools/Views/panels, so the camera defaults to ~10m away (making the 30cm arm look like a pixel) and no `MoveCamera` tool is loaded (so the mouse does nothing). Re-launch with `ros2 launch $(pwd)/launch/view_in_rviz.launch.py` from `robots/rebot-arm-b601-dm/` — that points RViz at our `rviz/view.rviz`, which sets the camera at 0.8 m, enables the MoveCamera/Select/FocusCamera tools, and shows the standard Displays/Views panels.

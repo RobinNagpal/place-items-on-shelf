@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.substitutions import Command, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -10,7 +12,14 @@ def generate_launch_description():
     urdf_file = PathJoinSubstitution(
         [bringup_share, "description", "urdf", "reBot-DevArm_fixend.urdf"]
     )
-    rviz_config = PathJoinSubstitution([bringup_share, "rviz", "rebotarm.rviz"])
+    # Seeed's bundled rebotarm.rviz is a stub: no Tools, no Views, no panels
+    # besides Displays — so the viewport renders the arm but mouse pan/zoom
+    # doesn't work and the camera sits at the default 10m distance, making a
+    # ~30cm arm look like a pixel. Use our own config sitting next to this
+    # launch file instead.
+    rviz_config = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "rviz", "view.rviz"
+    )
     robot_description = ParameterValue(Command(["cat ", urdf_file]), value_type=str)
 
     # Unlike Seeed's bundled rviz.launch.py, we do NOT remap /joint_states to
