@@ -1,0 +1,4 @@
+[submodule "robots/mycobot-280-pi/src/mycobot_ros2"]
+	path = robots/mycobot-280-pi/src/mycobot_ros2
+	url = https://github.com/elephantrobotics/mycobot_ros2.git
+	branch = humble
