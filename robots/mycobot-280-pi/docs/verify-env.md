@@ -69,30 +69,6 @@ A pair of cartoon eyes should appear. Close them.
 
 If `xeyes` is missing: `sudo apt install -y x11-apps`. If it installs but the window does not appear, you are on Windows 10 or an older WSL build — upgrade to WSL 2 on Windows 11 (WSLg ships built-in), or install a third-party X server (VcXsrv) and export `DISPLAY` manually.
 
-## 6. (Step 2 only) Gazebo Sim and ros2_control are installed
-
-Skip this if you are only running the RViz viewer (Step 1).
-
-```bash
-gz sim --version
-# Expected (on Jazzy): Gazebo Sim, version 8.x.x   (Harmonic)
-
-ros2 pkg list | grep -E '^(ros_gz_sim|gz_ros2_control|joint_trajectory_controller|joint_state_broadcaster|control_msgs)$'
-```
-
-Expected packages (order may vary):
-
-```
-control_msgs
-gz_ros2_control
-joint_state_broadcaster
-joint_trajectory_controller
-ros_gz_sim
-```
-
-If `gz sim` is not found, re-run the `gz-harmonic` apt install in [`install.md`](install.md) step 5.
-
 ## What's next
 
-If checks 1–5 pass, go to [`docs/run.md`](run.md) for the RViz viewer.
-If check 6 also passes, go to [`docs/run_sim.md`](run_sim.md) for the Gazebo simulation.
+If all five checks pass, go to [`docs/run.md`](run.md) to build and launch the viewer.
