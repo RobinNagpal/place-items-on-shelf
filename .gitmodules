@@ -1,0 +1,4 @@
+[submodule "robots/rebot-arm-b601-dm/src/rebotarm_ros2"]
+	path = robots/rebot-arm-b601-dm/src/rebotarm_ros2
+	url = https://github.com/Seeed-Projects/reBotArmController_ROS2.git
+	branch = main
