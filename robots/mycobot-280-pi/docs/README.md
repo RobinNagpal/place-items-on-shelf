@@ -23,6 +23,9 @@ Read them in order — each one builds on the previous.
    to launch.
 6. **[06-glossary.md](06-glossary.md)** — Short definitions of every acronym and jargon
    word you'll bump into.
+7. **[07-viewing-camera-output.md](07-viewing-camera-output.md)** — Two short recipes
+   for "I just want to see what the camera is seeing" — via RViz, or via Gazebo's own
+   built-in viewer.
 
 ## The 30-second big picture
 
