@@ -46,18 +46,6 @@ The previous round of this PR had us authoring a Gazebo + ros2_control + URDF wr
 
 Re-implementing any of this would be churn. The right move is to stand on it and add only what addison's repo can't know about — the HPLC autosampler scene.
 
-## Do all myCobot 280 variants share the same shape?
-
-**Yes — for our purposes.** The myCobot 280 ships in three controller variants:
-
-| Variant | Onboard compute | Arm shape |
-|---|---|---|
-| myCobot 280 M5 | ESP32 (M5Stack), no Linux | same |
-| **myCobot 280 Pi** | Raspberry Pi 4, Ubuntu Mate | same — we order this one |
-| myCobot 280 JN | NVIDIA Jetson Nano | same |
-
-The arm above the base flange is identical across all three — same 6-DOF kinematics, same link lengths, same 280 mm reach, same 250 g payload, same ±0.5 mm repeatability. Only the controller box at the base differs. addison's `mycobot_280.urdf.xacro` models the shared arm, so it represents all three variants for simulation purposes.
-
 ## Quick start
 
 ```bash
