@@ -1,53 +1,56 @@
 # place-items-on-shelf
 
-A multi-robot evaluation monorepo for prototyping a "place items on a shelf" task across different robotic arms. Simulation first; hardware is only ordered once a viewer + simulator pipeline works end-to-end.
+A multi-robot evaluation monorepo. Current target: a stationary arm that picks small vials and places them into HPLC autosampler tray slots.
 
-The current focus is the **HPLC autosampler tray-loading** use case: a stationary arm that picks small vials from a holder and places them into specific slots in a tray.
+## What runs today
 
-## Layout
-
-```
-.
-└── robots/
-    ├── elephant-robotics-best-option/   # decision record: which Elephant Robotics arm to use
-    └── mycobot-280-pi/                  # simulation-first bring-up of the chosen arm (Steps 1-7)
-```
-
-| Robot / task | Folder | Status |
+| Step | What | Status |
 |---|---|---|
-| Pick best Elephant Robotics arm | [`robots/elephant-robotics-best-option/`](robots/elephant-robotics-best-option/) | Decision: myCobot 280 Pi |
-| myCobot 280 Pi | [`robots/mycobot-280-pi/`](robots/mycobot-280-pi/) | Steps 1–2 working via upstream `automaticaddison/mycobot_ros2` (Jul 2025 pin) |
+| 1 | myCobot 280 Pi URDF in RViz (with sliders) | ✅ |
+| 2 | myCobot 280 Pi in Gazebo Sim — physics, ros2_control, JointTrajectoryController, ROS↔Gazebo bridge, RViz attached | ✅ |
+| 3 | MoveIt 2 motion planning | ⬜ next |
+| 4 | HPLC autosampler tray + vial-rack Gazebo scene (the only step we author ourselves) | ⬜ |
+| 5–6 | Vision + scripted pick-and-place | ⬜ |
+| 7 | Real hardware | ⬜ blocked on order |
 
-## Cloning
+Steps 1, 2, 3, 5, and 6 are covered by [`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2), vendored as a git submodule pinned to commit `a75c80d`. Step 4 is the only project-specific piece left to write.
 
-This repo uses a git submodule to vendor in the [`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2) ROS 2 stack. **You must initialise it or builds will find zero packages.**
-
-Fresh clone:
-
-```bash
-git clone --recurse-submodules https://github.com/RobinNagpal/place-items-on-shelf.git
-```
-
-If you already cloned, or you switched branches with `git switch` / `git checkout` (which updates the submodule pointer but does NOT update the working tree), run from the repo root:
+## Quick start (Ubuntu 24.04 + ROS 2 Jazzy)
 
 ```bash
-git submodule update --init --recursive
+# 0. Clone with submodule
+git clone --recurse-submodules https://github.com/RobinNagpal/place-items-on-shelf.git \
+  ~/ros2_ws/src/place-items-on-shelf
+
+# 1. Bridge addison's hardcoded source path to our submodule (one-time)
+ln -sfT \
+  ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+  ~/ros2_ws/src/mycobot_ros2
+
+# 2. Install ROS 2 + Gazebo Harmonic deps
+source /opt/ros/jazzy/setup.bash
+cd ~/ros2_ws
+rosdep install --from-paths src --ignore-src -r -y --rosdistro jazzy
+
+# 3. Build
+colcon build \
+  --packages-select mycobot_interfaces mycobot_description mycobot_moveit_config mycobot_gazebo \
+  --symlink-install
+source install/setup.bash
+
+# 4a. Step 1 — RViz viewer
+ros2 launch mycobot_description robot_state_publisher.launch.py
+
+# 4b. Step 2 — Gazebo Sim
+ros2 launch mycobot_gazebo mycobot.gazebo.launch.py
 ```
 
-Verify it worked:
+Full setup and troubleshooting docs:
+- [`robots/mycobot-280-pi/docs/install.md`](robots/mycobot-280-pi/docs/install.md)
+- [`robots/mycobot-280-pi/docs/run.md`](robots/mycobot-280-pi/docs/run.md) — Step 1
+- [`robots/mycobot-280-pi/docs/run_sim.md`](robots/mycobot-280-pi/docs/run_sim.md) — Step 2
+- [`robots/mycobot-280-pi/README.md`](robots/mycobot-280-pi/README.md) — full roadmap + the "why this arm" decision record
 
-```bash
-ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_gazebo/launch/mycobot.gazebo.launch.py
-# Expected: the path is printed back.
-```
+## Why this arm
 
-## Where to start
-
-If you want to run the myCobot 280 Pi simulation on your machine, follow:
-
-1. [`robots/mycobot-280-pi/docs/install.md`](robots/mycobot-280-pi/docs/install.md) — one-time setup (ROS 2 + Gazebo + addison's rosdep deps).
-2. [`robots/mycobot-280-pi/docs/verify-env.md`](robots/mycobot-280-pi/docs/verify-env.md) — quick checks before you build.
-3. [`robots/mycobot-280-pi/docs/run.md`](robots/mycobot-280-pi/docs/run.md) — Step 1: URDF viewer in RViz.
-4. [`robots/mycobot-280-pi/docs/run_sim.md`](robots/mycobot-280-pi/docs/run_sim.md) — Step 2: Gazebo Sim.
-
-For the full Step-by-step roadmap (1 through 7), see [`robots/mycobot-280-pi/README.md`](robots/mycobot-280-pi/README.md).
+Decision record: [`robots/elephant-robotics-best-option/README.md`](robots/elephant-robotics-best-option/README.md). Short version: smallest in the Elephant Robotics lineup, biggest community footprint, easiest sensor integration, first-party ROS 2 / Gazebo / MoveIt packages.
