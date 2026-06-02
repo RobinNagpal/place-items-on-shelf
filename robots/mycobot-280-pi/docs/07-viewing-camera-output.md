@@ -60,3 +60,42 @@ sim), so it's a quick way to confirm "is the camera even rendering anything?".
 
 Both are non-disruptive — you can have both open at once, neither affects the running
 simulation.
+
+## Bonus — viewing the Planning Scene (the green object shapes)
+
+This is the view that shows what **perception identified**: the table and each
+detected object as a simple green shape (box or cylinder) overlaid in the world.
+It's the most satisfying view because you can literally watch perception "see" each
+object.
+
+### Steps
+
+1. Make sure you have **Terminals 1, 2, 3** running — Gazebo, MoveIt's `move_group`,
+   and the perception server. (Terminal 4 is what *triggers* perception; you can use
+   it, or trigger manually — both work.)
+2. Open RViz in a separate terminal (`ros2 run rviz2 rviz2`).
+3. Fixed Frame → `base_link` (same as Approach 1).
+4. Click **Add** → **By display type** tab → expand
+   **moveit_ros_visualization** → pick **PlanningScene** → **OK**.
+5. In the Displays panel, find the new **PlanningScene** entry → expand **Scene
+   Geometry** → set **Scene Alpha** to about `0.5` (makes the green shapes
+   semi-transparent so they don't hide things underneath).
+6. Run Terminal 4 as normal to execute the pick-and-place task. Within a couple of
+   seconds you'll see in RViz:
+   - A thin green slab where the table is.
+   - Several green boxes for the YCB objects.
+   - A tall thin green cylinder right where the red cylinder is.
+   - The arm moving through the pick sequence as MTC executes.
+
+The tall green cylinder appearing on top of the red cylinder is the visual proof of
+"perception identified the cylinder". Toggle the PlanningScene display off and on to
+see the green shapes appear and disappear.
+
+### Save this layout too
+
+Once you've got RViz set up with Image + PlanningScene + (optionally) RobotModel,
+**File → Save Config As...** to e.g. `~/mycobot_full_view.rviz`. Re-open later with
+`ros2 run rviz2 rviz2 -d ~/mycobot_full_view.rviz`.
+
+→ For the explanation of *how* perception is producing those green shapes (without
+any AI), see **[08-how-perception-works.md](08-how-perception-works.md)**.

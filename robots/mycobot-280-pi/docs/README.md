@@ -25,7 +25,12 @@ Read them in order — each one builds on the previous.
    word you'll bump into.
 7. **[07-viewing-camera-output.md](07-viewing-camera-output.md)** — Two short recipes
    for "I just want to see what the camera is seeing" — via RViz, or via Gazebo's own
-   built-in viewer.
+   built-in viewer. Plus a bonus section for visualizing the PlanningScene (the green
+   shapes perception identifies).
+8. **[08-how-perception-works.md](08-how-perception-works.md)** — Plain-English
+   explanation of how perception identifies the cylinder without any AI: surface
+   normals, clustering, RANSAC shape-fitting. What's actually happening inside the
+   `get_planning_scene_server` node.
 
 ## The 30-second big picture
 
