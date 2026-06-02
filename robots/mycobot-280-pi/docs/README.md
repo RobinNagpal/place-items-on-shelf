@@ -31,6 +31,10 @@ Read them in order — each one builds on the previous.
    explanation of how perception identifies the cylinder without any AI: surface
    normals, clustering, RANSAC shape-fitting. What's actually happening inside the
    `get_planning_scene_server` node.
+9. **[09-how-planning-works.md](09-how-planning-works.md)** — Companion to 08. How
+   the arm decides which joint angles to use, in plain English: the hardcoded task
+   "recipe" (in `mtc_node.cpp`) vs. the live joint-trajectory math (OMPL randomised
+   search). No AI here either.
 
 ## The 30-second big picture
 
