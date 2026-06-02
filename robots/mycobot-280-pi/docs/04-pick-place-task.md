@@ -178,36 +178,67 @@ lifts it, swings to a new location, lowers it, releases it, and goes home. 🎉
 
 ## "Why does the second run do nothing?" — a common gotcha
 
-You noticed: after the arm successfully picks and places once, re-running
-`ros2 launch mycobot_mtc_pick_place_demo pick_place_demo.launch.py` does nothing.
+You noticed: after the arm successfully picks the red cylinder once and places it
+elsewhere, killing Terminal 4 and re-launching
+`ros2 launch mycobot_mtc_pick_place_demo pick_place_demo.launch.py` does nothing
+visible — the arm just sits at home.
 
-Two likely reasons:
+### The main reason — the world is no longer in its starting state
 
-1. **The previous `mtc_node` is still alive.** Look at the bottom of the first run's
-   log: it says `Keeping node alive for visualization. Press Ctrl+C to exit.` That node
-   is still running. When you start a second one with the same name, ROS 2 may either
-   reject it or silently let it idle. **Fix:** Press Ctrl+C in Terminal 4 to kill the
-   first `mtc_node` *before* re-launching.
+After the first successful run:
 
-2. **The world state is now different.** After a successful run:
-   - The arm is back at home (good).
-   - The red cylinder is now at the *place* position, not its original position.
-   - The gripper is open.
-   - The planning scene that `move_group` holds may still have the old "attached object"
-     entry from when the cylinder was being carried.
+- The arm is back at home (that part's fine).
+- The red cylinder is no longer where it started. It's now at the **place pose**
+  (`place_pose: [-0.183, -0.14, 0.0, ...]` in `mtc_node_params.yaml`), which is very
+  close to the robot base — sometimes inside its inner kinematic limit or in an
+  awkward orientation. The gripper opened to release it, so it may have wobbled,
+  rolled, or tipped over depending on physics.
+- The gripper is open.
 
-   The second run's perception step will find the cylinder at its new location (or it
-   may have rolled off the table — small upright cylinders are very unstable when the
-   gripper opens). MTC will then try to plan a new pick, but the start/goal poses are
-   different and the cylinder might be unreachable.
+When the second run's perception step runs, it scans the camera again and finds the
+cylinder at its **new** location. It still identifies it correctly (same shape, same
+size) and hands it to MTC as the target. But now MTC has to plan a pick from a place
+where the cylinder is either:
 
-   **Fix:** If the cylinder is still on the table, kill Terminal 4 (Ctrl+C) and re-launch
-   it — that usually works. If the cylinder fell off the table, restart Terminal 1
-   (Gazebo) too, which respawns the world fresh.
+- **Too close to the base** for the arm's 6 joints to reach with the gripper aligned
+  vertically (the inner workspace of a 6-DOF arm is surprisingly small).
+- **Lying on its side** instead of standing upright, which the grasp-pose generator
+  in addison's task wasn't designed for — it assumes a vertical cylinder.
+- **Off the table** entirely if it rolled away when the gripper released it.
 
-A cleaner long-term fix is to make the task itself reset the scene at the end (e.g.
-teleport the cylinder back to its starting pose). That's a feature to add later when
-we're authoring our own task instead of running addison's.
+In any of those cases, MTC will silently fail one of the early planning stages
+(`generate grasp pose` is the usual one) and either log a planning failure or just
+visualise the plan up to the failing stage without sending anything to the controllers.
+
+### Fix
+
+Restart **Terminal 1 (Gazebo) too**, not just Terminal 4. Gazebo respawns the world
+from the SDF file, putting the cylinder back at its original position. Then re-launch
+Terminals 3 and 4 in order. The cycle:
+
+```bash
+# Ctrl+C Terminals 4, 3, 1 (in that order)
+# Re-launch:
+#   Terminal 1: ros2 launch mycobot_gazebo mycobot.gazebo.launch.py ...
+#   Terminal 3: ros2 launch mycobot_mtc_pick_place_demo get_planning_scene_server.launch.py
+#   Terminal 4: ros2 launch mycobot_mtc_pick_place_demo pick_place_demo.launch.py
+# Terminal 2 (move_group) can usually stay running.
+```
+
+### Minor secondary reason — leftover `mtc_node` process
+
+If you *forgot* to kill Terminal 4 before re-launching, the previous `mtc_node` is
+still alive (its bottom log line said `Keeping node alive for visualization. Press
+Ctrl+C to exit.`). ROS 2 will either reject the second node-with-same-name or let it
+run in a confused state. So always Ctrl+C before re-launching. You already did this,
+which is why this isn't your actual issue — but worth knowing.
+
+### Cleaner long-term fixes
+
+A real fix is to make the task itself reset the scene at the end (e.g. teleport the
+cylinder back to its starting pose, or set up a Gazebo "reset world" service call as
+part of the task). That's a feature to add when we author our own custom MTC task
+instead of running addison's stock demo.
 
 ## How to see what the camera sees while all this is happening
 
