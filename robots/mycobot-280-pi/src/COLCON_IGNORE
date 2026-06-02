@@ -1,0 +1,15 @@
+# colcon — do not scan packages below this directory.
+#
+# automaticaddison/mycobot_ros2 (vendored at ./mycobot_ros2/) hardcodes
+# ~/ros2_ws/src/mycobot_ros2/ in several launch files (see
+# mycobot_description/launch/robot_state_publisher.launch.py). To satisfy
+# that assumption you must create a symlink:
+#
+#   ln -sfT \
+#     ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+#     ~/ros2_ws/src/mycobot_ros2
+#
+# With both this path AND the symlink visible to colcon, scanning would
+# double-discover every package. This COLCON_IGNORE file makes colcon
+# skip THIS path. The symlinked path at ~/ros2_ws/src/mycobot_ros2 is
+# the one colcon sees and builds against.

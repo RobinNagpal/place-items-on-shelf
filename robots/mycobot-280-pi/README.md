@@ -69,27 +69,46 @@ git switch add-elephant-robotics-best-option-task
 # 1. Init the submodule (only once per clone)
 git submodule update --init --recursive
 
-# 2. Source ROS 2
+# 2. Create the symlink addison's launches require (one-time, see "Required symlink" below)
+ln -sfT \
+  ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+  ~/ros2_ws/src/mycobot_ros2
+
+# 3. Source ROS 2
 source /opt/ros/jazzy/setup.bash       # or /opt/ros/humble/setup.bash
 
-# 3. Install addison's runtime deps via rosdep (one shot for Steps 1-6)
+# 4. Install addison's runtime deps via rosdep (one shot for Steps 1-6)
 cd ~/ros2_ws
 rosdep install --from-paths src --ignore-src -r -y --rosdistro jazzy
 
-# 4. Build
-colcon build --symlink-install   # everything; or --packages-up-to mycobot_gazebo for Step 2
+# 5. Build
+colcon build --symlink-install   # everything; or --packages-select mycobot_interfaces mycobot_description mycobot_moveit_config mycobot_gazebo for Step 2
 
-# 5. Source the workspace
+# 6. Source the workspace
 source install/setup.bash
 
-# 6a. Run Step 1 (RViz viewer)
+# 7a. Run Step 1 (RViz viewer)
 ros2 launch mycobot_description robot_state_publisher.launch.py
 
-# 6b. Run Step 2 (Gazebo Sim)
+# 7b. Run Step 2 (Gazebo Sim)
 ros2 launch mycobot_gazebo mycobot.gazebo.launch.py
 ```
 
 Full prose-form instructions in [`docs/install.md`](docs/install.md), [`docs/run.md`](docs/run.md), and [`docs/run_sim.md`](docs/run_sim.md).
+
+## Required symlink: `~/ros2_ws/src/mycobot_ros2`
+
+addison's launch files (e.g. `mycobot_description/launch/robot_state_publisher.launch.py`) [hardcode the path](https://github.com/automaticaddison/mycobot_ros2/blob/a75c80d/mycobot_description/launch/robot_state_publisher.launch.py#L46) `~/ros2_ws/src/mycobot_ros2/mycobot_moveit_config/...` to read templates from the source tree at launch time. We vendor addison as a git submodule at the deeper path `robots/mycobot-280-pi/src/mycobot_ros2/`, so that hardcoded path doesn't exist by default — and launches die with `[Errno 2] No such file or directory`.
+
+The fix is a one-time symlink that bridges addison's expected location to where we actually keep the code:
+
+```bash
+ln -sfT \
+  ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+  ~/ros2_ws/src/mycobot_ros2
+```
+
+To stop colcon from double-discovering every package (once at the symlinked path, once at the deep path), this folder ships [`src/COLCON_IGNORE`](src/COLCON_IGNORE) — that file makes colcon skip the deep path. Only the symlinked path at `~/ros2_ws/src/mycobot_ros2/` is built.
 
 ## How this folder fits the bigger plan
 

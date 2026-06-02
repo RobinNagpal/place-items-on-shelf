@@ -41,6 +41,20 @@ colcon list --packages-up-to mycobot_gazebo 2>/dev/null | sort
 
 Expected (order may vary): `mycobot_bringup`, `mycobot_description`, `mycobot_gazebo`, `mycobot_interfaces`, `mycobot_moveit_config`. If colcon prints nothing, the submodule isn't initialised — see [`run.md`](run.md) step 0.
 
+## 3b. The addison symlink exists
+
+addison's launch files hardcode `~/ros2_ws/src/mycobot_ros2/...`. Verify the symlink documented in [`install.md`](install.md) step 4b is in place:
+
+```bash
+ls -ld ~/ros2_ws/src/mycobot_ros2
+# Expected: lrwxrwxrwx ... ~/ros2_ws/src/mycobot_ros2 -> .../place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2
+
+ls ~/ros2_ws/src/mycobot_ros2/mycobot_moveit_config/config/mycobot_280/ros2_controllers_template.yaml
+# Expected: the path is printed back (resolves through the symlink).
+```
+
+If either fails, create the symlink (see [`install.md`](install.md) step 4b).
+
 ## 4. Gazebo Sim is installed (Jazzy only — skip for pure RViz)
 
 ```bash

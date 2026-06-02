@@ -75,6 +75,18 @@ That pulls in MoveIt 2, MoveIt Task Constructor, ros2_control, ros2_controllers,
 
 If `rosdep` complains about unknown keys, that's a sign your `${DISTRO}` is wrong or `rosdep update` was skipped — fix and rerun.
 
+## 4b. Create the addison source-tree symlink (REQUIRED)
+
+addison's launch files hardcode the expectation that the source tree lives at `~/ros2_ws/src/mycobot_ros2/`. We vendor the repo deeper inside our submodule layout, so a symlink is needed to bridge the two:
+
+```bash
+ln -sfT \
+  ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+  ~/ros2_ws/src/mycobot_ros2
+```
+
+Without this you'll hit `[Errno 2] No such file or directory` at launch time inside addison's `robot_state_publisher.launch.py`. The `robots/mycobot-280-pi/src/COLCON_IGNORE` file in our repo prevents colcon from double-discovering packages when both paths exist.
+
 ## 5. Make sourcing automatic (optional)
 
 ```bash

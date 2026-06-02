@@ -28,7 +28,7 @@ git switch add-elephant-robotics-best-option-task    # or `main` once the PR is 
 
 ## 1. First-time only — initialise the submodule
 
-If you cloned with `git clone --recurse-submodules`, skip to step 2.
+If you cloned with `git clone --recurse-submodules`, skip to step 1b.
 
 Otherwise:
 
@@ -43,6 +43,24 @@ Confirm it worked:
 ls robots/mycobot-280-pi/src/mycobot_ros2/mycobot_description/urdf/robots/mycobot_280.urdf.xacro
 # Expected: the path is printed back.
 ```
+
+## 1b. First-time only — create the addison symlink (REQUIRED)
+
+addison's launch files [hardcode the source-tree path](https://github.com/automaticaddison/mycobot_ros2/blob/a75c80d/mycobot_description/launch/robot_state_publisher.launch.py#L46) as `~/ros2_ws/src/mycobot_ros2/...`. We vendor the repo at a deeper path. Bridge the two with a symlink:
+
+```bash
+ln -sfT \
+  ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2 \
+  ~/ros2_ws/src/mycobot_ros2
+
+# Verify it resolves
+ls -ld ~/ros2_ws/src/mycobot_ros2
+# Expected: lrwxrwxrwx ... ~/ros2_ws/src/mycobot_ros2 -> ~/ros2_ws/src/place-items-on-shelf/robots/mycobot-280-pi/src/mycobot_ros2
+ls ~/ros2_ws/src/mycobot_ros2/mycobot_gazebo/launch/mycobot.gazebo.launch.py
+# Expected: the path is printed back.
+```
+
+Without this symlink you'll see `[Errno 2] No such file or directory: '/home/<you>/ros2_ws/src/mycobot_ros2/mycobot_moveit_config/config/mycobot_280/ros2_controllers_template.yaml'` at launch time. The empty `robots/mycobot-280-pi/src/COLCON_IGNORE` file we ship makes colcon scan ONLY the symlinked path, so packages aren't built twice.
 
 ## 2. Source ROS 2
 
@@ -69,6 +87,8 @@ For Step 1 we only need `mycobot_description`. From the workspace root:
 cd ~/ros2_ws
 colcon build --packages-select mycobot_description --symlink-install
 ```
+
+> If a previous build of your workspace left stale `install/` directories from packages that no longer exist in `src/`, wipe them first: `rm -rf build install log` before the `colcon build` line.
 
 `--symlink-install` means edits to URDFs / meshes show up without a rebuild. If the build finishes with `Summary: 1 package finished`, you are good.
 

@@ -2,7 +2,7 @@
 
 This step launches Gazebo Harmonic with the arm spawned, ros2_control controllers loaded, the ROS↔Gazebo bridge running, and RViz attached. The launch file we use is **shipped by addison's `mycobot_gazebo` package** — we don't author our own.
 
-> Prerequisite: Step 1 already works ([`run.md`](run.md)). If `ros2 launch mycobot_description robot_state_publisher.launch.py` doesn't open RViz, fix that first.
+> Prerequisite: Step 1 already works ([`run.md`](run.md)). If `ros2 launch mycobot_description robot_state_publisher.launch.py` doesn't open RViz, fix that first. **In particular, the `~/ros2_ws/src/mycobot_ros2` symlink documented in `run.md` step 1b is also required for Step 2** — addison's gazebo launch chains through the same description launch and inherits the same hardcoded path assumption.
 
 > Distro: addison's stack targets ROS 2 Jazzy + Gazebo Harmonic on Ubuntu 24.04 (Humble is also supported in the same repo). The instructions below assume Jazzy.
 
@@ -81,6 +81,7 @@ ros2 control list_controllers
 
 ## Common issues
 
+- **`[Errno 2] No such file or directory: '/home/<you>/ros2_ws/src/mycobot_ros2/mycobot_moveit_config/...'`** — you skipped the `~/ros2_ws/src/mycobot_ros2` symlink in [`run.md`](run.md) step 1b. addison's launch hardcodes that path. Create the symlink and rerun.
 - **Gazebo opens but the arm is missing or sunk into the floor** — the spawn-entity ran before the world was ready. Stop everything, `Ctrl-C`, and re-launch. If it persists, check the launch terminal output for plugin load errors.
 - **`Failed to load plugin gz_ros2_control-system`** — `gz_ros2_control` apt package isn't installed. Rerun `rosdep install ...` from [`install.md`](install.md).
 - **Gazebo window is black or empty** — WSLg / GPU drivers issue, not addison's. Try `LIBGL_ALWAYS_SOFTWARE=1 ros2 launch mycobot_gazebo mycobot.gazebo.launch.py` to force software rendering.
