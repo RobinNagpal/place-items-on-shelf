@@ -206,9 +206,9 @@ Layer 2 is complete:
 Cross-check it against the Layer-1 requirements. Add up the prices.
 That's your hardware quote.
 
-The next layer (to be written) covers the **software side** — what
-runs on top of this hardware. ROS 2, MoveIt, vendor SDKs, perception
-code, AI models, the build-vs-buy decisions.
+The next layer — [`../03-software-stack/`](../03-software-stack/) —
+covers the **software side**: what runs on top of this hardware.
+ROS 2, MoveIt, vendor SDKs, perception code, AI models, the
+build-vs-buy decisions.
 
-Until that lands: you have everything you need to actually buy hardware
-and put it on a table.
+→ Next: [`../03-software-stack/README.md`](../03-software-stack/README.md)

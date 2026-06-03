@@ -11,7 +11,7 @@ fast.
 
 ## How this is organised
 
-Two layers so far, each in its own subfolder:
+Four layers so far, each in its own subfolder:
 
 - **[`01-finalize-requirements/`](01-finalize-requirements/)** — Figure
   out what the robot has to do. Just thinking and writing — no shopping,
@@ -20,21 +20,36 @@ Two layers so far, each in its own subfolder:
   hardware. One file per piece (arm, gripper, sensors, mount, power,
   control hardware, network, cables, safety, operator interface). Each
   file lists the common / popular options and what each is best for.
+- **[`03-software-stack/`](03-software-stack/)** — Pick all the
+  software that runs on top of the hardware. One file per piece
+  (operating system, middleware, vendor SDKs, motion planning,
+  perception, AI / foundation models, simulation, task orchestration,
+  logging, build & deploy). Same shape as Layer 2.
+- **[`04-integration-and-bring-up/`](04-integration-and-bring-up/)** —
+  The **workflow** for turning all of the above into a working cell.
+  Simulation-first development (`01-a`..`01-f`), the sim-to-real
+  bridge (`02-a`..`02-e`), system integration on real hardware
+  (`03`), the imitation-learning workflow with leader-follower demos
+  (`04-a`..`04-f`), then bring-up checklist, pilot, acceptance tests,
+  safety validation, operator runbooks, and Day-2 monitoring (`05`–`10`).
 
 Read the subfolder READMEs for the order inside each layer.
 
-A later layer (to be written) will cover the **software side** — what
-software you run on top of the hardware list you finish with.
+Layer 5+ (fleet operations, continuous improvement) is **out of
+scope for now** — get one cell rock-solid first.
 
-## Reference (not a numbered layer)
+## Reference (lives inside Layer 2)
 
-- **[latest-robots.md](latest-robots.md)** — A dated snapshot of newer
-  hardware. Humanoids actually shipping (Figure, Tesla Optimus, 1X NEO,
-  Apptronik Apollo, Unitree G1, Agility Digit), "AI-included"
-  manipulation platforms (Physical Intelligence, Covariant, Dexterity,
-  Mech-Mind), and the foundation-model "robot brains" that are starting
-  to drive hardware choices. Useful when the established hardware in
-  Layer 2 can't do your task and you need to look at the bleeding edge.
+The "latest robots" snapshot is part of hardware selection — it lives
+inside Layer 2:
+
+- **[`02-hardware-selection/latest-robots.md`](02-hardware-selection/latest-robots.md)** —
+  A dated snapshot of newer hardware. Humanoids actually shipping (Figure,
+  Tesla Optimus, 1X NEO, Apptronik Apollo, Unitree G1, Agility Digit),
+  "AI-included" manipulation platforms (Physical Intelligence, Covariant,
+  Dexterity, Mech-Mind), and the foundation-model "robot brains" that are
+  starting to drive hardware choices. Useful when the established hardware
+  in Layer 2 can't do your task and you need to look at the bleeding edge.
 
 ## How each doc is written
 
@@ -49,6 +64,32 @@ Every doc in the series follows roughly this shape:
 6. **Output** — what to write down before moving on.
 7. **Common mistakes** — what beginners get wrong.
 8. **What's next** — the next file in the reading order.
+
+## Writing guidelines (for anyone adding or editing a doc)
+
+These are the rules. Every new file and every edit must follow them.
+
+- **Write in simple English.** Short sentences. Common words. If a
+  10th-grader can't follow it, rewrite it. No academic tone, no jargon
+  unless you also define it on the spot.
+- **Use proper Markdown.** ATX headings (`#`, `##`, `###`), fenced code
+  blocks with a language tag, real bullet lists, and tables where a table
+  is clearer than prose. No HTML, no decorative emoji.
+- **Be crisp.** Give the pinpoint detail — the number, the file path, the
+  exact command, the actual trade-off. "It depends" without saying *on
+  what* is not a sentence.
+- **No redundancy.** Don't repeat what a sibling file already says — link
+  to it. Don't re-explain a concept that was just defined one section up.
+- **Relevant and useful only.** Every paragraph must answer a question the
+  reader actually has at that point in the walkthrough. Cut filler,
+  history, and marketing copy.
+- **Show, don't pad.** Prefer a 5-row table or a 6-line checklist over a
+  paragraph of prose. Prefer a 3-line example over a 10-line explanation.
+- **Link, don't duplicate.** Cross-reference other docs and external
+  sources with relative paths.
+- **One topic per file.** If a file grows past ~250 lines or starts
+  covering two unrelated ideas, split it using the `NN-a-…`, `NN-b-…`
+  sub-letter convention used in Layer 4.
 
 ## What this series is not
 

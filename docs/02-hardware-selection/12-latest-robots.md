@@ -1,7 +1,7 @@
 # Latest Robots — A Snapshot
 
 > **Who this is for:** You're done filtering on physical fit
-> ([Layer 02](02-choosing-arm-and-gripper.md)) and you want to know what's
+> ([Layer 02 README](README.md)) and you want to know what's
 > *new* — especially in the rapidly-changing "AI-included" category where the
 > platform comes with perception and a learned manipulation policy out of the
 > box.
@@ -16,7 +16,7 @@
 
 ## Why a separate doc for "latest"
 
-The market map in [Layer 02](02-choosing-arm-and-gripper.md) covers the
+The market map in the rest of [Layer 02](README.md) covers the
 *established* arms and grippers — names that have been shipping in volume for
 years (UR, FANUC, ABB, Robotiq, OnRobot, …). This page is for the **newer
 entrants**: humanoids being delivered for the first time, foundation-model
@@ -146,9 +146,10 @@ on a low-cost hobby arm (myCobot 280 Pi). For that profile:
   — running an open VLA on a cheap arm is increasingly viable as a research
   exercise.
 
-When Layer 03 (software / AI) lands, the table from Layer 02 plus this
-snapshot become the inputs to "build vs. buy" for the perception and
-manipulation stack.
+Layer 03 ([software stack](../03-software-stack/README.md)) takes the
+table from Layer 02 plus this snapshot as inputs to "build vs. buy"
+for the perception and manipulation stack — see in particular
+[`../03-software-stack/06-ai-and-foundation-models/README.md`](../03-software-stack/06-ai-and-foundation-models/README.md).
 
 ## How to keep this file fresh
 

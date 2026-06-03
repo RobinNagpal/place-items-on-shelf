@@ -57,7 +57,11 @@ and mounting flange. Once you know those, the rest fall into place.
 
 ## Reference (not a numbered step)
 
-- **[`../latest-robots.md`](../latest-robots.md)** — A dated snapshot of
+- **[`arm-gripper-bundles.md`](arm-gripper-bundles.md)** — Arm + gripper
+  combos that ship together. Which arm vendors sell their *own* gripper,
+  which ones resell a partner's, and which pairings have a tested driver
+  on day one.
+- **[`latest-robots.md`](latest-robots.md)** — A dated snapshot of
   newer hardware: humanoids actually shipping or in production pilots,
   "AI-included" manipulation platforms, foundation-model "robot brains".
   Useful when the established hardware in this layer can't do your task
@@ -72,9 +76,10 @@ Layer-1 task spec, this is enough to start procurement.
 You also have a clear picture of the **physical setup**: where every piece
 sits, how cables run, who has access, how a human steps in if needed.
 
-## What's next (later layer)
+## What's next
 
-Layer 3 (to be written) will cover the **software side**: given the
-hardware list you finish with here, what perception, planning, and control
-software do you build vs. inherit from open libraries vs. buy from a
-vendor?
+Layer 3 — [`../03-software-stack/`](../03-software-stack/) — takes
+this hardware list and turns it into a working stack of software:
+operating system, middleware, vendor SDKs, motion planning, perception,
+AI / foundation models, simulation, orchestration, logging, and the
+build-and-deploy pipeline. One file per piece, just like Layer 2.
