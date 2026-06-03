@@ -1,0 +1,112 @@
+# 04 — Workspace And Reach
+
+> Answers question **6** from
+> [`../../01-finalize-requirements/01-understanding-the-problem.md`](../../01-finalize-requirements/01-understanding-the-problem.md):
+> "What is the workspace and reach?"
+
+## The cell, from above
+
+A rough plan view of the v1 cell:
+
+```
+                   ┌──────────────────┐
+                   │   HPLC instrument│
+                   │  (drawer opens →)│
+                   │                  │
+                   │   [autosampler   │
+                   │     tray, 96]    │  ←── destination
+                   └────────┬─────────┘
+                            │
+                       (~150 mm)
+                            │
+        ┌───────────────────┴────────────────────┐
+        │                                        │
+        │            [robot arm base]            │  ←── arm mount
+        │                                        │
+        └──────┬─────────────────┬───────────────┘
+               │                 │
+          (~100 mm)         (~150 mm)
+               │                 │
+   ┌───────────┴──┐      ┌───────┴──────┐
+   │ barcode      │      │ inbound rack │   ←── source
+   │ reader       │      │ (48 vials)   │
+   └──────────────┘      └──────────────┘
+```
+
+All three peripherals (rack, tray, barcode reader) live in a single
+roughly **40 × 40 cm region** centred on the arm base.
+
+## Working volume
+
+| Property                 | Value                                                |
+|--------------------------|------------------------------------------------------|
+| Working area (top view)  | **~40 cm × 40 cm**                                   |
+| Working height           | **~30 cm above bench**                               |
+| Working volume           | ~40 × 40 × 30 cm                                     |
+| Arm base height          | At bench level (0 mm)                                |
+| Tray slot height         | ~70 mm above bench (inside the open drawer)          |
+| Rack slot height         | ~50 mm above bench                                    |
+| Barcode reader height    | Window centred ~80 mm above bench                    |
+
+## Reach required
+
+The arm must reach:
+
+- The **furthest corner of the inbound rack** (≈ rack centre +
+  ½ × diagonal).
+- The **furthest corner of the autosampler tray** — usually the
+  far rear corner inside the drawer.
+- The **barcode reader window**, mid-air, mid-cycle.
+
+Worst-case farthest point from the arm base, given the rough plan
+above: about **250 mm horizontally** and **150 mm vertically**.
+
+| Candidate arm        | Reach   | Verdict for this cell                                |
+|----------------------|---------|------------------------------------------------------|
+| **myCobot 280 Pi**   | 280 mm  | **Tight but feasible** — peripherals must be packed close. Plan for ~10 % margin loss when accounting for end-effector length. |
+| myCobot 320          | 320 mm  | Comfortable                                          |
+| UR3e                 | 500 mm  | Generous                                             |
+| Franka Research 3    | 855 mm  | Overkill for v1, but fine                            |
+
+## Obstacles inside the workspace
+
+The arm must plan motions that avoid:
+
+1. **The autosampler housing** — the drawer rails, the front fascia
+   of the instrument.
+2. **The drawer itself when open** — the rails stick out into the
+   cell.
+3. **The inbound rack walls** — the rack has plastic walls between
+   vials.
+4. **The barcode reader stand** — a vertical post.
+5. **Already-placed vials** in the tray — these grow during a load
+   cycle and act as new obstacles for later picks.
+6. **The technician's hands**, sometimes — handled by safety
+   speed/separation monitoring, not by collision avoidance.
+7. **The arm's own body** — the planner already handles self-collision.
+
+## Mounting
+
+- **Fixed base**, bolted to a rigid bench plate.
+- The base plate is **levelled to ±0.5 mm** with adjustable feet so
+  the arm's coordinate frame is reliably horizontal.
+- A small **fiducial marker** (e.g. ArUco tag) is placed on the
+  bench in known offset from the base, used by perception to
+  re-zero the world frame at calibration time.
+
+## What this means for the next layers
+
+| Layer-2 topic         | Constraint from this doc                          |
+|-----------------------|---------------------------------------------------|
+| Arm reach             | ≥ **300 mm** preferred; 280 mm is tight           |
+| Arm base mount        | Rigid plate, levelled, fiducial near base         |
+| Cell layout           | Peripherals packed within 40 × 40 × 30 cm         |
+| End-effector length   | Short — every mm of gripper length steals reach    |
+
+## Sources
+
+- [myCobot 280 Pi Specifications — Elephant Robotics](https://www.elephantrobotics.com/en/mycobot-280-pi-2023-specifications/)
+- [Universal Robots UR3e specifications page](https://www.universal-robots.com/products/ur3-robot/)
+- [Agilent autosampler tray geometry overview](https://www.agilent.com/en/product/liquid-chromatography/hplc-supplies-accessories/autosampler-fraction-collector-supplies-for-hplc/sample-trays-for-hplc)
+
+→ Next: [`05-practical-limits.md`](05-practical-limits.md)
