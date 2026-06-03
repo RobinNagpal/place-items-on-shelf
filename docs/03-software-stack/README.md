@@ -100,11 +100,12 @@ these decisions deliberately, not by accident.
   repo) the docs under
   [`../../robots/mycobot-280-pi/docs/`](../../robots/mycobot-280-pi/docs/).
 
-## What's next (later layer)
+## What's next
 
-Layer 4 (to be written) will cover **integration, testing, and
-deployment**: how you actually go from "all the pieces work alone" to
-"the cell runs unattended for a week and we trust it." Until that lands,
-the last file in this layer
-([`10-build-deploy-and-maintenance.md`](10-build-deploy-and-maintenance.md))
-has the practical advice you need.
+Layer 4 — [`../04-integration-and-bring-up/`](../04-integration-and-bring-up/) —
+covers the **workflow** of going from "all the pieces work alone" to
+"the cell runs unattended for a week and we trust it":
+simulation-first development, the sim-to-real bridge, the
+imitation-learning workflow with leader-follower demos, bring-up
+checklist, pilot deployment, acceptance tests, safety validation,
+operator runbooks, and Day-2 monitoring.

@@ -212,16 +212,16 @@ Security updates policy:  weekly / monthly / on-CVE / ad-hoc
    can reach it. Plan VPN / Tailscale / vendor remote access from
    day one.
 
-## What's next (later layer)
+## What's next
 
-Layer 4 (to be written) will cover **integration, testing, and
-ramp-up** — the bridge from "all pieces work" to "the cell runs
-unattended for a week and we trust it." Among the topics: pilot
-deployments, acceptance tests, the human side of handing a system over
-to operators, and incident response patterns.
+Layer 4 — [`../04-integration-and-bring-up/`](../04-integration-and-bring-up/) —
+covers the **workflow** of turning the software list from this layer
+plus the hardware list from Layer 2 into a working cell:
+simulation-first development, the sim-to-real bridge, system
+integration on real hardware, the imitation-learning workflow with
+leader-follower demos, pilot deployment, acceptance tests, safety
+validation, operator runbooks, and Day-2 monitoring.
 
-Until that lands: with everything in this layer set up, you can build,
-deploy, and update the robot. That's the end of the software story for
-now.
+→ Next: [`../04-integration-and-bring-up/README.md`](../04-integration-and-bring-up/README.md)
 
 ← Back to: [Layer 3 README](README.md)

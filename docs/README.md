@@ -11,7 +11,7 @@ fast.
 
 ## How this is organised
 
-Three layers so far, each in its own subfolder:
+Four layers so far, each in its own subfolder:
 
 - **[`01-finalize-requirements/`](01-finalize-requirements/)** — Figure
   out what the robot has to do. Just thinking and writing — no shopping,
@@ -25,12 +25,18 @@ Three layers so far, each in its own subfolder:
   (operating system, middleware, vendor SDKs, motion planning,
   perception, AI / foundation models, simulation, task orchestration,
   logging, build & deploy). Same shape as Layer 2.
+- **[`04-integration-and-bring-up/`](04-integration-and-bring-up/)** —
+  The **workflow** for turning all of the above into a working cell.
+  Simulation-first development (`01-a`..`01-f`), the sim-to-real
+  bridge (`02-a`..`02-e`), system integration on real hardware
+  (`03`), the imitation-learning workflow with leader-follower demos
+  (`04-a`..`04-f`), then bring-up checklist, pilot, acceptance tests,
+  safety validation, operator runbooks, and Day-2 monitoring (`05`–`10`).
 
 Read the subfolder READMEs for the order inside each layer.
 
-A later layer (to be written) will cover **integration, testing, and
-deployment** — how you go from "all the pieces work alone" to "the
-cell runs unattended for a week and we trust it."
+Layer 5+ (fleet operations, continuous improvement) is **out of
+scope for now** — get one cell rock-solid first.
 
 ## Reference (not a numbered layer)
 
