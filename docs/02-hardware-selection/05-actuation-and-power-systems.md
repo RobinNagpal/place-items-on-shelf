@@ -170,4 +170,4 @@ Grounding plan:          ___
 You have a powered, mounted arm. Next: the **computer or box that
 actually runs it**.
 
-→ Next: [control-hardware.md](control-hardware.md)
+→ Next: [06-control-hardware.md](06-control-hardware.md)

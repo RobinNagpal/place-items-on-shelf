@@ -201,4 +201,4 @@ Wiring diagram?:           yes (PDF / Visio / paper)
 You have wires that won't break. Now: what makes the robot **stop** when
 a human gets in the way?
 
-→ Next: [safety-equipment.md](safety-equipment.md)
+→ Next: [09-safety-equipment.md](09-safety-equipment.md)

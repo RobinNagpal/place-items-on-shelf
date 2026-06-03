@@ -6,7 +6,7 @@ idea what's around it.
 
 This file covers everyday sensors that mount on or near an arm. **Safety
 sensors** (laser scanners, light curtains) live in their own file:
-[`safety-equipment.md`](safety-equipment.md).
+[`09-safety-equipment.md`](09-safety-equipment.md).
 
 ## First: do you even need a sensor?
 
@@ -21,7 +21,7 @@ Run these binary checks against your Layer-1 spec first:
 | Do object positions **change**? | A 2D or 3D camera. |
 | Is depth important (stacked items, picking from a bin)? | A depth (RGBD) camera, not a flat RGB one. |
 | Does the gripper need to **feel** the object (fragile, variable weight)? | A force/torque sensor or a tactile sensor. |
-| Are humans nearby and the area isn't fenced off? | A safety sensor (in [safety-equipment.md](safety-equipment.md)). |
+| Are humans nearby and the area isn't fenced off? | A safety sensor (in [09-safety-equipment.md](09-safety-equipment.md)). |
 | Does the task involve weighing? | A load cell or scale, separate from the arm. |
 
 If most answers are "no," you probably need fewer sensors than you think.
@@ -222,4 +222,4 @@ interface.
 You have arm, gripper, and sensors. The next decision is what they all
 **sit on** — the mounting structure.
 
-→ Next: [mounting-and-mechanical-structure.md](mounting-and-mechanical-structure.md)
+→ Next: [04-mounting-and-mechanical-structure.md](04-mounting-and-mechanical-structure.md)

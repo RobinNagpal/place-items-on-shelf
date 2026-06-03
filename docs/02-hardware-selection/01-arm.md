@@ -174,4 +174,4 @@ You have an arm shortlist. The gripper choice may force a change — some
 grippers don't fit some wrist flanges, and a vacuum gripper needs a
 pneumatic line some arms don't have.
 
-→ Next: [gripper.md](gripper.md)
+→ Next: [02-gripper.md](02-gripper.md)

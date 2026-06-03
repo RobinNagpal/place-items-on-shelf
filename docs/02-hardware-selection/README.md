@@ -24,34 +24,36 @@ piece**, in the order you'd usually decide them.
 The arm and the gripper come first because they decide your reach, payload,
 and mounting flange. Once you know those, the rest fall into place.
 
-1. **[arm.md](arm.md)** — Degrees of freedom, payload, reach,
+1. **[01-arm.md](01-arm.md)** — Degrees of freedom, payload, reach,
    repeatability. The popular arm brands and what each one is best for
    (hobby, cobot research, industrial).
-2. **[gripper.md](gripper.md)** — The hand. Parallel jaw, vacuum, soft,
-   multi-finger, magnetic. Popular makers (Robotiq, OnRobot, Schmalz,
-   SCHUNK, Soft Robotics).
-3. **[sensors.md](sensors.md)** — Cameras (2D and depth), force/torque,
-   tactile, proximity. Popular models per family and where they mount.
-4. **[mounting-and-mechanical-structure.md](mounting-and-mechanical-structure.md)** —
+2. **[02-gripper.md](02-gripper.md)** — The hand. Parallel jaw, vacuum,
+   soft, multi-finger, magnetic. Popular makers (Robotiq, OnRobot,
+   Schmalz, SCHUNK, Soft Robotics).
+3. **[03-sensors.md](03-sensors.md)** — Cameras (2D and depth),
+   force/torque, tactile, proximity. Popular models per family and where
+   they mount.
+4. **[04-mounting-and-mechanical-structure.md](04-mounting-and-mechanical-structure.md)** —
    The frame and table. Heavy steel base, aluminum extrusion, mobile cart.
    Vibration, footprint, reaction forces.
-5. **[actuation-and-power-systems.md](actuation-and-power-systems.md)** —
+5. **[05-actuation-and-power-systems.md](05-actuation-and-power-systems.md)** —
    What feeds the motors. AC mains, DC, compressed air. Power supplies,
    transformers, compressors, UPS.
-6. **[control-hardware.md](control-hardware.md)** — The computer that runs
-   the robot. Vendor controller box, PLC, industrial PC, edge AI box,
-   Raspberry Pi.
-7. **[communication-and-networking.md](communication-and-networking.md)** —
+6. **[06-control-hardware.md](06-control-hardware.md)** — The computer
+   that runs the robot. Vendor controller box, PLC, industrial PC, edge
+   AI box, Raspberry Pi.
+7. **[07-communication-and-networking.md](07-communication-and-networking.md)** —
    How the pieces talk. Ethernet, EtherCAT, PROFINET, Modbus, ROS 2 DDS,
    USB3, GigE Vision. Switches, isolation, wireless.
-8. **[cable-management.md](cable-management.md)** — How wires survive a
-   moving arm. Drag chains, service loops, flex-rated cable, slip rings.
-9. **[safety-equipment.md](safety-equipment.md)** — Emergency stops, light
-   curtains, safety scanners, safety relays. What ISO 10218 actually
-   requires.
-10. **[operator-interface.md](operator-interface.md)** — Teach pendants,
-    HMI panels, stack lights, push buttons. How a human controls and
-    monitors the robot.
+8. **[08-cable-management.md](08-cable-management.md)** — How wires
+   survive a moving arm. Drag chains, service loops, flex-rated cable,
+   slip rings.
+9. **[09-safety-equipment.md](09-safety-equipment.md)** — Emergency
+   stops, light curtains, safety scanners, safety relays. What ISO 10218
+   actually requires.
+10. **[10-operator-interface.md](10-operator-interface.md)** — Teach
+    pendants, HMI panels, stack lights, push buttons. How a human
+    controls and monitors the robot.
 
 ## Reference (not a numbered step)
 

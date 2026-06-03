@@ -204,7 +204,7 @@ Power / air supply:      ___
 Price:                   ___
 ```
 
-Now go back to the arm shortlist from [arm.md](arm.md) and **cross-check
+Now go back to the arm shortlist from [01-arm.md](01-arm.md) and **cross-check
 compatibility**. Some pairs that look good independently won't actually
 bolt together.
 
@@ -227,4 +227,4 @@ bolt together.
 You have an arm + gripper shortlist. The next decision is **sensors** —
 how the robot sees, feels, and measures.
 
-→ Next: [sensors.md](sensors.md)
+→ Next: [03-sensors.md](03-sensors.md)

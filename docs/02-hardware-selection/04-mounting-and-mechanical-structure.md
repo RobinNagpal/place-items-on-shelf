@@ -146,4 +146,4 @@ Cost (incl. install):    ___
 
 The arm is mounted on something solid. Next: how do you power it?
 
-→ Next: [actuation-and-power-systems.md](actuation-and-power-systems.md)
+→ Next: [05-actuation-and-power-systems.md](05-actuation-and-power-systems.md)

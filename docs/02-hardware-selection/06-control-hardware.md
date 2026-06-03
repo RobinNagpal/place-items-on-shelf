@@ -182,4 +182,4 @@ Software stack:          ROS 2 / vendor SDK / TwinCAT / Step 7 / ...
 You have a controller, maybe an IPC, maybe a Jetson. Now: how do they
 all **talk to each other and to the arm**?
 
-→ Next: [communication-and-networking.md](communication-and-networking.md)
+→ Next: [07-communication-and-networking.md](07-communication-and-networking.md)

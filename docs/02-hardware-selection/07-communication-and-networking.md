@@ -232,4 +232,4 @@ Firewall between nets?:  yes / no
 You've designed the network. Now you have to actually **run the cables**
 through a moving system without breaking them.
 
-→ Next: [cable-management.md](cable-management.md)
+→ Next: [08-cable-management.md](08-cable-management.md)

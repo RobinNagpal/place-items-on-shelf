@@ -10,11 +10,11 @@ short document.
 
 ## Read these in order
 
-1. **[understanding-the-problem.md](understanding-the-problem.md)** — The
-   seven core questions every project must answer. The task, the objects,
-   the place, success and failure, speed, reach, and the boring practical
-   limits (money, power, safety, who fixes it when it breaks).
-2. **[additional-requirements-to-consider.md](additional-requirements-to-consider.md)** —
+1. **[01-understanding-the-problem.md](01-understanding-the-problem.md)** —
+   The seven core questions every project must answer. The task, the
+   objects, the place, success and failure, speed, reach, and the boring
+   practical limits (money, power, safety, who fixes it when it breaks).
+2. **[02-additional-requirements-to-consider.md](02-additional-requirements-to-consider.md)** —
    The questions people often miss in the first pass: how often does this
    run, how long must it last, who operates and maintains it, what happens
    when it fails, what other systems must it talk to, what records must it

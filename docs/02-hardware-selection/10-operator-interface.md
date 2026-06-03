@@ -93,7 +93,7 @@ Physical buttons mounted on the cell or operator panel.
 
 - **Push button (momentary)** — pressed, releases. "Start cycle."
 - **Push button (maintained)** — stays in. "Auto mode on."
-- **Mushroom e-stop** — separate file ([safety](safety-equipment.md)).
+- **Mushroom e-stop** — separate file ([safety](09-safety-equipment.md)).
 - **Selector switches** — 2 or 3 position. "Manual / Auto / Off."
 - **Pilot lights** — green, red, amber, blue indicators next to buttons.
 

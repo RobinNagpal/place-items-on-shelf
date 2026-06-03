@@ -222,4 +222,4 @@ Standards to comply with: ISO 10218 / ISO/TS 15066 / others: ___
 
 The cell is safe. Now: how does a human **tell the robot what to do**?
 
-→ Next: [operator-interface.md](operator-interface.md)
+→ Next: [10-operator-interface.md](10-operator-interface.md)
