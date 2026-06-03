@@ -37,11 +37,27 @@ per piece**, in the order you'd usually decide them.
    PCL, depth pipelines, pose estimation. Turning camera pixels into
    "there's a cylinder at (x, y, z)."
 6. **[06-ai-and-foundation-models.md](06-ai-and-foundation-models.md)** —
-   YOLO, SAM, GraspNet, VLAs. Imitation learning vs. reinforcement
-   learning. Datasets and training frameworks (LeRobot, Open
-   X-Embodiment). Teleop rigs (ALOHA, GELLO, SO-100). When perception
-   + planning isn't enough and you want the robot to learn or
-   generalise.
+   The AI layer overview: when you actually need a foundation model,
+   the scripted vs. imitation-learning vs. RL split, and the output
+   AI-plan template. Detail lives in eight sub-files, one per
+   technique, each listing use cases and frameworks:
+   - **[06-a](06-a-open-vocab-perception.md)** Open-vocab perception
+     (CLIP, SAM, Grounding DINO, OWL-ViT).
+   - **[06-b](06-b-neural-grasp-generation.md)** Neural grasp
+     generation (GraspNet, ContactGraspNet, AnyGrasp).
+   - **[06-c](06-c-imitation-learning.md)** Imitation learning
+     (BC, ACT, Diffusion Policy) + teleop rigs (ALOHA, GELLO, SO-100).
+   - **[06-d](06-d-reinforcement-learning.md)** Reinforcement learning
+     (PPO, SAC, Isaac Lab, MuJoCo MJX) + sim-to-real bridge.
+   - **[06-e](06-e-vision-language-action.md)** Vision-Language-Action
+     models (RT-1/2, OpenVLA, Pi-0, GR00T, Octo).
+   - **[06-f](06-f-llms-in-the-loop.md)** LLMs in the loop
+     (Code-as-Policies, SayCan, Function Calling).
+   - **[06-g](06-g-datasets-and-pretraining.md)** Datasets and
+     pretraining (LeRobot, Open X-Embodiment, DROID, BridgeData V2).
+   - **[06-h](06-h-where-models-run.md)** Where the models run
+     (Jetson Orin vs desktop GPU vs cloud, quantisation, edge/cloud
+     split).
 7. **[07-simulation.md](07-simulation.md)** — Gazebo, Isaac Sim, MuJoCo,
    PyBullet. Where you test before touching real hardware.
 8. **[08-task-orchestration.md](08-task-orchestration.md)** — Behaviour
