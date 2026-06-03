@@ -62,6 +62,32 @@ Every doc in the series follows roughly this shape:
 7. **Common mistakes** — what beginners get wrong.
 8. **What's next** — the next file in the reading order.
 
+## Writing guidelines (for anyone adding or editing a doc)
+
+These are the rules. Every new file and every edit must follow them.
+
+- **Write in simple English.** Short sentences. Common words. If a
+  10th-grader can't follow it, rewrite it. No academic tone, no jargon
+  unless you also define it on the spot.
+- **Use proper Markdown.** ATX headings (`#`, `##`, `###`), fenced code
+  blocks with a language tag, real bullet lists, and tables where a table
+  is clearer than prose. No HTML, no decorative emoji.
+- **Be crisp.** Give the pinpoint detail — the number, the file path, the
+  exact command, the actual trade-off. "It depends" without saying *on
+  what* is not a sentence.
+- **No redundancy.** Don't repeat what a sibling file already says — link
+  to it. Don't re-explain a concept that was just defined one section up.
+- **Relevant and useful only.** Every paragraph must answer a question the
+  reader actually has at that point in the walkthrough. Cut filler,
+  history, and marketing copy.
+- **Show, don't pad.** Prefer a 5-row table or a 6-line checklist over a
+  paragraph of prose. Prefer a 3-line example over a 10-line explanation.
+- **Link, don't duplicate.** Cross-reference other docs and external
+  sources with relative paths.
+- **One topic per file.** If a file grows past ~250 lines or starts
+  covering two unrelated ideas, split it using the `NN-a-…`, `NN-b-…`
+  sub-letter convention used in Layer 4.
+
 ## What this series is not
 
 - **Not a tutorial for one specific robot.** The myCobot-280-Pi-specific
