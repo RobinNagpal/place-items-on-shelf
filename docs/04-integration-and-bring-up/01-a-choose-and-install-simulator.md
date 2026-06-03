@@ -2,8 +2,9 @@
 
 This is the **first step of the simulation-first workflow.** Before
 you touch real hardware, you build a virtual version of the cell and
-run everything against it. This file is just about getting the
-simulator on disk and confirming it launches.
+run everything against it. This file is about *picking* the simulator
+and confirming it launches — not about how to install each one (every
+tool has its own install guide, and they change).
 
 Layer 3's [`07-simulation.md`](../03-software-stack/07-simulation.md)
 compared the simulator products in depth. Re-skim it if you haven't
@@ -13,93 +14,107 @@ chosen yet. This file picks up from "you've chosen one" and goes to
 ## What you need before this step
 
 - A computer that meets the simulator's spec (CPU, GPU, RAM, disk).
-- An OS that the simulator supports (almost always Ubuntu LTS).
-- A ROS 2 distro installed and sourced if you're going Gazebo or
-  Isaac Sim.
+- An OS the simulator supports (almost always Ubuntu LTS).
+- The vendor's install guide bookmarked.
 
-## The four realistic picks
+## The popular simulator options
 
-For an arm-on-a-table pick-and-place project, you're almost certainly
-using one of:
+For an arm-on-a-table pick-and-place project, the following come up
+again and again. The first four are the most common defaults in
+2025–2026.
 
-| Simulator | Install path | Disk | Notes |
-|-----------|--------------|------|-------|
-| **Gazebo Harmonic** | `sudo apt install ros-${ROS_DISTRO}-ros-gz` | ~3 GB | The default for ROS 2. What this repo's myCobot 280 Pi setup uses. |
-| **NVIDIA Isaac Sim** | Download via Omniverse Launcher, or pull the Docker image | ~30 GB | RTX-rendered, GPU required. Heavyweight. |
-| **MuJoCo (≥ 3.x)** | `pip install mujoco`, plus `mujoco_menagerie` for arm models | ~500 MB | Research-grade physics. Less ROS 2 plumbing. |
-| **PyBullet** | `pip install pybullet` | ~50 MB | Smallest, oldest. Use it if you just want to script Python. |
+### Gazebo (Harmonic / Fortress)
 
-If you're not sure, **start with Gazebo Harmonic.** It's free, it's
-ROS 2-native, and almost every tutorial assumes it.
+The default open simulator for ROS 2 work. Free, well-integrated,
+huge model library (Gazebo Fuel). Harmonic pairs with ROS 2 Jazzy;
+Fortress with Humble.
 
-## Install — by simulator
-
-### Gazebo Harmonic (with ROS 2 Jazzy or Humble)
-
-```
-sudo apt update
-sudo apt install ros-${ROS_DISTRO}-ros-gz ros-${ROS_DISTRO}-gz-ros2-control
-gz sim --version          # confirm it runs
-ros2 launch ros_gz_sim gz_sim.launch.py   # launches an empty world
-```
-
-For Humble (Gazebo Fortress instead of Harmonic):
-
-```
-sudo apt install ros-humble-ros-ign
-```
+**Best for:** any ROS 2 project unless you have a specific reason to
+go elsewhere.
 
 ### NVIDIA Isaac Sim
 
-The supported install today is **container or Omniverse Launcher**.
+GPU-rendered, photo-realistic, RTX-required. Built on USD. Pairs
+tightly with **Isaac Lab** for reinforcement learning at scale.
 
-```
-docker pull nvcr.io/nvidia/isaac-sim:4.5.0
-# OR
-# download the Omniverse Launcher, then install Isaac Sim from there.
-```
+**Best for:** vision-heavy work, RL training, AI-included development
+where you'll throw a serious GPU at the problem.
 
-You need:
+### MuJoCo (≥ 3.x)
 
-- An RTX-class GPU (3000-series or later).
-- NVIDIA driver ≥ 535.
-- Recent `nvidia-container-toolkit` if running in Docker.
+Lightweight, fast, research-grade physics. The default in academic
+robotics and the basis of many RL benchmarks. **MJX** (JAX bindings)
+gives thousands of parallel envs on one GPU. ROS 2 plumbing is
+younger than Gazebo's.
 
-Verify by running the launcher's "open Hello World" scene.
-
-### MuJoCo
-
-```
-pip install mujoco
-git clone https://github.com/google-deepmind/mujoco_menagerie.git
-python -m mujoco.viewer --mjcf mujoco_menagerie/franka_emika_panda/scene.xml
-```
-
-For ROS 2 integration there's a `mujoco_ros2_control` plugin, plus
-several community wrappers. The ROS 2 story is younger than Gazebo's;
-expect to write some glue.
+**Best for:** RL training, contact-rich research, sim-to-real.
 
 ### PyBullet
 
-```
-pip install pybullet
-python -c "import pybullet_data, pybullet as p; p.connect(p.GUI); p.setAdditionalSearchPath(pybullet_data.getDataPath()); p.loadURDF('plane.urdf'); input('press enter')"
-```
+Older, smaller, Python-first. Easy to script. Less polish than the
+others.
 
-You won't get a ROS 2 graph out of the box. Useful for pure-Python RL
-experiments.
+**Best for:** quick Python experiments, education, lightweight RL.
+
+### Webots (Cyberbotics)
+
+Polished GUI, very approachable, strong in education and competitions.
+ROS 2 support is solid. Free since 2018.
+
+**Best for:** teaching, demos, students, projects where the GUI
+matters.
+
+### CoppeliaSim (formerly V-REP)
+
+Long-standing research simulator. Scriptable in Lua / Python. Free
+EDU edition.
+
+**Best for:** legacy research code, multi-language scripting.
+
+### Drake (Toyota Research Institute)
+
+Less a simulator, more a "robotics toolbox" with physics, planning,
+and visualisation in one C++ / Python library. Excellent contact
+physics.
+
+**Best for:** contact-rich manipulation research, when you want the
+planner and the simulator in one stack.
+
+### Genesis (2025-)
+
+GPU-accelerated unified physics + rendering, fast-growing in
+2025–2026. Worth tracking.
+
+**Best for:** RL training, future-proofing.
+
+### Unity / Unreal + ROS bridges
+
+Game engines repurposed for high-fidelity visuals. AirSim (drones),
+CARLA (driving), and several custom rigs for vision research run on
+them.
+
+**Best for:** photo-realistic vision data, novel sensor models.
+
+## If you're not sure, default to…
+
+Start with **Gazebo (Harmonic if you're on ROS 2 Jazzy, Fortress if
+you're on Humble).** It's free, ROS 2-native, and almost every
+tutorial assumes it. You can always switch later — the URDF you build
+in [01-b](01-b-build-the-virtual-cell.md) is portable.
 
 ## How to confirm it's actually working
 
-A "yes it installed" test is **not** a "yes it works" test. After
-install, check:
+A "yes it installed" check is **not** a "yes it works" check. After
+install, verify:
 
 1. The simulator window opens.
 2. A default scene loads (an empty world, a hello-world robot).
-3. Physics ticks (a dropped cube falls, an arm settles under gravity).
-4. The ROS 2 bridge publishes topics — `ros2 topic list` shows the
-   `clock`, `tf`, and joint-state topics if you used a robot scene.
-5. (Isaac / Gazebo) RViz 2 can connect and visualise.
+3. Physics ticks — a dropped cube falls, an arm settles under
+   gravity.
+4. The ROS 2 bridge (if applicable) publishes the topics you'd
+   expect — clock, transforms, joint states.
+5. The visualiser (RViz 2 on ROS 2; the simulator's own viewer
+   otherwise) can connect.
 
 If any step fails, fix it now. Every later step assumes a working
 simulator.
@@ -107,27 +122,29 @@ simulator.
 ## Output of this step
 
 ```
-Simulator chosen:     Gazebo Harmonic / Isaac Sim / MuJoCo / PyBullet
-Version:              ___
-Installed via:        apt / docker / pip / launcher
-ROS 2 bridge:         ros_gz_bridge / isaac_ros / mujoco_ros2_control / none
-GPU required:         yes / no — model: ___
-Empty world launches?: yes / no
-ROS 2 topics visible?: yes / no
-RViz can connect?:    yes / no
+Simulator chosen:        Gazebo / Isaac Sim / MuJoCo / PyBullet / Webots / CoppeliaSim / Drake / Genesis / other
+Version:                 ___
+Installed via:           OS package / Docker / pip / vendor launcher / source build
+GPU required?:           yes / no — model: ___
+ROS 2 bridge needed?:    yes / no — which: ___
+Empty world launches?:   yes / no
+Physics ticks?:          yes / no
+ROS 2 topics visible?:   yes / no
+Visualiser can connect?: yes / no
 ```
 
 ## Common mistakes
 
-1. **Installing two simulators "to compare" before either works.** You
-   end up debugging both. Get one fully running first.
-2. **ROS 2 distro / Gazebo version mismatch.** Harmonic pairs with
-   Jazzy; Fortress with Humble. Mixing them is a rabbit hole.
-3. **Trying Isaac Sim on a laptop GPU that's too small.** The
-   launcher will look like it loads, then crash on the first scene.
-   Check VRAM (16 GB+ comfortable for serious work).
-4. **Skipping the "physics ticks" test.** A simulator window opening
-   doesn't prove physics works. Drop a cube.
+1. **Installing two simulators "to compare" before either works.**
+   You end up debugging both. Get one fully running first.
+2. **ROS 2 distro / simulator version mismatch.** Gazebo Harmonic
+   pairs with ROS 2 Jazzy; Fortress with Humble. Mixing them is a
+   rabbit hole.
+3. **Trying Isaac Sim on a GPU that's too small.** The launcher
+   appears to load, then crashes on the first scene. Check VRAM
+   (16 GB+ comfortable for serious work).
+4. **Skipping the "physics ticks" check.** A simulator window
+   opening doesn't prove physics works. Drop a cube.
 5. **Running the simulator inside a VM or WSL.** GPU passthrough is
    fiddly. Use bare metal for the simulator host if at all possible.
 

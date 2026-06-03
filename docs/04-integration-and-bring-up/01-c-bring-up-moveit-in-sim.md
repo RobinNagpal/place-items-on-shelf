@@ -1,127 +1,138 @@
-# 01-c — Bring Up MoveIt in Sim
+# 01-c — Bring Up the Motion Planner in Sim
 
 You have a virtual cell. You can see the arm sit on the table. But
 right now the arm only moves if you drag its joints by hand. This
-step gives the arm a planner — so you can say "go to this pose" and
-the arm figures out *how*.
+step gives the arm a **planner** — so you can say "go to this pose"
+and the arm figures out *how*.
 
-That planner is **MoveIt 2** (Layer 3
-[`04-motion-planning.md`](../03-software-stack/04-motion-planning.md))
-for almost everyone.
+For most ROS 2 projects, that planner is **MoveIt 2** (Layer 3
+[`04-motion-planning.md`](../03-software-stack/04-motion-planning.md)).
+This file walks you through bringing MoveIt up against the simulator.
+
+If you're **not** on ROS 2, or MoveIt isn't the right fit, see
+"Alternatives to MoveIt" near the bottom — the rest of the workflow
+still applies, you just swap the planner.
 
 ## What you need before this step
 
-- Working virtual cell from [01-b](01-b-build-the-virtual-cell.md).
-- ROS 2 sourced, the arm description package built.
-- MoveIt 2 installed for your ROS 2 distro:
-  `sudo apt install ros-${ROS_DISTRO}-moveit`.
+- Working virtual cell from
+  [01-b](01-b-build-the-virtual-cell.md).
+- A motion planner available for your stack (MoveIt 2 on ROS 2
+  Jazzy / Humble — or one of the alternatives below).
 
 ## The two MoveIt configurations you might already have
 
-1. **The vendor already ships one** — check for a
+1. **The vendor already ships one** — check for an
    `<arm>_moveit_config/` package. UR, Franka, Kinova, myCobot, etc.
-   all ship one. If you have it, use it. Skip to "Launch and test."
-2. **You don't have one** — you generate it once with
-   `moveit_setup_assistant`. Below.
+   all ship one. If you have it, use it.
+2. **You don't have one** — you generate it once with the **MoveIt
+   Setup Assistant**, a GUI that takes your URDF and a few clicks
+   and emits a complete `<arm>_moveit_config` package.
 
-## Generate a MoveIt config (only if no vendor config exists)
+## What the MoveIt setup actually configures
 
-```
-ros2 launch moveit_setup_assistant setup_assistant.launch.py
-```
+Whether you generate it or use a vendor package, the configuration
+captures these decisions:
 
-A GUI opens. Walk through these tabs in order:
+- **Self-collision matrix** — pairs of links that can never collide,
+  so the planner skips checking them.
+- **Virtual joint** — `world → base_link` (usually fixed).
+- **Planning groups** — at minimum one named `<arm>` for the
+  kinematic chain `base_link → tool0`, and a second for the
+  `<gripper>` if you have one.
+- **Reference poses** — `home`, `ready`, `tuck` for testing.
+- **Controllers** — typically a joint-trajectory controller for the
+  arm; an action controller for the gripper.
+- **Planning algorithm and IK solver** — RRTConnect (default
+  planner); **TRAC-IK** or **PickIK** for inverse kinematics. The
+  default KDL IK silently misses solutions on near-singular poses —
+  switch.
 
-1. **Load URDF** — point at the URDF / xacro from [01-b](01-b-build-the-virtual-cell.md).
-2. **Self-Collisions** — click "Generate". MoveIt computes pairs that
-   never collide and skips them at run time.
-3. **Virtual Joints** — add a `world → base_link` fixed joint.
-4. **Planning Groups** — add one named `<arm>` whose chain is
-   `base_link` → `tool0` (or your wrist link).
-5. **Robot Poses** — define `home`, `ready`, `tuck` poses for later
-   testing.
-6. **End Effectors** — declare the gripper group if your arm has one.
-7. **Controllers** — pick `JointTrajectoryController` (or
-   `position_controllers/JointGroupPositionController` for direct
-   position).
-8. **Generate Package** — save as `<arm>_moveit_config`.
+If you go through Setup Assistant, walk those tabs in order and save
+the package as `<arm>_moveit_config`.
 
-Build the new package:
+## Launch the planner against the simulator
 
-```
-cd ~/ros2_ws && colcon build --packages-select <arm>_moveit_config
-source install/setup.bash
-```
+A typical "sim demo" launch (vendor packages usually ship one) brings
+up, all in one process group:
 
-## Launch MoveIt against the simulator
+- The simulator world from [01-b](01-b-build-the-virtual-cell.md).
+- A node that turns joint angles into transforms.
+- The simulator's hardware interface (see
+  [02-b](02-b-ros2-control-driver-swap.md) for the swap to real
+  later).
+- The MoveIt planner.
+- The visualiser (RViz 2) with the MoveIt motion-planning plugin.
 
-A typical `demo_gazebo.launch.py` (vendor packages usually ship one)
-brings up:
+Wait for "You can start planning now!" in the visualiser before
+testing.
 
-- The Gazebo world from [01-b](01-b-build-the-virtual-cell.md).
-- The `robot_state_publisher` (turns joint angles into `tf`).
-- `gz_ros2_control` (the sim hardware interface — see
-  [02-b](02-b-ros2-control-driver-swap.md)).
-- `move_group` (the planner).
-- RViz 2 with the MoveIt motion-planning plugin.
-
-Run it:
-
-```
-ros2 launch <arm>_moveit_config demo_gazebo.launch.py
-```
-
-Wait for "You can start planning now!" in the RViz status line.
-
-## Test it by hand in RViz
-
-In the RViz MoveIt panel:
+## Test it by hand in the visualiser
 
 1. Open the **Motion Planning** panel.
-2. Drag the **interactive marker** at the end effector to a new pose.
-3. Click **Plan**. RViz shows the proposed trajectory as a moving
+2. Drag the **interactive marker** at the end effector to a new
+   pose.
+3. **Plan.** The visualiser shows the proposed trajectory as a
    ghost arm.
-4. Click **Execute**. The real (simulated) arm should follow.
-5. Click **Update** in the **Planning Scene** tab to load collision
-   objects.
+4. **Execute.** The simulated arm follows the plan.
+5. In the **Planning Scene** tab, add collision objects (the table)
+   and verify the planner avoids them.
 
-If the arm moves to the target, MoveIt is healthy.
+If the arm moves to the target, the planner is healthy.
 
 ## Things to check before moving on
 
-- **Self-collision flagging.** Drag the gripper into the base. RViz
-  should refuse to plan ("goal in self-collision").
-- **Joint limits.** Drag toward a joint extreme. RViz should refuse
-  past the URDF's limit.
-- **Table as a collision object.** Add it as a `box` in the
-  Planning Scene tab. Verify the planner avoids it.
+- **Self-collision flagging.** Drag the gripper into the base. The
+  planner should refuse ("goal in self-collision").
+- **Joint limits.** Drag toward a joint extreme. The planner should
+  refuse past the description's limit.
+- **Table as a collision object.** Add it; verify the planner
+  avoids it.
 - **A "home" pose plan** works in one click.
 
 If any of these don't behave, fix them now. Every later step assumes
-MoveIt is correct.
+the planner is correct.
+
+## Alternatives to MoveIt
+
+MoveIt is the dominant choice on ROS 2, but it's not the only one.
+Pick the right tool for your stack:
+
+| Stack | Common motion-planning choice |
+|-------|------------------------------|
+| **ROS 2, general manipulation** | MoveIt 2 (this file). |
+| **Vendor-native programming** | UR PolyScope / URScript, Franka Desk, FANUC TP, ABB RobotStudio, KUKA Sunrise. The pendant / vendor IDE *is* the planner. |
+| **Drake** | Drake's own trajectory optimisation (TrajOpt) and inverse kinematics. Strong on contact-rich manipulation. |
+| **Pinocchio / Crocoddyl** | C++ rigid-body library + optimisation-based planning. Common in research, especially humanoids and legged robots. |
+| **OMPL directly** | Sampling-based planner library that MoveIt uses internally. Wrap it yourself for niche cases. |
+| **OpenRAVE** | Legacy; only in inherited projects. |
+| **MoveIt 1 (ROS 1)** | Maintained for old projects; new code targets MoveIt 2. |
+
+Whichever you pick, the rest of the simulation-first workflow stays
+the same — sim, planner, scripted task, fake perception, stress
+test.
 
 ## Tools you'll use a lot
 
-- **RViz MoveIt panel** — the interactive interface to MoveIt.
-- **`ros2 service call /plan_kinematic_path`** — call the planner from
-  the command line for scripted tests.
-- **`moveit_py`** — the Python API for MoveIt 2. The path most task
-  code uses.
-- **`MoveGroupInterface` (C++)** — for production code.
-- **`MoveIt Task Constructor`** — for multi-stage pick-and-place
-  pipelines (used in [01-d](01-d-scripted-first-task.md)).
+- The visualiser's interactive marker (RViz 2 on ROS 2).
+- A scripted interface to the planner — `moveit_py` (Python) or
+  `MoveGroupInterface` (C++) on ROS 2; the vendor's API on a
+  vendor-native stack.
+- **MoveIt Task Constructor (MTC)** — for multi-stage
+  pick-and-place pipelines (see
+  [01-d](01-d-scripted-first-task.md)).
 
 ## Output of this step
 
 ```
-MoveIt config package:       <arm>_moveit_config (version: ___ )
-Planning group(s):           <arm>, <gripper>
-Default planner:             RRTConnect / STOMP / Pilz / ___
-IK solver:                   KDL / TRAC-IK / IKFast / ___
+Motion planner used:         MoveIt 2 / Drake / vendor / other (___)
+Planner config package:      <arm>_moveit_config (version: ___ )
+Planning groups:             <arm>, <gripper>
+Default planner algorithm:   RRTConnect / STOMP / Pilz / TrajOpt / ___
+IK solver:                   KDL / TRAC-IK / IKFast / PickIK / ___
 Self-collisions generated:   yes / no
 Reference poses defined:     home, ready, ___
-Sim launch file:             <arm>_moveit_config/launch/demo_gazebo.launch.py
-RViz Plan + Execute works:   yes / no
+Plan + Execute works:        yes / no
 Joint limits honoured:       yes / no
 Self-collision blocks plan:  yes / no
 ```
@@ -134,17 +145,17 @@ Self-collision blocks plan:  yes / no
    the table. Add it as a collision object.
 3. **One huge planning group containing everything.** Keep `<arm>`
    and `<gripper>` separate.
-4. **Joint limits in URDF wider than reality.** The real arm will
-   collide with itself. Trim limits to match the real arm's stops.
-5. **Skipping the RViz drag-and-plan check.** If it doesn't work
-   here, it definitely won't work from your task code.
-6. **Vendor MoveIt config copied without checking the URDF version.**
-   A URDF mismatch causes silent IK failures.
+4. **Joint limits in the description wider than reality.** The real
+   arm will hit its stops. Trim limits to match.
+5. **Skipping the drag-and-plan check.** If it doesn't work here,
+   it definitely won't work from your task code.
+6. **Vendor config copied without checking the URDF version.** A
+   URDF mismatch causes silent IK failures.
 
 ## What's next
 
-You can plan motions one click at a time. Real tasks aren't one click;
-they're a *sequence* (approach, descend, grasp, lift, move, release).
-Time to write that sequence in code.
+You can plan motions one click at a time. Real tasks aren't one
+click; they're a *sequence* (approach, descend, grasp, lift, move,
+release). Time to write that sequence.
 
 → Next: [01-d-scripted-first-task.md](01-d-scripted-first-task.md)
