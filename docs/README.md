@@ -4,8 +4,10 @@ A beginner-friendly walkthrough of how to think about a robotic-arm problem
 *from scratch*. Written for people who are new to robotics and want to learn
 the field one layer at a time, in plain English, without diving into code.
 
-We focus only on **robotic arms** (sometimes called manipulators). Mobile
-robots, drones, and humanoids are out of scope here.
+We focus on **robotic arms** (sometimes called manipulators). Mobile robots
+and drones are out of scope; humanoids are off the main reading path but
+covered briefly in the reference section below because the line between
+"arm" and "humanoid arm" is genuinely blurring in 2026.
 
 The series is built so each doc adds one layer on top of the previous ones.
 Read them in order.
@@ -27,9 +29,29 @@ Every doc in this series follows the same shape:
    The first step for any robotic-arm task: defining the problem before you
    touch any hardware or library. The 7 questions to ask, the checklist to
    fill in, and what to hand off to the next layer.
+2. **[02-choosing-arm-and-gripper.md](02-choosing-arm-and-gripper.md)** —
+   Turning the Layer-1 spec into a hardware shortlist. Criteria for picking
+   an arm (DOF, payload, reach, repeatability, safety, SDK, AI-included), a
+   market map of the common / popular arms (hobby, mid-range cobot,
+   industrial) and grippers (parallel, vacuum, soft, etc.), and why the
+   software/AI question must be considered *in parallel* with the hardware
+   choice rather than after it.
 
 *(More layers will be added one at a time. This series is intentionally being
-written slowly — each layer thoroughly before the next.)*
+written slowly — each layer thoroughly before the next. Layer 03 will cover
+the software / AI stack that pairs with the hardware shortlist.)*
+
+## Reference docs (not numbered layers)
+
+These sit alongside the layered series and are meant to be skimmed on demand
+rather than read in order:
+
+- **[latest-robots.md](latest-robots.md)** — A dated snapshot of newer robot
+  hardware: humanoids actually shipping or in production pilots, "AI-included"
+  manipulation platforms, and the foundation-model "robot brains" that are
+  starting to drive hardware choices. Intentionally broader than "just arms"
+  because in 2026 that line is genuinely blurring. Has an explicit freshness
+  warning at the top — re-check before relying on it.
 
 ## What this series is **not**
 
