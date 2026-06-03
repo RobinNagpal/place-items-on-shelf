@@ -6,20 +6,21 @@
 
 ## The cell, from above
 
-A rough plan view of the v1 cell:
+A rough plan view of the v1 cell. **The autosampler tray sits on
+the bench, in its own alignment mount, not inside the HPLC.** The
+HPLC itself is offset to the side; the human carries the loaded
+tray over when the robot finishes.
 
 ```
-                   ┌──────────────────┐
-                   │   HPLC instrument│
-                   │  (drawer opens →)│
-                   │                  │
-                   │   [autosampler   │
-                   │     tray, 96]    │  ←── destination
-                   └────────┬─────────┘
-                            │
-                       (~150 mm)
-                            │
-        ┌───────────────────┴────────────────────┐
+       ┌──────────────────┐
+       │   HPLC instrument│       ← off to one side; out of arm's reach
+       │ (human inserts   │         the robot NEVER reaches into it
+       │  loaded tray)    │
+       └──────────────────┘
+                ⇧ human carries tray over here when robot is done
+
+
+        ┌────────────────────────────────────────┐
         │                                        │
         │            [robot arm base]            │  ←── arm mount
         │                                        │
@@ -27,24 +28,30 @@ A rough plan view of the v1 cell:
                │                 │
           (~100 mm)         (~150 mm)
                │                 │
-   ┌───────────┴──┐      ┌───────┴──────┐
-   │ barcode      │      │ inbound rack │   ←── source
-   │ reader       │      │ (48 vials)   │
-   └──────────────┘      └──────────────┘
+   ┌───────────┴──┐      ┌───────┴──────┐      ┌──────────────┐
+   │ barcode      │      │ inbound rack │      │ destination  │
+   │ reader       │      │ (48 vials)   │      │ tray on      │
+   │              │      │              │      │ alignment    │
+   └──────────────┘      └──────────────┘      │ plate (96)   │
+                                                └──────────────┘
+                                                ← tray is on the BENCH
 ```
 
-All three peripherals (rack, tray, barcode reader) live in a single
-roughly **40 × 40 cm region** centred on the arm base.
+All three peripherals (rack, benchtop tray mount, barcode reader)
+live in a single roughly **40 × 40 cm region** centred on the arm
+base. **The HPLC instrument is intentionally outside the arm's
+reach envelope** — a tray-transport step (human in v1, motorised
+shuttle in a hypothetical v2) bridges the gap.
 
 ## Working volume
 
 | Property                 | Value                                                |
 |--------------------------|------------------------------------------------------|
 | Working area (top view)  | **~40 cm × 40 cm**                                   |
-| Working height           | **~30 cm above bench**                               |
-| Working volume           | ~40 × 40 × 30 cm                                     |
+| Working height           | **~20 cm above bench**                               |
+| Working volume           | ~40 × 40 × 20 cm                                     |
 | Arm base height          | At bench level (0 mm)                                |
-| Tray slot height         | ~70 mm above bench (inside the open drawer)          |
+| Tray slot height         | ~20 mm above bench (tray on an alignment plate)      |
 | Rack slot height         | ~50 mm above bench                                    |
 | Barcode reader height    | Window centred ~80 mm above bench                    |
 
@@ -72,18 +79,22 @@ above: about **250 mm horizontally** and **150 mm vertically**.
 
 The arm must plan motions that avoid:
 
-1. **The autosampler housing** — the drawer rails, the front fascia
-   of the instrument.
-2. **The drawer itself when open** — the rails stick out into the
-   cell.
-3. **The inbound rack walls** — the rack has plastic walls between
+1. **The benchtop tray alignment plate** — the plate has walls
+   around the tray to keep it in a fixed pose.
+2. **The inbound rack walls** — the rack has plastic walls between
    vials.
-4. **The barcode reader stand** — a vertical post.
-5. **Already-placed vials** in the tray — these grow during a load
+3. **The barcode reader stand** — a vertical post.
+4. **Already-placed vials** in the tray — these grow during a load
    cycle and act as new obstacles for later picks.
-6. **The technician's hands**, sometimes — handled by safety
+5. **The technician's hands**, sometimes — handled by safety
    speed/separation monitoring, not by collision avoidance.
-7. **The arm's own body** — the planner already handles self-collision.
+6. **The arm's own body** — the planner already handles self-collision.
+
+> **What the arm does NOT have to avoid (because the HPLC is out
+> of reach):** the autosampler housing, the open drawer, drawer
+> rails, instrument fascia. The benchtop-tray decision (see
+> [`../03-manual-steps-today.md`](../03-manual-steps-today.md), Step C)
+> removes this entire class of obstacles.
 
 ## Mounting
 

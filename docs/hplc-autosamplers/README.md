@@ -14,7 +14,7 @@ the **first real task** we apply that curriculum to.
 
 ## Read these in order
 
-The four files at this level explain the problem in plain English:
+The five files at this level explain the problem in plain English:
 
 1. **[`01-what-needs-to-be-done.md`](01-what-needs-to-be-done.md)** —
    The whole task in one page. Skim this first to get the shape of
@@ -24,16 +24,21 @@ The four files at this level explain the problem in plain English:
    labs care about either.
 3. **[`03-manual-steps-today.md`](03-manual-steps-today.md)** — The
    steps a human still does by hand today: sample prep, capping and
-   labelling, tray loading, drawer in/out.
+   labelling, tray loading, drawer in/out. **Includes the rationale
+   for loading on the bench (not inside the instrument).**
 4. **[`04-why-automate-tray-loading.md`](04-why-automate-tray-loading.md)** —
    The case for automating *the tray-loading step specifically* (vs.
    the rest of the workflow).
+5. **[`05-existing-solutions.md`](05-existing-solutions.md)** —
+   Survey of existing companies, products, and academic projects
+   doing this or similar work. Tells you where our project fits
+   in the wider lab-automation market.
 
 Then the **requirements** — what the robot must actually deliver,
 filled in against the framework in
 [`../01-finalize-requirements/`](../01-finalize-requirements/):
 
-5. **[`requirements/`](requirements/)** — One folder, six short
+6. **[`requirements/`](requirements/)** — One folder, six short
    files, each answering a slice of the Layer-1 questions for this
    specific project. **Requirements are the starting point** — every
    later hardware and software choice gets filtered against these

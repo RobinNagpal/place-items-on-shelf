@@ -142,5 +142,5 @@ To stay honest:
 
 ## What's next
 
-→ Next: [`requirements/`](requirements/) — the requirements
-themselves, broken out by topic.
+→ Next: [`05-existing-solutions.md`](05-existing-solutions.md) —
+who else is doing this and where our project fits.

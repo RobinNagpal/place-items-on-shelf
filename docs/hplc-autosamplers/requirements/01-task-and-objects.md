@@ -74,8 +74,22 @@ realistic numbers come from public datasheets — see Sources.
 | Slot diameter         | ~14 mm (about 2 mm wider than the vial)                          |
 | **Slot clearance**    | **~1 mm radial** — placement tolerance is roughly **±1 mm**       |
 | Footprint             | Vendor-specific, roughly 150 × 200 mm                            |
-| Sits inside           | A pull-out **drawer** of the HPLC autosampler                    |
+| **Location during loading (v1)** | **On the bench, in an alignment plate next to the arm — NOT inside the HPLC.** |
 | Tray orientation      | Numbered, with slot 1 in a fixed corner                          |
+
+**Why the tray is on the bench, not in the instrument:**
+
+Most HPLC autosamplers either house the tray fully inside (carousel
+style) or behind a small drawer opening that is hard for a robot
+wrist + gripper to fit through. Agilent themselves sell an
+**"external tray" / WalkUp** option on the 1290 Infinity II
+Vialsampler precisely so robots can load on the bench and a
+transport step delivers the tray into the instrument afterwards.
+v1 follows the same pattern: **the robot loads on the bench, then
+a human carries the loaded tray the short distance into the
+autosampler drawer.** See
+[`../03-manual-steps-today.md`](../03-manual-steps-today.md) Step C
+for the full rationale.
 
 **What this means for the robot:**
 
@@ -83,7 +97,10 @@ realistic numbers come from public datasheets — see Sources.
   — see [`03-success-precision-speed.md`](03-success-precision-speed.md).
 - Vendor differences (Agilent vs Waters vs Shimadzu) mostly affect
   tray *footprint*, not slot geometry. v1 targets one tray at a
-  time, calibrated to its mounting position.
+  time, sitting in a fixed alignment plate calibrated to the arm.
+- **The arm never has to reach inside the HPLC.** This is by design
+  — it removes a whole class of collisions and lets us use a much
+  smaller (and cheaper) arm.
 
 ## Variations the robot should handle later (not v1)
 

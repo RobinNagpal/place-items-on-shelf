@@ -41,6 +41,13 @@ Out of scope keeps the project small enough to actually finish:
   Vials arrive ready and full.
 - **Capping or crimping vials.** Caps are already on.
 - **Microlitre pipetting** of liquids.
+- **Putting the loaded tray into the HPLC.** The robot loads a tray
+  that **sits on the bench**, not inside the instrument. A human
+  then carries the loaded tray the short distance to the
+  autosampler drawer and slides it in. This is by design — it lets
+  us use a much smaller arm and removes a whole class of
+  collisions (see
+  [`03-manual-steps-today.md`](03-manual-steps-today.md), Step C).
 - **Operating the HPLC itself.** Vendor software still runs the run.
 - **Disposing of vials after the run.** Technician removes the tray.
 - **Multi-tray / 24-hour unattended operation.** v1 is one tray at
@@ -90,9 +97,12 @@ A picture of the finished v1, in words:
   a lab bench, bolted to a base plate.
 - To the **left** of the arm: an inbound rack with up to 24–48 ready
   vials, capped, with barcode labels.
-- To the **right** of the arm: an HPLC autosampler with its drawer
-  open and a standard tray sitting in it.
-- **Between them**: a fixed-position barcode reader.
+- To the **right** of the arm: an empty autosampler tray sitting
+  on a benchtop alignment plate (NOT inside the HPLC).
+- The **HPLC instrument** itself sits a short walk away on the
+  same bench. The human carries the loaded tray over when the
+  robot is done.
+- **Between rack and tray**: a fixed-position barcode reader.
 - A **camera mounted overhead** (or on the wrist) sees the rack and
   the tray.
 - A small **PC** runs the perception, motion planning, and the LIMS

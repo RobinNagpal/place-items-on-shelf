@@ -65,7 +65,8 @@ which vial it is holding.
 This is the step the robot replaces.
 
 The technician has, say, 96 ready vials in a rack on the bench, and
-an empty 96-slot autosampler tray next to them. The job is to:
+an empty 96-slot autosampler tray **sitting on the bench next to
+them** — not yet inside the instrument. The job is to:
 
 1. **Pick up vial 1** from the source rack.
 2. **(Optionally) scan its barcode** with a hand reader.
@@ -74,6 +75,30 @@ an empty 96-slot autosampler tray next to them. The job is to:
      numbered list saying which sample goes in which slot.
 4. **Repeat for vial 2, 3, …** until the rack is empty or the tray
    is full.
+
+> **Where is the tray during loading?** In practice this varies by
+> autosampler design:
+>
+> - **Drawer-style autosamplers** (most Agilent, Waters, Shimadzu): the
+>   technician *can* load directly into the tray while the drawer is
+>   open, but that means reaching into a small (~20 × 25 cm) opening.
+>   Many techs prefer to lift the tray out first, load it on the
+>   bench, then slide it back.
+> - **Carousel / enclosed autosamplers**: the tray is fully inside the
+>   instrument housing. The only way to load is to take the tray *out*
+>   first.
+> - **"External tray" / WalkUp modes** (e.g. Agilent 1290 Infinity II
+>   Vialsampler): Agilent explicitly offers an external-tray option
+>   so robots can load on the bench and a transport step delivers
+>   the tray to the instrument.
+>
+> **For our v1 we load on the bench**, not inside the instrument. The
+> tray sits in a known mount on the bench, the robot loads it, and
+> a human (or, in v2+, a tray-transport mechanism) carries it the
+> short distance into the autosampler. This single design choice
+> removes a large class of collisions (the robot never has to reach
+> into the instrument) and matches the natural workflow of every
+> autosampler design above.
 
 For each placement, the technician must also **write down** (or have
 the LIMS write down) the barcode-to-slot mapping. That mapping is
@@ -111,12 +136,25 @@ After the tray is loaded:
 When the run finishes (often hours later), the same steps run in
 reverse to retrieve the tray.
 
-For our project, **drawer in / out is partially in scope**. The arm
-can shove and pull a tray if the drawer is the slide-out kind, but
-some autosamplers have spring-loaded or motorised drawers that we
-will leave to the technician. **Pressing Start is left to the
-technician** for v1 — much simpler than integrating with vendor
+For our project, **drawer in / out is OUT of scope for v1.** The
+technician carries the loaded benchtop tray the short distance to
+the instrument and slides it in by hand. The arm never has to reach
+into the instrument housing. **Pressing Start** is also left to the
+technician for v1 — much simpler than integrating with vendor
 software.
+
+This was a real design decision: we considered having the arm push
+a loaded tray into a drawer, but two problems killed it:
+
+1. **Reach.** Drawer openings are small (~20 × 25 cm), and a small
+   cobot's wrist + tray together is bigger than the opening.
+2. **Collision risk.** Reaching into the instrument means a missed
+   motion can damage thousands of dollars of HPLC. The benchtop-only
+   path eliminates this whole class of failure.
+
+A v2+ design could add a small tray-transport mechanism (motorised
+shuttle or shorter arm dedicated to drawer handling). v1 keeps it
+human.
 
 ## Summary table
 
@@ -124,8 +162,8 @@ software.
 |------|-------------|--------------|----------------|
 | A    | Sample prep | Manual + some big-budget liquid handlers | **Out of scope** |
 | B    | Cap & label | Manual | **Capping out, barcode reading in** |
-| C    | Tray load   | Manual | **In scope — the heart of the project** |
-| D    | Drawer & Start | Manual | **Partially in scope (drawer); Start out** |
+| C    | Tray load (benchtop) | Manual | **In scope — the heart of the project** |
+| D    | Drawer & Start | Manual | **Out of scope (human carries the tray over)** |
 
 ## Sources
 
