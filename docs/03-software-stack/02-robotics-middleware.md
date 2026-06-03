@@ -1,169 +1,120 @@
 # Robotics Middleware
 
 A robot is many small programs running at once: the arm driver, the
-camera driver, the planner, the gripper controller, a status dashboard.
-They have to **find each other and exchange messages** without you
-hand-wiring every connection.
+camera driver, the planner, the gripper, a dashboard. They all need to
+**find each other and exchange messages** — without you hand-wiring
+every connection.
 
-The software layer that handles "publish a message", "call a service",
-"find the other process running on the same robot" is called
-**middleware**. Pick it early — every later library you choose
-(perception, planning, simulation) assumes one.
+The software that handles "send a message to whoever cares" is called
+**middleware**. Think of it as the post office between the programs on
+your robot.
 
-This file is just about which middleware to use.
+Pick it early — every other library you choose later (perception,
+planning, simulation) already assumes one.
 
-## What you check, before anything else
+## What you check first
 
-- **What ecosystem does your arm vendor support?** Most cobot vendors
-  ship an official ROS 2 driver. Industrial big-four (FANUC, ABB, KUKA,
-  Yaskawa) have community ROS 2 drivers of varying quality plus their
-  own native SDKs.
-- **What ecosystem do your perception and planning libraries assume?**
-  MoveIt is a ROS 2 package. Most camera SDKs publish to ROS 2 out of
-  the box.
-- **Real-time requirements** — ROS 2 is *not* hard real-time end-to-end.
-  For tight motion loops, the real-time bit usually lives below the
-  middleware, in a vendor driver.
-- **Team experience** — if the team already knows ROS 1, the transition
-  cost to ROS 2 is real but bounded. The transition cost to "build my
-  own middleware" is unbounded.
+- **What does your arm vendor support?** Cobot vendors almost always
+  ship a ROS 2 driver. The big-four industrial brands (FANUC, ABB,
+  KUKA, Yaskawa) have community ROS 2 drivers plus their own native
+  SDKs.
+- **What do your other libraries assume?** MoveIt, most camera
+  drivers, and most planners are ROS 2 packages.
+- **Real-time?** ROS 2 is *not* hard real-time end-to-end. The
+  µs-precise motion loop lives below it, in the vendor driver.
+- **Team experience.** Moving from ROS 1 to ROS 2 is real but bounded
+  work. Writing your own middleware is bottomless work.
 
 ## The main options
 
 ### ROS 2 — the default
 
-The dominant open robotics middleware in 2025–2026. Built on **DDS**
-(Data Distribution Service) for discovery and transport. Topics
-(broadcast streams), services (request/response), actions (long-running
-goals), and parameters (per-node config). Multi-language: C++ and Python
-are first-class; Rust, Go, and JavaScript bindings exist.
+The dominant open robotics middleware in 2025–2026. You publish on
+**topics**, call **services** for request/response, run **actions**
+for long jobs, and read **parameters** for config. C++ and Python are
+first-class.
 
-Pick a current ROS 2 distro:
+Pick a distro:
 
-- **ROS 2 Humble (LTS, Ubuntu 22.04, support to 2027)** — the safe
-  production pick today. Most third-party packages target it.
-- **ROS 2 Jazzy (LTS, Ubuntu 24.04, support to 2029)** — the new
-  starting point. Pick this for a fresh project.
-- **ROS 2 Kilted (non-LTS)** — bleeding-edge, short support window.
-  Only if you need a specific new feature.
-- **ROS 2 Rolling** — continuous development branch. Not for
-  production; use only to develop packages you'll backport.
-
-**Best for:** essentially every research and most production cells.
-Default unless one of the alternatives below applies.
+| Distro | Status | When to pick |
+|--------|--------|--------------|
+| **ROS 2 Jazzy** | LTS on Ubuntu 24.04, support to 2029 | Fresh project. Default. |
+| **ROS 2 Humble** | LTS on Ubuntu 22.04, support to 2027 | Existing project already on Humble. |
+| **ROS 2 Kilted** | Non-LTS | Only if you need a specific new feature. |
+| **ROS 2 Rolling** | Dev branch | Package authors only, never production. |
 
 ### ROS 1 — legacy
 
-ROS 1 (Noetic, the last release) is **end-of-life as of May 2025**. The
-ecosystem is migrating to ROS 2.
+ROS 1 Noetic went end-of-life in **May 2025**. Keep maintaining old
+projects on it, but **don't start new ones on ROS 1**.
 
-- **Best for:** maintaining existing systems while you plan migration.
-- **Avoid for:** new projects. Every month, more packages drop ROS 1.
+### Vendor PLC stack (in factories)
 
-### Vendor middleware (in industrial cells)
+In a factory, the robot may not be on ROS 2 at all. The "middleware"
+is the **fieldbus** (EtherCAT, PROFINET, EtherNet/IP) and the **PLC
+program** on top — usually **Siemens TIA Portal**, **Rockwell
+Studio 5000**, or **Beckhoff TwinCAT**.
 
-In a factory, the robot may not be on ROS 2 at all. The middleware is
-the **fieldbus** — EtherCAT, PROFINET, EtherNet/IP — and the high-level
-glue is the **PLC program** plus an HMI / SCADA stack.
+ROS 2 is often a *side* IPC for vision; the PLC runs the motion
+sequence.
 
-- **Siemens TIA Portal** — Siemens-native PLC + HMI development.
-- **Rockwell Studio 5000 + FactoryTalk** — Allen-Bradley's equivalent.
-- **Beckhoff TwinCAT** — PC-based PLC + motion + middleware. Often
-  used alongside ROS 2.
+### Cloud message brokers (alongside ROS 2)
 
-**Best for:** factory cells whose primary integrator is the PLC team,
-not the robotics team. ROS 2 is sometimes a side IPC for vision; PLC
-runs the motion sequence.
+Not robotics middleware on their own — use them to ship data **off**
+the robot. **MQTT** (Mosquitto, EMQX) for fleet telemetry; **Kafka**
+or **AWS IoT / Azure IoT** for heavier logs.
 
-### MQTT / Kafka / cloud message brokers
+**Never** use them inside the robot's own control loop.
 
-Not robotics middleware on their own, but used **alongside** ROS 2 to
-ship robot data to the cloud or to receive higher-level commands.
+## DDS — a ROS 2 footnote you'll hit
 
-- **MQTT** — light, popular for "telemetry from many small robots."
-  Brokers: Mosquitto, EMQX, HiveMQ.
-- **Apache Kafka** — heavier, used in fleets that produce serious
-  log volume.
-- **AWS IoT Core, Azure IoT Hub, Google Cloud IoT** — managed
-  brokers. Cheap until they're not.
+ROS 2 sends messages over **DDS**, a publish/subscribe protocol.
+Every distro ships at least two DDS implementations:
 
-**Best for:** fleet management, remote monitoring, "robot to dashboard."
-Not for the robot's own control loop.
+- **Fast DDS** — the default. Works for most cases.
+- **Cyclone DDS** — switch to it if discovery is flaky or topics are
+  high-throughput.
+- **RTI Connext** — commercial; some industrial cells.
 
-### LCM (Lightweight Communications and Marshalling)
-
-Lightweight UDP-based message system from MIT. Used by Boston Dynamics
-SDKs and some custom research stacks.
-
-**Best for:** legacy MIT-spinout code, BD Spot SDK. Don't start a new
-project on LCM unless you have a specific reason.
-
-### Direct sockets / gRPC / ZeroMQ
-
-Building robotics middleware yourself by writing TCP / UDP / gRPC
-endpoints between processes.
-
-**Best for:** when you have exactly two programs that need to talk, the
-data is simple, and ROS 2 feels overkill. Also for the cloud-to-robot
-edge.
-
-**Avoid for:** the main robot graph. You'll re-implement discovery,
-QoS, recording, and tooling, badly.
-
-## DDS configuration (a ROS 2 footnote you will hit)
-
-Every ROS 2 distro ships with at least two DDS implementations:
-
-- **Fast DDS (default)** — open-source, made by eProsima.
-- **Cyclone DDS** — open-source, often faster for high-throughput
-  topics. Switch to it if Fast DDS gives you discovery problems.
-- **Connext DDS (RTI)** — commercial, used in some industrial cells.
-
-When two ROS 2 nodes don't see each other, the answer is almost always
-DDS — wrong implementation, wrong domain ID, multicast blocked, or
-firewall in the way. Learn `ros2 doctor`, `ros2 topic list`, and your
-DDS-vendor diagnostic tool early.
+When two ROS 2 nodes don't see each other, the cause is almost always
+DDS: wrong implementation, wrong domain ID, multicast blocked, or a
+firewall. Learn `ros2 doctor` and `ros2 topic list` early.
 
 ## How to pick
 
-1. **New robotics project, modern hardware?** → ROS 2 Jazzy.
-2. **Existing ROS 2 codebase on Humble?** → Stay on Humble until next
-   migration window.
-3. **Stuck on ROS 1 Noetic?** → Plan a ROS 2 migration. New code
-   targets ROS 2.
-4. **Production factory with PLC primary?** → PLC vendor stack +
-   ROS 2 as a side IPC if you need vision.
-5. **Fleet of robots reporting to a backend?** → ROS 2 *on* each
-   robot + MQTT *between* robot and cloud.
+1. **New project, modern hardware?** → ROS 2 Jazzy.
+2. **Existing ROS 2 codebase on Humble?** → Stay on Humble.
+3. **Stuck on ROS 1 Noetic?** → Migrate to ROS 2; new code targets it.
+4. **Factory cell with PLC primary?** → PLC stack + ROS 2 as a side
+   IPC for vision.
+5. **Fleet of robots reporting upstream?** → ROS 2 *on* each robot,
+   MQTT *between* robot and cloud.
 
 ## Output of this file — your middleware plan
 
 ```
 Primary middleware:        ROS 2 Jazzy / Humble / vendor PLC / ___
 ROS 2 DDS:                 Fast DDS (default) / Cyclone DDS / RTI Connext
-Domain ID:                 ___ (single-digit, isolates fleets sharing a network)
+Domain ID:                 ___ (single-digit, isolates fleets on one network)
 Cloud / fleet middleware:  none / MQTT (broker: ___) / Kafka / AWS IoT
-Real-time path:            arm vendor driver direct / EtherCAT master / ROS 2 only
+Real-time path:            arm vendor driver / EtherCAT master / ROS 2 only
 Bridge to PLC?:            none / OPC UA / Modbus / EtherNet/IP
 ```
 
 ## Common mistakes
 
-1. **Picking ROS 1 in 2026.** Ecosystem is gone. Just don't.
-2. **Mixing Humble and Jazzy on the same network.** Cross-version
-   DDS can negotiate, but you'll see surprise interop bugs. Pin a
-   distro per fleet.
+1. **Picking ROS 1 in 2026.** Ecosystem is gone.
+2. **Mixing Humble and Jazzy on one network.** Cross-version DDS
+   sometimes negotiates, sometimes doesn't. Pin one distro per fleet.
 3. **Multicast disabled on the corporate network.** DDS discovery
-   silently fails. Use a unicast peer list or a dedicated robot
-   subnet.
-4. **One giant ROS 2 node doing everything.** You lose the whole
-   point of the middleware. Split into focused nodes.
-5. **Putting MQTT on the robot's control loop.** It's not designed
-   for it. Use ROS 2 inside the robot, MQTT only for the cloud edge.
+   silently fails. Use a unicast peer list or a dedicated subnet.
+4. **One giant ROS 2 node doing everything.** Defeats the point. Split
+   into focused nodes.
+5. **MQTT on the control loop.** It's not designed for it.
 
 ## What's next
 
-You have a middleware. Now: how does the middleware actually talk to
-the **arm** sitting on your table?
+You have a middleware. Now: how does it actually talk to the **arm**
+on your table?
 
 → Next: [03-vendor-sdks-and-drivers.md](03-vendor-sdks-and-drivers.md)
