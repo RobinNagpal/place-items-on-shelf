@@ -6,7 +6,7 @@ operates **for someone other than the people who built it**, on
 
 That's the pilot. It's the bridge between "we proved it works" and
 "we trust it." The phased rollout from
-[02-e](02-e-phased-rollout.md) is the *operational* protocol; this
+[02-sim-to-real-bridge/05](02-sim-to-real-bridge/05-phased-rollout.md) is the *operational* protocol; this
 file covers the *business* side of the pilot — stakeholders,
 duration, exit criteria.
 

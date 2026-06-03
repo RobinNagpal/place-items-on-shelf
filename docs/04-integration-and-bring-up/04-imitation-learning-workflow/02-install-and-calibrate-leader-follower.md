@@ -11,7 +11,7 @@ This file is about avoiding both.
 
 ## What you need before this step
 
-- Teleop hardware from [04-a](04-a-pick-teleop-hardware.md) on the
+- Teleop hardware from [step 1](01-pick-teleop-hardware.md) on the
   desk.
 - The production arm (the follower) brought up through
   [03](03-system-integration-on-real.md).
@@ -187,4 +187,4 @@ Sanity 30-s recording opens cleanly: yes / no
 The rig is calibrated. The follower mirrors the leader. Time to
 actually collect the demonstrations.
 
-→ Next: [04-c-record-demos.md](04-c-record-demos.md)
+→ Next: [03-record-demos.md](03-record-demos.md)

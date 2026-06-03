@@ -144,9 +144,9 @@ You can build this scene either:
 - **From a CAD export** — accurate but more work.
 - **From a depth scan** — fancy but rarely worth it.
 
-After loading, run the [01-d](01-d-scripted-first-task.md) scripted
+After loading, run the [01-simulation-first-development/04](01-simulation-first-development/04-scripted-first-task.md) scripted
 task once more on **real** with the slow-speed settings from
-[02-d](02-d-shadow-mode-and-slow-speeds.md). The planner should now
+[02-sim-to-real-bridge/04](02-sim-to-real-bridge/04-shadow-mode-and-slow-speeds.md). The planner should now
 route around the real obstacles.
 
 ## Output of this step
@@ -196,4 +196,4 @@ If you're not using imitation learning, skip ahead to
 [05-bring-up-checklist.md](05-bring-up-checklist.md).
 
 → Optional next (only if using IL):
-[04-a-pick-teleop-hardware.md](04-a-pick-teleop-hardware.md)
+[04-imitation-learning-workflow/01-pick-teleop-hardware.md](04-imitation-learning-workflow/01-pick-teleop-hardware.md)

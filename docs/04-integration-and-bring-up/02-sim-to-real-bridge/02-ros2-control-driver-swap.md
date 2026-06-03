@@ -26,7 +26,7 @@ controller list identical.
 
 ## What you need before this step
 
-- A shared URDF + frame setup from [02-a](02-a-shared-urdf-and-frames.md).
+- A shared URDF + frame setup from [step 1](01-shared-urdf-and-frames.md).
 - A working sim cell using the sim hardware interface (e.g.
   `gz_ros2_control/GazeboSimSystem`).
 - Real hardware physically powered, networked, and reachable.
@@ -158,7 +158,7 @@ joint_trajectory_controller:
 ```
 
 Run at 25% for the first day. Step up gradually. See
-[02-d](02-d-shadow-mode-and-slow-speeds.md) for the full protocol.
+[step 4](04-shadow-mode-and-slow-speeds.md) for the full protocol.
 
 ## Output of this step
 
@@ -200,4 +200,4 @@ The driver swap works mechanically. But sim and real disagree on
 gripper, the latency of the network. The next step is to measure and
 correct those.
 
-→ Next: [02-c-hand-eye-and-base-calibration.md](02-c-hand-eye-and-base-calibration.md)
+→ Next: [03-hand-eye-and-base-calibration.md](03-hand-eye-and-base-calibration.md)

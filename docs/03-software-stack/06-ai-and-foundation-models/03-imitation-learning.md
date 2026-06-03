@@ -20,7 +20,7 @@ You **don't** want IL when:
 - The task is faster than the human can demonstrate.
 - The task requires sub-millimetre precision the human can't repeat.
 - The human doesn't know the right strategy (use RL instead — see
-  [06-d](06-d-reinforcement-learning.md)).
+  [step 4](04-reinforcement-learning.md)).
 
 ## Frameworks / libraries / methods
 
@@ -61,7 +61,7 @@ backbone.
 
 The library that ties everything together: dataset format, policy
 implementations, training scripts, and drivers for cheap arms. See
-[06-g](06-g-datasets-and-pretraining.md) for the dataset side.
+[step 7](07-datasets-and-pretraining.md) for the dataset side.
 
 ## Data you need
 
@@ -69,7 +69,7 @@ implementations, training scripts, and drivers for cheap arms. See
   floor.
 - **A few thousand demos** for robust multi-task.
 - **Tens of millions of trajectories** for foundation-scale VLAs (see
-  [06-e](06-e-vision-language-action.md)).
+  [step 5](05-vision-language-action.md)).
 
 ## How to collect demos — teleop hardware
 
@@ -87,7 +87,7 @@ The data pipeline is half hardware. The common rigs:
 | **Replay from rosbag** | Re-record an already-working scripted controller | Free | Bootstrapping. |
 
 The Layer-4 workflow for actually doing this is in
-[`../04-integration-and-bring-up/04-a-pick-teleop-hardware.md`](../04-integration-and-bring-up/04-a-pick-teleop-hardware.md)
+[`../../04-integration-and-bring-up/04-imitation-learning-workflow/01-pick-teleop-hardware.md`](../../04-integration-and-bring-up/04-imitation-learning-workflow/01-pick-teleop-hardware.md)
 through `04-f`.
 
 ## How to pick (the policy)
@@ -133,6 +133,6 @@ through `04-f`.
 
 When the human can't demo the task, the robot has to learn it itself.
 
-→ Next: [06-d-reinforcement-learning.md](06-d-reinforcement-learning.md)
+→ Next: [04-reinforcement-learning.md](04-reinforcement-learning.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

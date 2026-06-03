@@ -16,69 +16,71 @@ unattended for a week and we trust it."
 ## How this layer is organised
 
 Some chapters in this layer are single files — they're checklists or
-short recipes. Others have **many steps** and split into
-sub-files: `01-a`, `01-b`, etc. The letter suffix means "this is one
-step inside a longer workflow."
+short recipes. Others have **many steps**, and each multi-step
+workflow lives in **its own folder**. The folder name tells you what
+the steps are about; the numbered files inside are the steps in
+order.
 
-The four big multi-step workflows are:
+The three multi-step workflow folders are:
 
-1. **`01-*` — Simulation-first development.** You pick an arm and a
-   simulator. Before you touch real hardware, you make the *virtual*
-   version of the cell run end-to-end. Six steps: install the sim,
-   build the virtual cell, bring up MoveIt, write a scripted task,
-   fake the perception, stress-test.
-2. **`02-*` — From simulation to real.** Five steps for crossing the
-   sim-to-real gap without breaking anything: shared URDF + frames,
-   `ros2_control` driver swap, hand-eye calibration, shadow mode +
-   slow speeds, phased rollout.
-3. **`04-*` — Imitation learning workflow.** Six steps for collecting
-   teleop demos and training a policy from them: pick teleop
-   hardware, install + calibrate leader-follower, record demos,
-   curate, fine-tune, evaluate.
-4. **`05`–`10`** — Single-file chapters covering bring-up checklists,
-   pilot deployment, acceptance tests, safety validation, operator
-   runbooks, and Day-2 monitoring.
+1. **[`01-simulation-first-development/`](01-simulation-first-development/README.md)** —
+   You pick an arm and a simulator. Before you touch real hardware,
+   you make the *virtual* version of the cell run end-to-end. Six
+   steps: install the sim, build the virtual cell, bring up MoveIt,
+   write a scripted task, fake the perception, stress-test.
+2. **[`02-sim-to-real-bridge/`](02-sim-to-real-bridge/README.md)** —
+   Five steps for crossing the sim-to-real gap without breaking
+   anything: shared URDF + frames, `ros2_control` driver swap,
+   hand-eye calibration, shadow mode + slow speeds, phased rollout.
+3. **[`04-imitation-learning-workflow/`](04-imitation-learning-workflow/README.md)** —
+   Six steps for collecting teleop demos and training a policy from
+   them: pick teleop hardware, install + calibrate leader-follower,
+   record demos, curate, fine-tune, evaluate.
+
+Plus single-file chapters at the top level — `03`, `05`–`10` —
+covering on-real integration, the bring-up checklist, pilot
+deployment, acceptance tests, safety validation, operator runbooks,
+and Day-2 monitoring.
 
 ## Read these in order
 
-1. **[01-a-choose-and-install-simulator.md](01-a-choose-and-install-simulator.md)**
-2. **[01-b-build-the-virtual-cell.md](01-b-build-the-virtual-cell.md)**
-3. **[01-c-bring-up-moveit-in-sim.md](01-c-bring-up-moveit-in-sim.md)**
-4. **[01-d-scripted-first-task.md](01-d-scripted-first-task.md)**
-5. **[01-e-fake-perception-in-sim.md](01-e-fake-perception-in-sim.md)**
-6. **[01-f-stress-test-in-sim.md](01-f-stress-test-in-sim.md)**
-7. **[02-a-shared-urdf-and-frames.md](02-a-shared-urdf-and-frames.md)**
-8. **[02-b-ros2-control-driver-swap.md](02-b-ros2-control-driver-swap.md)**
-9. **[02-c-hand-eye-and-base-calibration.md](02-c-hand-eye-and-base-calibration.md)**
-10. **[02-d-shadow-mode-and-slow-speeds.md](02-d-shadow-mode-and-slow-speeds.md)**
-11. **[02-e-phased-rollout.md](02-e-phased-rollout.md)**
-12. **[03-system-integration-on-real.md](03-system-integration-on-real.md)**
-13. **[04-a-pick-teleop-hardware.md](04-a-pick-teleop-hardware.md)**
-14. **[04-b-install-and-calibrate-leader-follower.md](04-b-install-and-calibrate-leader-follower.md)**
-15. **[04-c-record-demos.md](04-c-record-demos.md)**
-16. **[04-d-curate-and-clean-dataset.md](04-d-curate-and-clean-dataset.md)**
-17. **[04-e-pick-and-fine-tune-policy.md](04-e-pick-and-fine-tune-policy.md)**
-18. **[04-f-evaluate-and-iterate.md](04-f-evaluate-and-iterate.md)**
-19. **[05-bring-up-checklist.md](05-bring-up-checklist.md)**
-20. **[06-pilot-deployment.md](06-pilot-deployment.md)**
-21. **[07-acceptance-tests.md](07-acceptance-tests.md)**
-22. **[08-safety-validation.md](08-safety-validation.md)**
-23. **[09-runbooks-and-operator-training.md](09-runbooks-and-operator-training.md)**
-24. **[10-monitoring-and-incident-response.md](10-monitoring-and-incident-response.md)**
+Each folder has its own README that lists the steps inside; the
+short version is below.
+
+1. **[`01-simulation-first-development/`](01-simulation-first-development/README.md)** —
+   six steps (`01`–`06`) inside.
+2. **[`02-sim-to-real-bridge/`](02-sim-to-real-bridge/README.md)** —
+   five steps (`01`–`05`) inside.
+3. **[03-system-integration-on-real.md](03-system-integration-on-real.md)**
+4. **[`04-imitation-learning-workflow/`](04-imitation-learning-workflow/README.md)** —
+   six steps (`01`–`06`) inside (optional — only if you need a
+   learned policy).
+5. **[05-bring-up-checklist.md](05-bring-up-checklist.md)**
+6. **[06-pilot-deployment.md](06-pilot-deployment.md)**
+7. **[07-acceptance-tests.md](07-acceptance-tests.md)**
+8. **[08-safety-validation.md](08-safety-validation.md)**
+9. **[09-runbooks-and-operator-training.md](09-runbooks-and-operator-training.md)**
+10. **[10-monitoring-and-incident-response.md](10-monitoring-and-incident-response.md)**
 
 ## When to skip ahead
 
 The reading order above is the "starting from scratch" order. If you're
 already partway through, jump in where you are:
 
-- **No simulation yet?** → Start at `01-a`.
-- **Sim works, never touched real?** → Start at `02-a`.
+- **No simulation yet?** → Start in
+  [`01-simulation-first-development/`](01-simulation-first-development/README.md).
+- **Sim works, never touched real?** → Start in
+  [`02-sim-to-real-bridge/`](02-sim-to-real-bridge/README.md).
 - **Real hardware boots but you've never run a task?** → Start at
-  `03`.
-- **You don't need a learned policy?** → Skip the `04-*` chapter.
+  [`03-system-integration-on-real.md`](03-system-integration-on-real.md).
+- **You don't need a learned policy?** → Skip the
+  [`04-imitation-learning-workflow/`](04-imitation-learning-workflow/README.md)
+  folder.
 - **You need a learned policy and don't know where to start?** → Read
-  `04-a` after you've finished `02-*`.
-- **Production cell, ramping up?** → Start at `05` and read through `10`.
+  [`04-imitation-learning-workflow/`](04-imitation-learning-workflow/README.md)
+  after you've finished `02-sim-to-real-bridge/`.
+- **Production cell, ramping up?** → Start at `05` and read through
+  `10`.
 
 ## What you leave this layer with
 

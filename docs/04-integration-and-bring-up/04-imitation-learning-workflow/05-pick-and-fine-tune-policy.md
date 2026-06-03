@@ -13,7 +13,7 @@ lifting.
 ## What you need before this step
 
 - A curated, versioned dataset from
-  [04-d](04-d-curate-and-clean-dataset.md).
+  [step 4](04-curate-and-clean-dataset.md).
 - A training computer with a GPU. A single RTX 4090 (24 GB) handles
   most policies. Bigger models want an A6000 or H100. LeRobot will
   also run small policies on a Jetson Orin.
@@ -156,7 +156,7 @@ Quantisation used:           none / INT8 / INT4
    working first.
 3. **Not validating on a held-out set.** Train-set loss looks great,
    real evaluation fails. Use the eval split from
-   [04-d](04-d-curate-and-clean-dataset.md).
+   [step 4](04-curate-and-clean-dataset.md).
 4. **Wrong inference rate.** Trained at 30 Hz, deploying at 10 Hz —
    the timing of action chunks is wrong. Match training and
    deployment rates.
@@ -170,4 +170,4 @@ Quantisation used:           none / INT8 / INT4
 The policy is trained. Time to find out if it actually works — first
 in sim, then on real.
 
-→ Next: [04-f-evaluate-and-iterate.md](04-f-evaluate-and-iterate.md)
+→ Next: [06-evaluate-and-iterate.md](06-evaluate-and-iterate.md)

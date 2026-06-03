@@ -10,9 +10,9 @@ If sim and real disagree on those, every later step lies to you.
 ## What you need before this step
 
 - A simulation-first cell that works through
-  [01-f](01-f-stress-test-in-sim.md).
+  [step 6 of 01-simulation-first-development](../01-simulation-first-development/06-stress-test-in-sim.md).
 - The vendor's URDF (or your custom one) — the same one
-  [01-b](01-b-build-the-virtual-cell.md) loaded.
+  [step 2 of 01-simulation-first-development](../01-simulation-first-development/02-build-the-virtual-cell.md) loaded.
 - A clear idea of what your **real** mounting setup looks like.
 
 ## The contract: what must match
@@ -72,7 +72,7 @@ the URDF:
 
 | What changes | Where it goes |
 |--------------|---------------|
-| Which `ros2_control` plugin runs | A `<sim>` vs `<real>` controller config (see [02-b](02-b-ros2-control-driver-swap.md)). |
+| Which `ros2_control` plugin runs | A `<sim>` vs `<real>` controller config (see [step 2](02-ros2-control-driver-swap.md)). |
 | Calibration offsets (camera to arm) | A YAML loaded at runtime, not the URDF. |
 | Joint home offsets (zero positions) | Vendor driver parameter, not URDF. |
 | Speed / acceleration limits for safety | Controller config, not URDF kinematics. |
@@ -157,4 +157,4 @@ TF tree intact:              yes / no
 URDF and frames are unified. Now you swap the **hardware driver**
 underneath that URDF — from the sim plugin to the real arm's driver.
 
-→ Next: [02-b-ros2-control-driver-swap.md](02-b-ros2-control-driver-swap.md)
+→ Next: [02-ros2-control-driver-swap.md](02-ros2-control-driver-swap.md)

@@ -10,7 +10,7 @@ different class of failure.
 ## What you need before this step
 
 - A cell that passes the slow/normal-speed bring-up in
-  [02-d](02-d-shadow-mode-and-slow-speeds.md).
+  [step 4](04-shadow-mode-and-slow-speeds.md).
 - A clear definition of **"success"** for one pick. This usually
   comes from your Layer-1 task spec, but if it didn't, write it now:
   - The object ended in the correct location, oriented correctly,
@@ -142,4 +142,4 @@ There's one more piece of "real world" stuff you must handle once,
 on real hardware only: the physical bring-up — wiring, power, the
 literal first-boot of the cell.
 
-→ Next: [03-system-integration-on-real.md](03-system-integration-on-real.md)
+→ Next: [03-system-integration-on-real.md](../03-system-integration-on-real.md)

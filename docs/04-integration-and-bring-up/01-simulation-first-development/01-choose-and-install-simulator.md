@@ -6,7 +6,7 @@ run everything against it. This file is about *picking* the simulator
 and confirming it launches — not about how to install each one (every
 tool has its own install guide, and they change).
 
-Layer 3's [`07-simulation.md`](../03-software-stack/07-simulation.md)
+Layer 3's [`07-simulation.md`](../../03-software-stack/07-simulation.md)
 compared the simulator products in depth. Re-skim it if you haven't
 chosen yet. This file picks up from "you've chosen one" and goes to
 "it's running on your machine."
@@ -100,7 +100,7 @@ them.
 Start with **Gazebo (Harmonic if you're on ROS 2 Jazzy, Fortress if
 you're on Humble).** It's free, ROS 2-native, and almost every
 tutorial assumes it. You can always switch later — the URDF you build
-in [01-b](01-b-build-the-virtual-cell.md) is portable.
+in [step 2](02-build-the-virtual-cell.md) is portable.
 
 ## How to confirm it's actually working
 
@@ -153,4 +153,4 @@ Visualiser can connect?: yes / no
 The simulator runs. Now you put the *actual arm* and the *actual
 scene* inside it.
 
-→ Next: [01-b-build-the-virtual-cell.md](01-b-build-the-virtual-cell.md)
+→ Next: [02-build-the-virtual-cell.md](02-build-the-virtual-cell.md)

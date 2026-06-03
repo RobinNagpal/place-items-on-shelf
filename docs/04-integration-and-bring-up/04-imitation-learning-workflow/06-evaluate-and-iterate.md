@@ -10,11 +10,11 @@ record more demos for exactly that, retrain, repeat.
 
 ## What you need before this step
 
-- A trained policy from [04-e](04-e-pick-and-fine-tune-policy.md).
-- The sim cell from [01-f](01-f-stress-test-in-sim.md) still
+- A trained policy from [step 5](05-pick-and-fine-tune-policy.md).
+- The sim cell from [step 6 of 01-simulation-first-development](../01-simulation-first-development/06-stress-test-in-sim.md) still
   available.
 - The real cell from [03](03-system-integration-on-real.md) ready.
-- The eval split from [04-d](04-d-curate-and-clean-dataset.md).
+- The eval split from [step 4](04-curate-and-clean-dataset.md).
 
 ## Step 1 — sim evaluation
 
@@ -28,7 +28,7 @@ How:
   - Subscribes to camera + joint-state topics.
   - Feeds them into the policy.
   - Publishes the policy's action as a trajectory command.
-- Use the sim harness from [01-f](01-f-stress-test-in-sim.md) for
+- Use the sim harness from [step 6 of 01-simulation-first-development](../01-simulation-first-development/06-stress-test-in-sim.md) for
   the experimental scaffolding.
 
 Run **100 episodes** in sim with varied object positions. Compute:
@@ -44,8 +44,8 @@ training, or the action / observation shape. Don't go to real yet.
 ## Step 2 — real evaluation (slow, supervised)
 
 In real, repeat exactly what the bring-up protocol from
-[02-d](02-d-shadow-mode-and-slow-speeds.md) and
-[02-e](02-e-phased-rollout.md) demanded for scripted code:
+[step 4 of 02-sim-to-real-bridge](../02-sim-to-real-bridge/04-shadow-mode-and-slow-speeds.md) and
+[step 5 of 02-sim-to-real-bridge](../02-sim-to-real-bridge/05-phased-rollout.md) demanded for scripted code:
 
 - Start at **25% speed scaling**.
 - Operator hand on e-stop.
@@ -110,7 +110,7 @@ Know when to stop and try something else:
 ## When the policy is good enough
 
 You're ready to move to operational phases (
-[02-e — phased rollout](02-e-phased-rollout.md) and
+[02-e — phased rollout](../02-sim-to-real-bridge/05-phased-rollout.md) and
 [06](06-pilot-deployment.md)) when:
 
 - Sim success ≥ 95%.
@@ -172,4 +172,4 @@ Ready for phased rollout?:    yes / no — gating issue: ___
 The policy is good enough. You're back on the main bring-up track.
 Run through the checklist before letting the cell go to pilot.
 
-→ Next: [05-bring-up-checklist.md](05-bring-up-checklist.md)
+→ Next: [05-bring-up-checklist.md](../05-bring-up-checklist.md)

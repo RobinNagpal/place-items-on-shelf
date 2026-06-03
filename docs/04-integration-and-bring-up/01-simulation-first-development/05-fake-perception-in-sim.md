@@ -24,7 +24,7 @@ swap in real perception later, only the perception node changes.
 ## What you need before this step
 
 - A working scripted task from
-  [01-d](01-d-scripted-first-task.md).
+  [step 4](04-scripted-first-task.md).
 - A clear decision on the **shape** of the perception output —
   usually one of:
   - **A single pose** message.
@@ -72,7 +72,7 @@ for stress testing.
 
 ## Swap the task code to consume perception
 
-In [01-d](01-d-scripted-first-task.md) you hard-coded the grasp
+In [step 4](04-scripted-first-task.md) you hard-coded the grasp
 pose. Now:
 
 1. Subscribe to your perception channel in the task node.
@@ -128,4 +128,4 @@ Timeout on missing perception:  ___ s
 The task picks from a moving object, with noisy perception, in sim.
 Now you **stress-test** the whole thing.
 
-→ Next: [01-f-stress-test-in-sim.md](01-f-stress-test-in-sim.md)
+→ Next: [06-stress-test-in-sim.md](06-stress-test-in-sim.md)

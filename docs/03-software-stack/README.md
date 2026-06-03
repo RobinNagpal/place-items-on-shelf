@@ -36,26 +36,27 @@ per piece**, in the order you'd usually decide them.
 5. **[05-perception-software.md](05-perception-software.md)** — OpenCV,
    PCL, depth pipelines, pose estimation. Turning camera pixels into
    "there's a cylinder at (x, y, z)."
-6. **[06-ai-and-foundation-models.md](06-ai-and-foundation-models.md)** —
+6. **[06-ai-and-foundation-models/](06-ai-and-foundation-models/README.md)** —
    The AI layer overview: when you actually need a foundation model,
    the scripted vs. imitation-learning vs. RL split, and the output
-   AI-plan template. Detail lives in eight sub-files, one per
-   technique, each listing use cases and frameworks:
-   - **[06-a](06-a-open-vocab-perception.md)** Open-vocab perception
+   AI-plan template. Detail lives in **eight sub-files in the
+   folder**, one per technique, each listing use cases and
+   frameworks:
+   - **[01](06-ai-and-foundation-models/01-open-vocab-perception.md)** Open-vocab perception
      (CLIP, SAM, Grounding DINO, OWL-ViT).
-   - **[06-b](06-b-neural-grasp-generation.md)** Neural grasp
+   - **[02](06-ai-and-foundation-models/02-neural-grasp-generation.md)** Neural grasp
      generation (GraspNet, ContactGraspNet, AnyGrasp).
-   - **[06-c](06-c-imitation-learning.md)** Imitation learning
+   - **[03](06-ai-and-foundation-models/03-imitation-learning.md)** Imitation learning
      (BC, ACT, Diffusion Policy) + teleop rigs (ALOHA, GELLO, SO-100).
-   - **[06-d](06-d-reinforcement-learning.md)** Reinforcement learning
+   - **[04](06-ai-and-foundation-models/04-reinforcement-learning.md)** Reinforcement learning
      (PPO, SAC, Isaac Lab, MuJoCo MJX) + sim-to-real bridge.
-   - **[06-e](06-e-vision-language-action.md)** Vision-Language-Action
+   - **[05](06-ai-and-foundation-models/05-vision-language-action.md)** Vision-Language-Action
      models (RT-1/2, OpenVLA, Pi-0, GR00T, Octo).
-   - **[06-f](06-f-llms-in-the-loop.md)** LLMs in the loop
+   - **[06](06-ai-and-foundation-models/06-llms-in-the-loop.md)** LLMs in the loop
      (Code-as-Policies, SayCan, Function Calling).
-   - **[06-g](06-g-datasets-and-pretraining.md)** Datasets and
+   - **[07](06-ai-and-foundation-models/07-datasets-and-pretraining.md)** Datasets and
      pretraining (LeRobot, Open X-Embodiment, DROID, BridgeData V2).
-   - **[06-h](06-h-where-models-run.md)** Where the models run
+   - **[08](06-ai-and-foundation-models/08-where-models-run.md)** Where the models run
      (Jetson Orin vs desktop GPU vs cloud, quantisation, edge/cloud
      split).
 7. **[07-simulation.md](07-simulation.md)** — Gazebo, Isaac Sim, MuJoCo,

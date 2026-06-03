@@ -72,7 +72,7 @@ dataset and policy ecosystem (HuggingFace). They're cheap, leader–follower
 kits are common, and most ship with a sample dataset and a fine-tunable
 policy out of the box. If you plan to collect teleop demos and train an
 imitation-learning policy (see
-[`../03-software-stack/06-ai-and-foundation-models.md`](../03-software-stack/06-ai-and-foundation-models.md)),
+[`../03-software-stack/06-ai-and-foundation-models/README.md`](../03-software-stack/06-ai-and-foundation-models/README.md)),
 start here.
 
 | Arm | DOF | Notes |

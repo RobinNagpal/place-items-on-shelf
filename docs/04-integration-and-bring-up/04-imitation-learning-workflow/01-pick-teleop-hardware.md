@@ -165,4 +165,4 @@ You have the hardware. Time to plug it in and confirm the leader
 moves the follower (or the VR controller moves the arm), reliably,
 with synchronised cameras.
 
-→ Next: [04-b-install-and-calibrate-leader-follower.md](04-b-install-and-calibrate-leader-follower.md)
+→ Next: [02-install-and-calibrate-leader-follower.md](02-install-and-calibrate-leader-follower.md)

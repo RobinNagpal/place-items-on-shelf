@@ -11,7 +11,7 @@ discipline that fixes that.
 ## What you need before this step
 
 - A calibrated leader-follower rig from
-  [04-b](04-b-install-and-calibrate-leader-follower.md).
+  [step 2](02-install-and-calibrate-leader-follower.md).
 - A working LeRobot or ALOHA recording setup.
 - The objects you want to manipulate, on the table.
 - A clear, written **task definition** — one sentence, e.g. "Pick the
@@ -32,7 +32,7 @@ Rough numbers, from real projects in 2024–2026:
 | **Multiple objects, varied scene** | 300–800 | Different objects each demo. |
 | **Multi-step, language-conditioned** | 1,000+ | And usually a foundation-model fine-tune. |
 
-These are **after curation** ([04-d](04-d-curate-and-clean-dataset.md));
+These are **after curation** ([step 4](04-curate-and-clean-dataset.md));
 expect to record 20–30% more than your target and throw away the
 bad takes.
 
@@ -156,7 +156,7 @@ Watch your **failure-mode distribution** during recording:
 - Even success across all variations → you're done with this round.
 
 You'll record another round after the first training pass anyway
-(see [04-f](04-f-evaluate-and-iterate.md)). Don't aim for perfection
+(see [step 6](06-evaluate-and-iterate.md)). Don't aim for perfection
 in round one.
 
 ## Output of this step
@@ -195,4 +195,4 @@ Date(s) recorded:                ___
 You have a dataset. Half of it is gold; the other 20–30% is junk.
 Time to clean it.
 
-→ Next: [04-d-curate-and-clean-dataset.md](04-d-curate-and-clean-dataset.md)
+→ Next: [04-curate-and-clean-dataset.md](04-curate-and-clean-dataset.md)

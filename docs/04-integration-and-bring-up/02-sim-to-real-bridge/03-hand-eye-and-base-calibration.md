@@ -12,7 +12,7 @@ real-world step in this layer.
 ## What you need before this step
 
 - Real arm running through `ros2_control` from
-  [02-b](02-b-ros2-control-driver-swap.md).
+  [step 2](02-ros2-control-driver-swap.md).
 - Real camera connected, calibrated for intrinsics (lens parameters),
   and publishing `/image` + `/camera_info`.
 - A printed **ArUco** or **ChArUco** calibration board. A4-size with
@@ -137,7 +137,7 @@ Three quick tests:
 2. **Touch test.** Place a small object at a known location; ask the
    robot to move `tool0` to that location. The gripper tip should hit
    the object dead-on.
-3. **Pick a fixed object.** Run the [01-d](01-d-scripted-first-task.md)
+3. **Pick a fixed object.** Run the [step 4 of 01-simulation-first-development](../01-simulation-first-development/04-scripted-first-task.md)
    task with the *real* perception pose. The grasp should land.
 
 If (2) or (3) is off by more than 5 mm, redo the calibration. Don't
@@ -190,4 +190,4 @@ Touch test passes (≤ 2 mm):      yes / no
 Calibration is in. Now you let your task code drive the real arm,
 but **carefully** — read-only first, then slow speeds.
 
-→ Next: [02-d-shadow-mode-and-slow-speeds.md](02-d-shadow-mode-and-slow-speeds.md)
+→ Next: [04-shadow-mode-and-slow-speeds.md](04-shadow-mode-and-slow-speeds.md)

@@ -12,9 +12,9 @@ small until one of them isn't done.
 - Real hardware brought up through
   [03](03-system-integration-on-real.md).
 - Calibration done through
-  [02-c](02-c-hand-eye-and-base-calibration.md).
+  [02-sim-to-real-bridge/03](02-sim-to-real-bridge/03-hand-eye-and-base-calibration.md).
 - The slow-speed pick from
-  [02-d](02-d-shadow-mode-and-slow-speeds.md) working.
+  [02-sim-to-real-bridge/04](02-sim-to-real-bridge/04-shadow-mode-and-slow-speeds.md) working.
 - A camera, a notebook, and a pen.
 
 ## The checklist
@@ -81,7 +81,7 @@ small until one of them isn't done.
 - [ ] Each named pose verified visually — arm is where the URDF says
       it is.
 - [ ] Slow-speed scripted pick from
-      [01-d](01-d-scripted-first-task.md) runs 5 times in a row
+      [01-simulation-first-development/04](01-simulation-first-development/04-scripted-first-task.md) runs 5 times in a row
       with no surprises.
 
 ### Calibration verification (re-check)
@@ -89,7 +89,7 @@ small until one of them isn't done.
 - [ ] Touch test: arm moves to a known-position object; gripper tip
       lands within 2 mm.
 - [ ] Hand-eye reprojection error logged. Within
-      [02-c](02-c-hand-eye-and-base-calibration.md) bar.
+      [02-sim-to-real-bridge/03](02-sim-to-real-bridge/03-hand-eye-and-base-calibration.md) bar.
 - [ ] Date and operator stamped on the calibration YAML.
 
 ### Operator handover

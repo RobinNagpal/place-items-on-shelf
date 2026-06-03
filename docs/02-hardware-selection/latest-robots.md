@@ -149,7 +149,7 @@ on a low-cost hobby arm (myCobot 280 Pi). For that profile:
 Layer 03 ([software stack](../03-software-stack/README.md)) takes the
 table from Layer 02 plus this snapshot as inputs to "build vs. buy"
 for the perception and manipulation stack — see in particular
-[`../03-software-stack/06-ai-and-foundation-models.md`](../03-software-stack/06-ai-and-foundation-models.md).
+[`../03-software-stack/06-ai-and-foundation-models/README.md`](../03-software-stack/06-ai-and-foundation-models/README.md).
 
 ## How to keep this file fresh
 

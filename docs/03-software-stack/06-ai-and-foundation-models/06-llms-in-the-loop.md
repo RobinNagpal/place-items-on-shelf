@@ -117,6 +117,6 @@ scripted skill library).
 Every model so far depends on a dataset and a pretrained checkpoint.
 Where do those come from?
 
-→ Next: [06-g-datasets-and-pretraining.md](06-g-datasets-and-pretraining.md)
+→ Next: [07-datasets-and-pretraining.md](07-datasets-and-pretraining.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

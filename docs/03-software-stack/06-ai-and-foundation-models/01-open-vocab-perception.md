@@ -95,6 +95,6 @@ and phrase grounding in one model.
 
 Once you've located the object, you need to grasp it.
 
-→ Next: [06-b-neural-grasp-generation.md](06-b-neural-grasp-generation.md)
+→ Next: [02-neural-grasp-generation.md](02-neural-grasp-generation.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

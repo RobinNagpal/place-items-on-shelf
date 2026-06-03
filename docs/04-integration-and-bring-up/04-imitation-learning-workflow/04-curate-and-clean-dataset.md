@@ -9,7 +9,7 @@ the hour.
 
 ## What you need before this step
 
-- A recorded dataset from [04-c](04-c-record-demos.md).
+- A recorded dataset from [step 3](03-record-demos.md).
 - A way to play back episodes (LeRobot has
   `lerobot.scripts.visualize_dataset`; ALOHA has a similar tool).
 - A spreadsheet or note file for tagging.
@@ -83,7 +83,7 @@ controlled with the project (not the dataset).
 
 ## Re-label for failure cases (later passes)
 
-After the first training round ([04-f](04-f-evaluate-and-iterate.md)),
+After the first training round ([step 6](06-evaluate-and-iterate.md)),
 you'll discover specific failure modes. Re-label some held-out
 episodes as **targeted regression cases** for those failures, and
 record new training demos that cover them.
@@ -164,4 +164,4 @@ Date frozen:                     ___
 You have a clean, versioned dataset. Time to pick a policy
 architecture and fine-tune.
 
-→ Next: [04-e-pick-and-fine-tune-policy.md](04-e-pick-and-fine-tune-policy.md)
+→ Next: [05-pick-and-fine-tune-policy.md](05-pick-and-fine-tune-policy.md)

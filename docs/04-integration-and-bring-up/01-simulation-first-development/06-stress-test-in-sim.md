@@ -10,7 +10,7 @@ before real hardware finds them for you. Real hardware finds them at
 ## What you need before this step
 
 - The full simulation-first workflow working through
-  [01-e](01-e-fake-perception-in-sim.md):
+  [step 5](05-fake-perception-in-sim.md):
   task code consuming (noisy, possibly dropped) perception, executing
   a pick-and-place against a virtual cell.
 - A way to run the task **many times in a row** without manual reset.
@@ -33,7 +33,7 @@ moving on.
 
 ### 2. Perception noise
 
-Crank up the noise added by your fake node from [01-e](01-e-fake-perception-in-sim.md):
+Crank up the noise added by your fake node from [step 5](05-fake-perception-in-sim.md):
 
 - Translation noise: 5 → 10 → 20 → 50 mm.
 - Rotation noise: 5° → 15° → 45°.
@@ -152,4 +152,4 @@ Acceptance bar met?:             yes / no
 The sim version of your cell works reliably. Time to plug the *real*
 arm in.
 
-→ Next: [02-a-shared-urdf-and-frames.md](02-a-shared-urdf-and-frames.md)
+→ Next: [02-sim-to-real-bridge/01-shared-urdf-and-frames.md](../02-sim-to-real-bridge/01-shared-urdf-and-frames.md)

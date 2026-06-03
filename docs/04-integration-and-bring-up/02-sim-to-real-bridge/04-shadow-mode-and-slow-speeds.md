@@ -12,12 +12,12 @@ This file is the protocol for the first day or two on real hardware.
 ## What you need before this step
 
 - Real arm running through `ros2_control` from
-  [02-b](02-b-ros2-control-driver-swap.md).
+  [step 2](02-ros2-control-driver-swap.md).
 - Camera + hand-eye calibration done in
-  [02-c](02-c-hand-eye-and-base-calibration.md).
+  [step 3](03-hand-eye-and-base-calibration.md).
 - Your sim-validated task code from
-  [01-d](01-d-scripted-first-task.md) /
-  [01-e](01-e-fake-perception-in-sim.md), ready to point at real.
+  [step 4 of 01-simulation-first-development](../01-simulation-first-development/04-scripted-first-task.md) /
+  [step 5 of 01-simulation-first-development](../01-simulation-first-development/05-fake-perception-in-sim.md), ready to point at real.
 - **A hand on the e-stop.** Always. Until the cell is signed off.
 
 ## The three phases
@@ -64,7 +64,7 @@ You're confident the plans are sane. Time to actually execute.
 Turn velocity scaling down:
 
 - **`speed_scaling: 0.25`** in `controllers_real.yaml` from
-  [02-b](02-b-ros2-control-driver-swap.md).
+  [step 2](02-ros2-control-driver-swap.md).
 - Or use `MoveItCpp::set_max_velocity_scaling_factor(0.25)` /
   `arm.set_max_velocity_scaling_factor(0.25)` in `moveit_py`.
 - **Acceleration scaling** to 0.25 as well.
@@ -81,7 +81,7 @@ What you watch for:
   too early on the way down. Adjust the `gripper_close` delay.
 - **Pose offset** — the gripper tip lands 8 mm to the left of the
   object. Your hand-eye calibration is off. Go back to
-  [02-c](02-c-hand-eye-and-base-calibration.md).
+  [step 3](03-hand-eye-and-base-calibration.md).
 
 Run **20 slow-speed pick attempts** with the object in different
 positions. Compute success rate.
@@ -168,4 +168,4 @@ Operator training done?:          yes (who: ___ ) / no
 The cell runs reliably at normal speed under supervision. Time to
 ramp toward unattended operation — the **phased rollout** plan.
 
-→ Next: [02-e-phased-rollout.md](02-e-phased-rollout.md)
+→ Next: [05-phased-rollout.md](05-phased-rollout.md)

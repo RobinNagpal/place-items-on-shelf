@@ -11,7 +11,7 @@ the policy you might train.
 ## What you need before this step
 
 - A working simulator from
-  [01-a](01-a-choose-and-install-simulator.md).
+  [step 1](01-choose-and-install-simulator.md).
 - A description of your arm in a format the simulator can read —
   usually **URDF** (ROS 2 ecosystem), **MJCF** (MuJoCo), or **USD**
   (Isaac Sim). Most arm vendors ship at least a URDF.
@@ -98,7 +98,7 @@ Don't get sucked into making the scene pretty.
 - **xacro** (ROS 2) — parameterises the URDF; one file, many gripper
   variants.
 - **MoveIt Setup Assistant** — generates the SRDF you'll need in
-  [01-c](01-c-bring-up-moveit-in-sim.md), if you're using MoveIt.
+  [step 3](03-bring-up-moveit-in-sim.md), if you're using MoveIt.
 - **Blender → mesh export** — for custom object meshes; export to
   Collada (`.dae`) or USD.
 
@@ -137,4 +137,4 @@ Simulator version pinned: ___
 The cell exists in sim. Now you give the arm a *brain* — a motion
 planner.
 
-→ Next: [01-c-bring-up-moveit-in-sim.md](01-c-bring-up-moveit-in-sim.md)
+→ Next: [03-bring-up-moveit-in-sim.md](03-bring-up-moveit-in-sim.md)

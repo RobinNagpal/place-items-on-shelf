@@ -48,29 +48,29 @@ contact-rich bits.
 Each sub-file lists the **common use cases** and the
 **frameworks / libraries / methods** you'd actually reach for.
 
-1. **[06-a-open-vocab-perception.md](06-a-open-vocab-perception.md)** —
+1. **[01-open-vocab-perception.md](01-open-vocab-perception.md)** —
    CLIP, SAM, Grounding DINO, OWL-ViT. The "vision" half of any LLM-
    or VLA-driven robot.
-2. **[06-b-neural-grasp-generation.md](06-b-neural-grasp-generation.md)** —
+2. **[02-neural-grasp-generation.md](02-neural-grasp-generation.md)** —
    GraspNet, ContactGraspNet, AnyGrasp. Given a novel object, where
    does the gripper go?
-3. **[06-c-imitation-learning.md](06-c-imitation-learning.md)** —
+3. **[03-imitation-learning.md](03-imitation-learning.md)** —
    Behaviour cloning, ACT, Diffusion Policy, VQ-BeT. Plus the
    teleoperation rigs (ALOHA, GELLO, SO-100) you'll use to record
    demos.
-4. **[06-d-reinforcement-learning.md](06-d-reinforcement-learning.md)** —
+4. **[04-reinforcement-learning.md](04-reinforcement-learning.md)** —
    PPO, SAC. Isaac Lab and MuJoCo MJX for parallel sim. Sim-to-real
    bridge with domain randomisation.
-5. **[06-e-vision-language-action.md](06-e-vision-language-action.md)** —
+5. **[05-vision-language-action.md](05-vision-language-action.md)** —
    RT-1, RT-2, OpenVLA, Pi-0, GR00T, Octo. End-to-end policies that
    eat vision + text and emit motor commands.
-6. **[06-f-llms-in-the-loop.md](06-f-llms-in-the-loop.md)** —
+6. **[06-llms-in-the-loop.md](06-llms-in-the-loop.md)** —
    GPT-4o / Claude / Gemini as task planner. Code-as-Policies,
    SayCan, Inner Monologue patterns.
-7. **[06-g-datasets-and-pretraining.md](06-g-datasets-and-pretraining.md)** —
+7. **[07-datasets-and-pretraining.md](07-datasets-and-pretraining.md)** —
    LeRobot, Open X-Embodiment, DROID, BridgeData V2. Where pretrained
    checkpoints come from and how you fine-tune on your task.
-8. **[06-h-where-models-run.md](06-h-where-models-run.md)** —
+8. **[08-where-models-run.md](08-where-models-run.md)** —
    Jetson Orin vs desktop GPU vs cloud. Quantisation. Edge / cloud
    split for VLAs.
 
@@ -78,26 +78,26 @@ Each sub-file lists the **common use cases** and the
 
 1. **Tight loop, fixed object set?** → Skip this layer. Scripted is
    fine. Go back to
-   [`05-perception-software.md`](05-perception-software.md).
+   [`../05-perception-software.md`](../05-perception-software.md).
 2. **Need to generalise to unseen objects?** → Start with
-   [open-vocab perception](06-a-open-vocab-perception.md). Skip VLAs
+   [open-vocab perception](01-open-vocab-perception.md). Skip VLAs
    until you've exhausted classical methods.
 3. **Long-horizon natural-language tasks?** →
-   [LLM-as-planner](06-f-llms-in-the-loop.md) + a library of robust
+   [LLM-as-planner](06-llms-in-the-loop.md) + a library of robust
    skills.
 4. **Want to learn a new skill from human demos?** →
-   [Imitation learning](06-c-imitation-learning.md): LeRobot + ACT or
+   [Imitation learning](03-imitation-learning.md): LeRobot + ACT or
    Diffusion Policy.
 5. **Task is too hard to demonstrate (precise, fast, dynamic)?** →
-   [Reinforcement learning](06-d-reinforcement-learning.md) in Isaac
+   [Reinforcement learning](04-reinforcement-learning.md) in Isaac
    Lab or MuJoCo MJX.
 6. **Research, willing to invest in data?** →
-   [Vision-Language-Action](06-e-vision-language-action.md): OpenVLA
+   [Vision-Language-Action](05-vision-language-action.md): OpenVLA
    or Pi-0 + your own teleoperation dataset.
 7. **"AI-included" platform with budget?** → Pi-0.x via Physical
    Intelligence partnerships, or one of the bundled industrial
    solutions in
-   [`../02-hardware-selection/latest-robots.md`](../02-hardware-selection/latest-robots.md).
+   [`../../02-hardware-selection/latest-robots.md`](../../02-hardware-selection/latest-robots.md).
 
 ## Output of this layer — your AI plan
 
@@ -147,4 +147,4 @@ Fallback when AI fails:    classical perception / human intervention / safe stop
 You have a model of *what* the robot will run. Before you run it on
 real hardware, you test it in simulation.
 
-→ Next: [07-simulation.md](07-simulation.md)
+→ Next: [07-simulation.md](../07-simulation.md)

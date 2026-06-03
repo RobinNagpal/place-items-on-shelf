@@ -187,4 +187,4 @@ Classical perception covers most pick-and-place. When you want the
 robot to generalise to unseen objects, or follow natural-language
 instructions, you reach for foundation models.
 
-→ Next: [06-ai-and-foundation-models.md](06-ai-and-foundation-models.md)
+→ Next: [06-ai-and-foundation-models/README.md](06-ai-and-foundation-models/README.md)

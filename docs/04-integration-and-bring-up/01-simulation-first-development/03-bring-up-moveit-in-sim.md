@@ -6,7 +6,7 @@ step gives the arm a **planner** — so you can say "go to this pose"
 and the arm figures out *how*.
 
 For most ROS 2 projects, that planner is **MoveIt 2** (Layer 3
-[`04-motion-planning.md`](../03-software-stack/04-motion-planning.md)).
+[`04-motion-planning.md`](../../03-software-stack/04-motion-planning.md)).
 This file walks you through bringing MoveIt up against the simulator.
 
 If you're **not** on ROS 2, or MoveIt isn't the right fit, see
@@ -16,7 +16,7 @@ still applies, you just swap the planner.
 ## What you need before this step
 
 - Working virtual cell from
-  [01-b](01-b-build-the-virtual-cell.md).
+  [step 2](02-build-the-virtual-cell.md).
 - A motion planner available for your stack (MoveIt 2 on ROS 2
   Jazzy / Humble — or one of the alternatives below).
 
@@ -56,10 +56,10 @@ the package as `<arm>_moveit_config`.
 A typical "sim demo" launch (vendor packages usually ship one) brings
 up, all in one process group:
 
-- The simulator world from [01-b](01-b-build-the-virtual-cell.md).
+- The simulator world from [step 2](02-build-the-virtual-cell.md).
 - A node that turns joint angles into transforms.
 - The simulator's hardware interface (see
-  [02-b](02-b-ros2-control-driver-swap.md) for the swap to real
+  [step 2 of 02-sim-to-real-bridge](../02-sim-to-real-bridge/02-ros2-control-driver-swap.md) for the swap to real
   later).
 - The MoveIt planner.
 - The visualiser (RViz 2) with the MoveIt motion-planning plugin.
@@ -120,7 +120,7 @@ test.
   vendor-native stack.
 - **MoveIt Task Constructor (MTC)** — for multi-stage
   pick-and-place pipelines (see
-  [01-d](01-d-scripted-first-task.md)).
+  [step 4](04-scripted-first-task.md)).
 
 ## Output of this step
 
@@ -158,4 +158,4 @@ You can plan motions one click at a time. Real tasks aren't one
 click; they're a *sequence* (approach, descend, grasp, lift, move,
 release). Time to write that sequence.
 
-→ Next: [01-d-scripted-first-task.md](01-d-scripted-first-task.md)
+→ Next: [04-scripted-first-task.md](04-scripted-first-task.md)

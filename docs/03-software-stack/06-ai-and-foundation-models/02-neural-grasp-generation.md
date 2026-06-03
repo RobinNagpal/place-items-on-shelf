@@ -5,7 +5,7 @@ object. Input: a point cloud (and sometimes RGB), a target region, and
 a gripper model. Output: one or more 6-DOF grasp poses with
 confidence scores.
 
-The detection from [06-a](06-a-open-vocab-perception.md) tells you
+The detection from [step 1](01-open-vocab-perception.md) tells you
 *what* and *where*; grasp generation tells you *how to grab it*.
 
 ## Common use cases
@@ -96,6 +96,6 @@ bundles outperform open models on reliability:
 If demonstrations are available, imitation learning often outperforms
 hand-tuned grasp generation for a specific task.
 
-→ Next: [06-c-imitation-learning.md](06-c-imitation-learning.md)
+→ Next: [03-imitation-learning.md](03-imitation-learning.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

@@ -19,7 +19,7 @@ real-world hours.
 You **don't** want RL when:
 
 - A human can teleop the task in under a minute. Just collect demos.
-  See [06-c](06-c-imitation-learning.md).
+  See [step 3](03-imitation-learning.md).
 - You don't have a sim that matches reality well enough — bad sim,
   bad policy.
 
@@ -76,7 +76,7 @@ hardware. The fix:
   fine-tune the sim-trained policy on it.
 
 Layer 4 walks through this end-to-end: see
-[`../04-integration-and-bring-up/02-a-shared-urdf-and-frames.md`](../04-integration-and-bring-up/02-a-shared-urdf-and-frames.md)
+[`../../04-integration-and-bring-up/02-sim-to-real-bridge/01-shared-urdf-and-frames.md`](../../04-integration-and-bring-up/02-sim-to-real-bridge/01-shared-urdf-and-frames.md)
 through `02-e`.
 
 ## How to pick
@@ -117,6 +117,6 @@ through `02-e`.
 A class of models eats vision + text instructions + state and outputs
 actions directly — the result of training IL + RL at foundation scale.
 
-→ Next: [06-e-vision-language-action.md](06-e-vision-language-action.md)
+→ Next: [05-vision-language-action.md](05-vision-language-action.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

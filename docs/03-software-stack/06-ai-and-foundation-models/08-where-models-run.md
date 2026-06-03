@@ -4,7 +4,7 @@ The practical question: "this model is 13 billion parameters; how do
 I run it on a robot?"
 
 This file is about the **compute placement** of the AI you picked in
-[06-a](06-a-open-vocab-perception.md)..[06-g](06-g-datasets-and-pretraining.md).
+[step 1](01-open-vocab-perception.md)..[step 7](07-datasets-and-pretraining.md).
 Hardware constraints often force the model choice, not the other way
 around.
 
@@ -106,6 +106,6 @@ You've decided what AI runs, what hardware it runs on, and what data
 trained it. Now you test the whole stack in simulation before you
 plug in the real arm.
 
-→ Next: [07-simulation.md](07-simulation.md)
+→ Next: [07-simulation.md](../07-simulation.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

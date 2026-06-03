@@ -15,10 +15,10 @@ You fine-tune (or sometimes zero-shot) on your task.
 - **"Tell the robot what to do"** interfaces — kitchen, household,
   flexible warehousing.
 - **Pretraining base** for your own imitation-learning fine-tunes
-  (see [06-c](06-c-imitation-learning.md)).
+  (see [step 3](03-imitation-learning.md)).
 - **"AI-included" commercial platforms** — the customer pays for the
   policy, not the arm (see
-  [`../02-hardware-selection/latest-robots.md`](../02-hardware-selection/latest-robots.md)).
+  [`../../02-hardware-selection/latest-robots.md`](../../02-hardware-selection/latest-robots.md)).
 - **Long-horizon tasks** where pure perception + planning fall short.
 
 You **don't** want a VLA when:
@@ -65,7 +65,7 @@ Not strictly end-to-end VLAs, but used in the same slot:
 3. **Diffusion-based experimentation?** → RDT.
 4. **Humanoid?** → GR00T (if you can get access).
 5. **You don't actually need a VLA?** → Use an IL policy from
-   [06-c](06-c-imitation-learning.md). Most "AI robot" demos in 2026
+   [step 3](03-imitation-learning.md). Most "AI robot" demos in 2026
    are still just well-tuned ACT or Diffusion Policy.
 
 ## Where it runs
@@ -80,7 +80,7 @@ Not strictly end-to-end VLAs, but used in the same slot:
 For latency-sensitive control, run the VLA at slow cadence (1–5 Hz)
 to emit *high-level intents*, and let a lower-level controller
 (MoveIt, vendor driver) execute at full rate. See
-[06-h](06-h-where-models-run.md).
+[step 8](08-where-models-run.md).
 
 ## Common mistakes
 
@@ -102,6 +102,6 @@ When the high-level policy is just "decide what to do next," a plain
 LLM sometimes does the job better than a VLA — without the training
 budget.
 
-→ Next: [06-f-llms-in-the-loop.md](06-f-llms-in-the-loop.md)
+→ Next: [06-llms-in-the-loop.md](06-llms-in-the-loop.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

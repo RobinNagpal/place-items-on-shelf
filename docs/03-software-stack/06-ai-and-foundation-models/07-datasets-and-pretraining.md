@@ -70,7 +70,7 @@ When real demos are scarce, you grow the dataset in sim:
    (OpenVLA, Pi-0, ACT trained on Open X-Embodiment).
 2. **Collect 50–200 of your own demos** on your robot with LeRobot
    or ALOHA-style teleop. See
-   [06-c-imitation-learning.md](06-c-imitation-learning.md) for the
+   [03-imitation-learning.md](03-imitation-learning.md) for the
    teleop rigs.
 3. **Fine-tune** for one or two days on a desktop GPU.
 4. **Evaluate** on a held-out scene.
@@ -105,6 +105,6 @@ When real demos are scarce, you grow the dataset in sim:
 
 You have a model. Where does it physically run?
 
-→ Next: [06-h-where-models-run.md](06-h-where-models-run.md)
+→ Next: [08-where-models-run.md](08-where-models-run.md)
 
-← Back to: [Layer 3, AI overview](06-ai-and-foundation-models.md)
+← Back to: [Layer 3, AI overview](README.md)

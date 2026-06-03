@@ -12,7 +12,7 @@ rest of the project is on sand.
 ## What you need before this step
 
 - Working planner + sim from
-  [01-c](01-c-bring-up-moveit-in-sim.md).
+  [step 3](03-bring-up-moveit-in-sim.md).
 - A gripper interface — vendor driver, sim plugin, or a placeholder
   action controller.
 - An object in the scene at a known pose.
@@ -101,7 +101,7 @@ task, "object follows the gripper when closed" is enough.
 ## Running and verifying
 
 1. Launch the world + planner (the "sim demo" launch from
-   [01-c](01-c-bring-up-moveit-in-sim.md)).
+   [step 3](03-bring-up-moveit-in-sim.md)).
 2. Start the task.
 3. Watch the visualiser — every planned trajectory should appear
    as a ghost arm and then execute.
@@ -148,4 +148,4 @@ The task works with a hard-coded object pose. In real life, the
 object isn't at a fixed pose. Even in sim, you want to **simulate**
 that — by faking the perception output.
 
-→ Next: [01-e-fake-perception-in-sim.md](01-e-fake-perception-in-sim.md)
+→ Next: [05-fake-perception-in-sim.md](05-fake-perception-in-sim.md)
