@@ -124,7 +124,7 @@ transport step delivers the tray into the instrument afterwards.
 v1 follows the same pattern: **the robot loads on the bench, then
 a human carries the loaded tray the short distance into the
 autosampler drawer.** See
-[`../03-manual-steps-today.md`](../03-manual-steps-today.md) Step C
+[`../research/03-manual-steps-today.md`](../research/03-manual-steps-today.md) Step C
 for the full rationale.
 
 **What this means for the robot:**

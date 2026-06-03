@@ -108,7 +108,7 @@ The arm must plan motions that avoid:
 > **What the arm does NOT have to avoid (because the HPLC is out
 > of reach):** the autosampler housing, the open drawer, drawer
 > rails, instrument fascia. The benchtop-tray decision (see
-> [`../03-manual-steps-today.md`](../03-manual-steps-today.md), Step C)
+> [`../research/03-manual-steps-today.md`](../research/03-manual-steps-today.md), Step C)
 > removes this entire class of obstacles.
 
 ## Mounting

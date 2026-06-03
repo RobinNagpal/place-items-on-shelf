@@ -112,7 +112,7 @@ gripper and looks up the slot in software before placing.
 - A small cobot (myCobot 280 Pi) costs **about $700**.
   - Payload: **250 g**, vials weigh ~5–10 g — comfortable margin.
   - Repeatability: **±0.5 mm**, slot clearance is ~1 mm — feasible
-    but tight; see [`requirements/03-success-precision-speed.md`](requirements/03-success-precision-speed.md).
+    but tight; see [`../requirements/03-success-precision-speed.md`](../requirements/03-success-precision-speed.md).
   - Reach: **280 mm**, fits a small bench cell.
 
 So the **cost-to-savings ratio for the loading step alone is
