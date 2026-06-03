@@ -38,15 +38,18 @@ Read the subfolder READMEs for the order inside each layer.
 Layer 5+ (fleet operations, continuous improvement) is **out of
 scope for now** — get one cell rock-solid first.
 
-## Reference (not a numbered layer)
+## Reference (lives inside Layer 2)
 
-- **[latest-robots.md](latest-robots.md)** — A dated snapshot of newer
-  hardware. Humanoids actually shipping (Figure, Tesla Optimus, 1X NEO,
-  Apptronik Apollo, Unitree G1, Agility Digit), "AI-included"
-  manipulation platforms (Physical Intelligence, Covariant, Dexterity,
-  Mech-Mind), and the foundation-model "robot brains" that are starting
-  to drive hardware choices. Useful when the established hardware in
-  Layer 2 can't do your task and you need to look at the bleeding edge.
+The "latest robots" snapshot is part of hardware selection — it lives
+inside Layer 2:
+
+- **[`02-hardware-selection/latest-robots.md`](02-hardware-selection/latest-robots.md)** —
+  A dated snapshot of newer hardware. Humanoids actually shipping (Figure,
+  Tesla Optimus, 1X NEO, Apptronik Apollo, Unitree G1, Agility Digit),
+  "AI-included" manipulation platforms (Physical Intelligence, Covariant,
+  Dexterity, Mech-Mind), and the foundation-model "robot brains" that are
+  starting to drive hardware choices. Useful when the established hardware
+  in Layer 2 can't do your task and you need to look at the bleeding edge.
 
 ## How each doc is written
 

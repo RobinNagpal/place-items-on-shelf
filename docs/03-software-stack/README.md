@@ -94,7 +94,7 @@ these decisions deliberately, not by accident.
   best for; we do not teach Python or C++.
 - **Not exhaustive about every alternative.** We list the names you'll
   keep seeing in 2025–2026 robotics work. Bleeding-edge research tools
-  belong in [`../latest-robots.md`](../latest-robots.md).
+  belong in [`../02-hardware-selection/latest-robots.md`](../02-hardware-selection/latest-robots.md).
 - **Not a substitute for the per-robot docs.** Once you've picked an arm,
   read the vendor docs and (if you're using the myCobot 280 Pi from this
   repo) the docs under

@@ -208,6 +208,13 @@ Now go back to the arm shortlist from [01-arm.md](01-arm.md) and **cross-check
 compatibility**. Some pairs that look good independently won't actually
 bolt together.
 
+> Many arm vendors also sell or co-market a specific gripper. See
+> [`arm-gripper-bundles.md`](arm-gripper-bundles.md) — it lists which
+> arm+gripper pairings ship together, whether the gripper is first-party
+> or a partner brand, and whether the driver is included in the arm's
+> SDK out of the box. Taking the bundle usually saves a couple of days
+> of integration work.
+
 ## Common mistakes
 
 1. **Picking the gripper after the arm.** They are decided together. The

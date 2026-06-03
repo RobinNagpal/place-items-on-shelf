@@ -57,7 +57,11 @@ and mounting flange. Once you know those, the rest fall into place.
 
 ## Reference (not a numbered step)
 
-- **[`../latest-robots.md`](../latest-robots.md)** — A dated snapshot of
+- **[`arm-gripper-bundles.md`](arm-gripper-bundles.md)** — Arm + gripper
+  combos that ship together. Which arm vendors sell their *own* gripper,
+  which ones resell a partner's, and which pairings have a tested driver
+  on day one.
+- **[`latest-robots.md`](latest-robots.md)** — A dated snapshot of
   newer hardware: humanoids actually shipping or in production pilots,
   "AI-included" manipulation platforms, foundation-model "robot brains".
   Useful when the established hardware in this layer can't do your task

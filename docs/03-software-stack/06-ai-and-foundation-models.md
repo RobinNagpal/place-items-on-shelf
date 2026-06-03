@@ -284,7 +284,7 @@ on the robot's IPC.**
    teleoperation dataset, or fine-tune Pi-0.
 7. **"AI-included" platform with budget?** → Pi-0.x via Physical
    Intelligence partnerships, or one of the bundled industrial
-   solutions in [`../latest-robots.md`](../latest-robots.md).
+   solutions in [`../02-hardware-selection/latest-robots.md`](../02-hardware-selection/latest-robots.md).
 
 ## Output of this file — your AI plan
 

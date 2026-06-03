@@ -65,6 +65,35 @@ use one of these.
 experiments. **Avoid for:** anything that has to run 8+ hours a day in
 production.
 
+### Newer affordable AI / imitation-learning arms (2025–2026)
+
+A fast-growing sub-tier of hobby arms designed around the **LeRobot**
+dataset and policy ecosystem (HuggingFace). They're cheap, leader–follower
+kits are common, and most ship with a sample dataset and a fine-tunable
+policy out of the box. If you plan to collect teleop demos and train an
+imitation-learning policy (see
+[`../03-software-stack/06-ai-and-foundation-models.md`](../03-software-stack/06-ai-and-foundation-models.md)),
+start here.
+
+| Arm | DOF | Notes |
+|-----|-----|-------|
+| **SO-ARM100 / SO-ARM101 (TheRobotStudio + Hugging Face)** | 5–6 | Open-hardware "Standard Open Arm." ~$110–$250 per arm as a kit. The reference platform for LeRobot tutorials. Leader–follower pairs are the cheapest way to record demos. |
+| **Koch v1.1** | 6 | Community LeRobot-compatible kit. Slightly stronger than SO-ARM100. |
+| **Moss v1** | 6 | Another LeRobot-aligned kit; widely used in Hugging Face dataset cards. |
+| **reBot Arm B601-DM Bundle** | 6 | Newer bundled "AI-ready" desktop arm + matched gripper + camera, marketed against the SO-ARM100/Koch tier with a more polished out-of-box experience. |
+| **AgileX PiPER** | 6 | ~$2.5k. Slightly bigger payload than the LeRobot kits. Comes with ROS 2 driver and is popular in academic VLA work. |
+| **Trossen WidowX-250 / ViperX-300** | 5 or 6 | Dynamixel-based, long-running staple in robot-learning labs. Used in the original ALOHA design. |
+| **ARX-5 / ARX-7 (ARX Robotics)** | 6 or 7 | Bi-manual rigs used in Physical Intelligence's Pi-0 paper and other VLA demos. Higher end of this tier. |
+
+**Pick these when:** the project is **imitation-learning-first** — you
+plan to record teleop demos and fine-tune a policy rather than scripting
+motions in MoveIt. **Avoid for:** any task where you need certified safety
+or > 1 kg payload.
+
+> **Heads-up:** model names, kit contents, and prices in this tier
+> churn fast. Always cross-check the vendor site and current LeRobot
+> compatibility table before buying.
+
 ### Mid-range industrial / cobot research ($10,000 – $50,000)
 
 The workhorse tier. Heavy enough to do real work, gentle enough for
@@ -132,7 +161,7 @@ writing perception code yourself.
   arms; they pair a vision + grasp stack with a UR or similar.
 
 **Pick these when:** Layer 1 says "pick whatever the camera sees" rather
-than "pick from a fixed jig." See [`../latest-robots.md`](../latest-robots.md)
+than "pick from a fixed jig." See [`latest-robots.md`](latest-robots.md)
 for the newer humanoid + foundation-model end of this category.
 
 ## Output of this file — your arm shortlist
