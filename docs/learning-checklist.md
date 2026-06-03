@@ -46,8 +46,8 @@ implement.
 
 ## B. Perception — using a camera
 
-Ten distinct ways to use a camera in an arm cell — modern ML, classical
-CV, and calibration.
+Distinct ways to use a camera in an arm cell — modern ML, classical CV,
+and calibration.
 
 - [ ] **3. Train a tiny YOLO on a custom 5-class dataset**
   - **Goal:** Fine-tune YOLOv8-nano on ~200 labeled images of 5
@@ -96,7 +96,26 @@ CV, and calibration.
     model.
   - **Time:** 1 day.
 
-- [ ] **7. Depth-camera point cloud → object centroid**
+- [ ] **7. Instance segmentation — pixel masks instead of bounding boxes**
+  - **Background (plain English):** YOLO draws a *rectangle* around an
+    object. Most of that rectangle is actually background. **Instance
+    segmentation** goes further — it labels every pixel that belongs
+    to each object, so you get the object's exact silhouette. Modern
+    options: **YOLOv8-seg** (a YOLO variant that outputs masks),
+    **Mask R-CNN** (the classic), and **SAM / SAM 2** (Meta's
+    foundation segmentation model — works zero-shot but is heavier).
+  - **Goal:** Run a pre-trained YOLOv8-seg or SAM on Gazebo frames.
+    Publish per-pixel masks for each detected object on a ROS 2
+    topic. Visualise in RViz.
+  - **Why it matters:** Bounding boxes are useless for irregular
+    objects, occluded objects, or anything close to clutter. Pixel
+    masks are what point-cloud math, grasp-point estimation, and any
+    "exact contour" task actually need.
+  - **Done when:** Mask IoU vs Gazebo ground truth is above 0.7 per
+    object across 10 random scenes.
+  - **Time:** 1 day.
+
+- [ ] **8. Depth-camera point cloud → object centroid**
   - **Goal:** With an RGB-D camera in sim, segment the table plane
     using RANSAC, cluster what's left, and return each cluster's
     centroid in the arm's base frame.
@@ -106,7 +125,26 @@ CV, and calibration.
   - **Done when:** Centroid agrees with Gazebo ground truth within 1 cm.
   - **Time:** 1 day.
 
-- [ ] **8. ArUco marker 6-DoF pose estimation**
+- [ ] **9. Depth-based grasp-point estimation**
+  - **Background (plain English):** Knowing *where* an object is is
+    not enough — pick-and-place needs to know *how* to grip it
+    (where the fingers should close, from which direction). The
+    simplest version (called an **antipodal grasp**): take the
+    object's point cloud, run PCA to find its principal axes, and
+    choose a grasp at the centroid, fingers closing along the
+    *shortest* axis (perpendicular to the longest one). For more
+    complex shapes there are learned methods like **GG-CNN** and
+    **Contact-GraspNet** — start with the PCA baseline first.
+  - **Goal:** From an RGB-D image of a single cube, compute a 3D
+    grasp pose (point + approach direction) using the PCA antipodal
+    method. Publish it as a pose for MoveIt to use.
+  - **Why it matters:** This is the bridge between "I see the object"
+    and "I can pick it up". Every pick-and-place cell needs it.
+  - **Done when:** The arm successfully grasps and lifts the cube
+    using the proposed grasp pose for 8/10 random cube orientations.
+  - **Time:** 1 day.
+
+- [ ] **10. ArUco marker 6-DoF pose estimation**
   - **Background (plain English):** ArUco markers are printable square
     black-and-white tags that look like simplified QR codes. Each one
     encodes a unique ID. When a *calibrated* camera sees one, OpenCV
@@ -127,7 +165,7 @@ CV, and calibration.
     object poses.
   - **Time:** 3–6 hours.
 
-- [ ] **9. Camera intrinsics calibration**
+- [ ] **11. Camera intrinsics calibration**
   - **Background (plain English):** A camera is not perfect. Its lens
     has a focal length, an image centre that's not quite in the
     middle, and a little barrel or pincushion distortion at the edges.
@@ -144,7 +182,7 @@ CV, and calibration.
   - **Done when:** Mean reprojection error is below 0.5 px.
   - **Time:** 3–6 hours.
 
-- [ ] **10. Hand-eye calibration (camera ↔ end-effector)**
+- [ ] **12. Hand-eye calibration (camera ↔ end-effector)**
   - **Background (plain English):** The camera sees the world in *its
     own* coordinate frame. The arm moves in *its own* coordinate
     frame. **Hand-eye calibration** figures out the rigid transform
@@ -164,7 +202,7 @@ CV, and calibration.
     5 mm of the marker's true position.
   - **Time:** 1 day.
 
-- [ ] **11. Classical colour segmentation (no ML)**
+- [ ] **13. Classical colour segmentation (no ML)**
   - **Goal:** Find the red cube in a cluttered Gazebo scene using only
     HSV thresholds + connected components.
   - **Why it matters:** When colour is reliable, classical CV is
@@ -173,7 +211,7 @@ CV, and calibration.
     lighting setups.
   - **Time:** 2–4 hours.
 
-- [ ] **12. Barcode / QR-code reader on simulated labels**
+- [ ] **14. Barcode / QR-code reader on simulated labels**
   - **Goal:** Render QR codes on cube faces in Gazebo, decode them
     with `pyzbar`, and attach each decoded ID to its corresponding
     object in MoveIt's planning scene.
@@ -188,7 +226,7 @@ CV, and calibration.
 The camera is one sensor on the arm. These are the other ones you will
 meet in any real cell.
 
-- [ ] **13. Wrist force/torque (F/T) sensor — detect surface contact**
+- [ ] **15. Wrist force/torque (F/T) sensor — detect surface contact**
   - **Goal:** Add a 6-axis F/T sensor between the arm's last link and
     its gripper in the URDF. Move the arm down until the published
     z-force exceeds 2 N, then stop.
@@ -198,7 +236,7 @@ meet in any real cell.
     every time, with no overshoot greater than 5 mm.
   - **Time:** 3–6 hours.
 
-- [ ] **14. Joint effort/current logging during a motion**
+- [ ] **16. Joint effort/current logging during a motion**
   - **Goal:** Subscribe to `/joint_states`, log the `effort` field for
     each joint to a CSV during a 10-second arm motion, plot the result.
   - **Why it matters:** Effort tells you how hard each joint is
@@ -208,7 +246,7 @@ meet in any real cell.
     can point to the spike when the arm picks up a 200 g weight.
   - **Time:** 2–3 hours.
 
-- [ ] **15. Gripper contact sensor — confirm grasp succeeded**
+- [ ] **17. Gripper contact sensor — confirm grasp succeeded**
   - **Goal:** Add a Gazebo `contact` sensor to each gripper finger.
     Publish a `grasp_ok` boolean that is true only when both fingers
     report contact with the same object.
@@ -224,7 +262,7 @@ The simple idea: **you describe what you want, MoveIt figures out the
 joint angles, the trajectory, and the timing.** You do not write IK or
 trajectory math yourself.
 
-- [ ] **16. Joint-space "hello world" with MoveIt**
+- [ ] **18. Joint-space "hello world" with MoveIt**
   - **Goal:** Move the arm to a hard-coded joint configuration from a
     20-line Python or C++ script using `MoveGroupInterface`.
   - **Why it matters:** Smallest possible end-to-end test that the
@@ -232,29 +270,32 @@ trajectory math yourself.
   - **Done when:** The arm reaches the goal in sim without warnings.
   - **Time:** 2–4 hours.
 
-- [ ] **17. Cartesian pose goal — let MoveIt do the IK + planning**
+- [ ] **19. Cartesian pose goal — MoveIt as the IK solver**
   - **Goal:** Ask MoveIt to move the end-effector to a target XYZ +
     orientation (e.g. "10 cm above the red cube, gripper facing
-    down"). MoveIt solves the inverse kinematics and plans the
-    trajectory; you just hand it the target pose.
-  - **Why it matters:** This is the normal way you talk to an arm.
-    Almost every higher-level behaviour boils down to a sequence of
-    Cartesian pose goals.
+    down"). MoveIt solves the inverse kinematics (target pose →
+    joint angles) and plans the trajectory; you only hand it the
+    target pose.
+  - **Why it matters:** This is **the** standard way to do inverse
+    kinematics in practice — let MoveIt's KDL/TracIK solver do it
+    instead of writing the math yourself. Almost every higher-level
+    behaviour boils down to a sequence of Cartesian pose goals.
   - **Done when:** The end-effector arrives within 5 mm and 2° of the
     requested pose for 10/10 random reachable targets.
   - **Time:** 3–6 hours.
 
-- [ ] **18. Add a table collision object to the planning scene**
+- [ ] **20. Collision avoidance — add a table to the planning scene**
   - **Goal:** Insert a static box representing the table into MoveIt's
     planning scene. Verify the planner goes *around* it, not through
-    it.
+    it. Repeat with a second box representing a wall.
   - **Why it matters:** Real cells always have static obstacles.
-    Getting collision objects right is half the planning battle.
+    Collision objects in the planning scene are how the arm knows to
+    avoid them — no extra logic required.
   - **Done when:** A goal *under* the table is correctly rejected as
-    unreachable.
+    unreachable. Adding the wall changes the planned path visibly.
   - **Time:** 3–6 hours.
 
-- [ ] **19. Hardcoded pick-and-place sequence — instructions only**
+- [ ] **21. Hardcoded pick-and-place sequence — instructions only**
   - **Goal:** Write a script with a hard-coded list of 5 poses
     (`home → above_cube → grasp_cube → above_shelf → release_pose`).
     Hand each one to MoveIt in order, open/close the gripper between
@@ -271,7 +312,7 @@ trajectory math yourself.
 All four work entirely in simulation. No hardware needed for any of
 them.
 
-- [ ] **20. Behavior cloning from one teleop demo**
+- [ ] **22. Behavior cloning from one teleop demo**
   - **Goal:** Record a 60-second teleop trajectory (keyboard or
     gamepad → sim arm) for a reach task. Train a small MLP to map
     `(joint state → next action)`. Replay it in sim.
@@ -281,7 +322,7 @@ them.
     8/10 fresh runs.
   - **Time:** 1–2 days.
 
-- [ ] **21. PPO reinforcement learning on a reach task**
+- [ ] **23. PPO reinforcement learning on a reach task**
   - **Goal:** Train a Stable-Baselines3 PPO agent.
     Observation = joint positions + target XYZ.
     Reward = -distance. Episode = 200 steps.
@@ -291,7 +332,7 @@ them.
     above 80%.
   - **Time:** 1–2 days.
 
-- [ ] **22. Tiny VLA inspection (no execution)**
+- [ ] **24. Tiny VLA inspection (no execution)**
   - **Goal:** Feed a sim image plus an instruction ("pick the red
     cube") to a small VLA model like OpenVLA, log the predicted
     7-DoF action — do **not** execute it on the arm.
@@ -301,7 +342,7 @@ them.
     how it maps to your arm's action space.
   - **Time:** 3–6 hours.
 
-- [ ] **23. LLM-as-router with a human in the loop**
+- [ ] **25. LLM-as-router with a human in the loop**
   - **Goal:** Detect objects with YOLO (item 4), hand the JSON to a
     small LLM along with a natural-language instruction ("pick the
     green one"), have the LLM emit the chosen object ID, send that
