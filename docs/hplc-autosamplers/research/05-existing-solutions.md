@@ -109,11 +109,6 @@ Worth knowing about but not direct competitors:
   [shop.cgenomix.com — Hitachi for HPLC preprocessing](https://shop.cgenomix.com/archives/6779/transforming-hplc-preprocessing-boosting-efficiency-and-accuracy-with-the-hitachi-robot/).
   Hitachi sells a robot specifically for HPLC preprocessing.
   Useful evidence that the niche is recognised in industry.
-- **Opentrons** —
-  [opentrons.com](https://opentrons.com/). The most affordable
-  established liquid-handling cobot. Different focus (pipetting,
-  not vial transport), but the open-protocol library is worth
-  looking at for our software design.
 
 ## 4. The closest research paper
 
