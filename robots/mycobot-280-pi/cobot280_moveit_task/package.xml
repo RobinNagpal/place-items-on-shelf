@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cobot280_moveit_task</name>
+  <version>0.1.0</version>
+  <description>
+    Minimal MoveIt 2 motion task for the myCobot 280: moves the arm through a
+    sequence of goals (named pose home -> named pose ready -> explicit joint goal
+    -> named pose home) using MoveGroupInterface. Designed to be the first
+    custom MoveIt code in this repo, runnable on top of automaticaddison's
+    mycobot_gazebo + mycobot_moveit_config stack.
+  </description>
+  <maintainer email="2021guneet@gmail.com">Ryan</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>moveit_ros_planning_interface</depend>
+
+  <exec_depend>mycobot_moveit_config</exec_depend>
+  <exec_depend>mycobot_gazebo</exec_depend>
+  <exec_depend>mycobot_description</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
