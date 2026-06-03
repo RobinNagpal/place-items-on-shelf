@@ -1,4 +1,4 @@
-# 08 — How Perception Identifies The Cylinder (No AI Required)
+# How Perception Identifies The Cylinder (No AI Required)
 
 ## Short answer: no AI, no machine learning, no neural networks
 
@@ -196,3 +196,7 @@ That's a future-project decision.
   view, no occlusion).
 - For complex scenes, AI-based methods would be more flexible — but heavier and
   harder to debug. Out of scope for now.
+
+→ Next: [how-planning-works.md](how-planning-works.md) — companion to this doc on the
+planning side: how the arm decides which joint angles to use once perception has
+identified the target.

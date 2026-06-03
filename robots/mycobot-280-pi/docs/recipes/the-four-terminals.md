@@ -1,4 +1,4 @@
-# 05 — The Four Terminals: Reference
+# The Four Terminals: Reference
 
 This is a flat cheat-sheet you can keep open while running the demo. Each section is
 "what this terminal does", "the command", "what success looks like", "what to do if it
@@ -81,7 +81,8 @@ ros2 launch mycobot_mtc_pick_place_demo get_planning_scene_server.launch.py
   camera topic is actually publishing (`ros2 topic hz /camera_head/depth/color/points`
   should show ~30 Hz).
 - `No valid plane model found` → the world doesn't have a table at the right height.
-  See [04-pick-place-task.md](04-pick-place-task.md) for the table fix.
+  See [../concepts/04-pick-place-task.md](../concepts/04-pick-place-task.md) for the
+  table fix.
 
 ## Terminal 4 — The MTC Pick-and-Place Task (`mtc_node`)
 
@@ -169,4 +170,5 @@ or when perception is finding things in unexpected places.
 - **To stop everything** → Ctrl+C each terminal. Check `ros2 node list` is empty
   before re-launching, otherwise stale nodes will conflict with new ones.
 
-→ Next: [06-glossary.md](06-glossary.md) — terms reference.
+→ Next: [viewing-camera-output.md](viewing-camera-output.md) — quick recipes for
+viewing the camera feed (and the perception output) in RViz or Gazebo.

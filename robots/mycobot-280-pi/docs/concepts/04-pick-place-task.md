@@ -242,20 +242,9 @@ instead of running addison's stock demo.
 
 ## How to see what the camera sees while all this is happening
 
-In a 5th terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
-ros2 run rqt_image_view rqt_image_view
-```
-
-Pick `/camera_head/color/image_raw` from the dropdown for the RGB view, or
-`/camera_head/depth/image_rect_raw` for the depth view.
-
-Or open RViz (also in its own terminal), add an Image display, point it at the same
-topic. RViz has the advantage that you can also see the point cloud, the planned
-trajectory, and the perception's collision objects all in the same 3D view.
+See [../recipes/viewing-camera-output.md](../recipes/viewing-camera-output.md) for two
+short recipes (RViz, or Gazebo's built-in viewer), plus a bonus section on visualising
+the PlanningScene (the green shapes perception identifies).
 
 ## What's next, once this all works
 
@@ -271,5 +260,5 @@ A few directions the project could go from here, each with its own follow-up doc
 - **Run on real hardware** — swap `mycobot_gazebo` for the elephantrobotics driver
   package and the same task should run on a physical myCobot 280 Pi.
 
-→ Next: [05-the-four-terminals.md](05-the-four-terminals.md) — one-page reference for the
-full launch sequence.
+→ Next: [../deep-dives/how-perception-works.md](../deep-dives/how-perception-works.md) —
+how the perception node turns the camera image into a list of objects, with no AI.
