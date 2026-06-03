@@ -4,37 +4,57 @@ These docs explain **what each piece of the simulation does** and **why we need 
 diving into code. They're written for someone new to ROS 2 robotics who wants to understand
 the whole pick-and-place demo from the ground up.
 
-Read them in order — each one builds on the previous.
+The docs are grouped by purpose, not by date added:
 
-## Reading Order
+- **Concepts** — read these first, in order. They build a mental model of the four programs
+  that make the demo work.
+- **Deep dives** — once you've read the concepts, these explain *how* perception and planning
+  actually work under the hood. Skip them if you only care about running the demo.
+- **Recipes** — short "how to do X" guides. Use as needed.
+- **Reference** — glossary you can flip to whenever a term confuses you.
 
-1. **[01-gazebo.md](01-gazebo.md)** — What Gazebo is. The "physics sandbox" where the robot
-   lives. Run *just this* and you see a robot you can't move yet.
-2. **[02-rviz.md](02-rviz.md)** — What RViz is. A second window that shows you what the
-   robot itself *thinks* the world looks like — frames, sensors, plans. Different from
-   Gazebo on purpose.
-3. **[03-moveit.md](03-moveit.md)** — What MoveIt is. The "brain" that turns a goal
-   ("move the hand to point X") into a smooth, collision-free joint motion.
-4. **[04-pick-place-task.md](04-pick-place-task.md)** — How the camera, the planning logic,
-   and the arm talk to each other to actually pick up the red cylinder and put it down
-   somewhere else.
-5. **[05-the-four-terminals.md](05-the-four-terminals.md)** — A one-page reference that
-   ties all four terminals together: what each one is, what it talks to, in what order
-   to launch.
-6. **[06-glossary.md](06-glossary.md)** — Short definitions of every acronym and jargon
-   word you'll bump into.
-7. **[07-viewing-camera-output.md](07-viewing-camera-output.md)** — Two short recipes
-   for "I just want to see what the camera is seeing" — via RViz, or via Gazebo's own
-   built-in viewer. Plus a bonus section for visualizing the PlanningScene (the green
-   shapes perception identifies).
-8. **[08-how-perception-works.md](08-how-perception-works.md)** — Plain-English
-   explanation of how perception identifies the cylinder without any AI: surface
-   normals, clustering, RANSAC shape-fitting. What's actually happening inside the
-   `get_planning_scene_server` node.
-9. **[09-how-planning-works.md](09-how-planning-works.md)** — Companion to 08. How
-   the arm decides which joint angles to use, in plain English: the hardcoded task
-   "recipe" (in `mtc_node.cpp`) vs. the live joint-trajectory math (OMPL randomised
-   search). No AI here either.
+## Reading order
+
+### Concepts (start here)
+
+1. **[concepts/01-gazebo.md](concepts/01-gazebo.md)** — Gazebo, the "physics sandbox"
+   where the robot lives. Run *just this* and you see a robot you can't move yet.
+2. **[concepts/02-rviz.md](concepts/02-rviz.md)** — RViz, a second window that shows
+   what the robot itself *thinks* the world looks like. Different from Gazebo on
+   purpose.
+3. **[concepts/03-moveit.md](concepts/03-moveit.md)** — MoveIt, the "brain" that turns
+   a goal ("move the hand to point X") into a smooth, collision-free joint motion.
+   Also introduces the **ros2_control** layer that sits beneath it.
+4. **[concepts/04-pick-place-task.md](concepts/04-pick-place-task.md)** — How the
+   camera, the planning logic, and the arm talk to each other to actually pick up the
+   red cylinder and put it down somewhere else.
+
+### Deep dives (the math behind concepts 3 and 4)
+
+5. **[deep-dives/how-perception-works.md](deep-dives/how-perception-works.md)** —
+   Plain-English explanation of how perception identifies the cylinder without any AI:
+   surface normals, clustering, RANSAC shape-fitting. What's actually happening inside
+   the `get_planning_scene_server` node.
+6. **[deep-dives/how-planning-works.md](deep-dives/how-planning-works.md)** — Companion
+   to the perception deep-dive. How the arm decides which joint angles to use: the
+   hardcoded task "recipe" (in `mtc_node.cpp`) vs. the live joint-trajectory math
+   (OMPL randomised search). No AI here either.
+
+### Recipes (operational)
+
+7. **[recipes/the-four-terminals.md](recipes/the-four-terminals.md)** — A one-page
+   cheatsheet that ties all four terminals together: what each one is, what it talks
+   to, in what order to launch. Intentionally redundant with the concept docs so you
+   can keep just this one open while running the demo.
+8. **[recipes/viewing-camera-output.md](recipes/viewing-camera-output.md)** — Two
+   short recipes for "I just want to see what the camera is seeing" — via RViz, or via
+   Gazebo's own built-in viewer. Plus a bonus section for visualising the
+   PlanningScene (the green shapes perception identifies).
+
+### Reference
+
+9. **[reference/glossary.md](reference/glossary.md)** — Short definitions of every
+   acronym and jargon word you'll bump into.
 
 ## The 30-second big picture
 

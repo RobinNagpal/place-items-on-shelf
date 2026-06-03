@@ -1,4 +1,4 @@
-# 07 — Viewing the Camera Output
+# Viewing the Camera Output
 
 Two short recipes for "I just want to see what the camera is seeing". Both work with
 only **Terminal 1 (Gazebo)** running — you don't need MoveIt or the task to be up.
@@ -98,4 +98,6 @@ Once you've got RViz set up with Image + PlanningScene + (optionally) RobotModel
 `ros2 run rviz2 rviz2 -d ~/mycobot_full_view.rviz`.
 
 → For the explanation of *how* perception is producing those green shapes (without
-any AI), see **[08-how-perception-works.md](08-how-perception-works.md)**.
+any AI), see **[../deep-dives/how-perception-works.md](../deep-dives/how-perception-works.md)**.
+
+→ Next: [../reference/glossary.md](../reference/glossary.md) — terms reference.

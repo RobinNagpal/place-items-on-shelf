@@ -1,8 +1,8 @@
-# 09 — How Planning Works (Hardcoded Recipe + Live Motion Math)
+# How Planning Works (Hardcoded Recipe + Live Motion Math)
 
-Companion to [08-how-perception-works.md](08-how-perception-works.md). That doc
-explained how the robot identifies the cylinder. This one explains what happens
-*after* — how the arm actually moves to pick it up.
+Companion to [how-perception-works.md](how-perception-works.md). That doc explained
+how the robot identifies the cylinder. This one explains what happens *after* — how
+the arm actually moves to pick it up.
 
 ## Short answer: there are two levels
 
@@ -214,7 +214,7 @@ MoveIt's planning scene = {                      collision checks, returns
 ```
 
 Everything to the left of the arrow is perception
-([08-how-perception-works.md](08-how-perception-works.md)). Everything to the
+([how-perception-works.md](how-perception-works.md)). Everything to the
 right is what this doc covered.
 
 ## TL;DR
@@ -235,3 +235,6 @@ right is what this doc covered.
 So perception + planning together = classical robotics. Each piece is decades-old
 math. The "magic" is in how cleanly the pieces fit together, not in any one of them
 being clever.
+
+→ Next: [../recipes/the-four-terminals.md](../recipes/the-four-terminals.md) — a
+one-page cheatsheet for the full launch sequence.

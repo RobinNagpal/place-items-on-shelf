@@ -1,4 +1,4 @@
-# 06 — Glossary
+# Glossary
 
 Short definitions of every acronym and term you'll bump into while reading these docs
 or the addison upstream repo. Roughly grouped by topic.

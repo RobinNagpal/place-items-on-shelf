@@ -10,6 +10,37 @@ separate program we'll meet in the next doc). MoveIt sits in the middle: you giv
 *goal*, it gives you a *trajectory* (a timed sequence of joint angles) that gets the arm
 from start to goal.
 
+## First: the controller layer beneath MoveIt — ros2_control
+
+Before diving into MoveIt itself, it helps to know what sits *beneath* it. The piece
+that quietly runs alongside Gazebo is **ros2_control**.
+
+ros2_control is the "translation layer" between high-level motion commands and the
+actual joints. When MoveIt says "move joint 1 to angle 1.57 over 0.5 seconds",
+ros2_control is the thing that:
+
+1. Receives that command on a ROS topic.
+2. Tells Gazebo (or a real robot) to drive joint 1 toward that angle.
+3. Reports back the actual current joint angles via `/joint_states`.
+
+It comes bundled with two **controllers** that get loaded when Gazebo starts, plus a
+state broadcaster:
+
+- **`arm_controller`** — handles the 6 arm joints, accepts trajectory commands
+  (sequences of joint positions over time).
+- **`gripper_action_controller`** — handles the gripper, accepts simple open/close
+  commands.
+- **`joint_state_broadcaster`** — publishes `/joint_states` so everyone knows the
+  current pose.
+
+You don't run ros2_control as a separate terminal — it's started by the Gazebo launch
+file automatically. But it's important to know it exists, because when "the plan looks
+correct in RViz but the arm doesn't move in Gazebo", the most likely culprit is a
+controller name mismatch.
+
+With that out of the way, the rest of this doc is about MoveIt — the layer *above*
+ros2_control that decides what trajectory to send it.
+
 ## Why planning is hard
 
 It sounds simple — "just move the hand here". But:

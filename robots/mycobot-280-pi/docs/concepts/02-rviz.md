@@ -51,33 +51,6 @@ Each display layer subscribes to a ROS topic and draws it. The common ones:
 - **PlanningScene** — the world as MoveIt sees it: the arm, plus all the collision
   boxes the perception step found.
 
-## The role of ros2_control (related, but not RViz)
-
-While we're talking about "the gap between Gazebo and your code", it's worth introducing
-a piece that quietly runs alongside Gazebo: **ros2_control**.
-
-ros2_control is the "translation layer" between high-level motion commands and the
-actual joints. When MoveIt says "move joint 1 to angle 1.57 over 0.5 seconds",
-ros2_control is the thing that:
-
-1. Receives that command on a ROS topic.
-2. Tells Gazebo (or a real robot) to drive joint 1 toward that angle.
-3. Reports back the actual current joint angles via `/joint_states`.
-
-It comes bundled with two **controllers** that get loaded when Gazebo starts:
-
-- **`arm_controller`** — handles the 6 arm joints, accepts trajectory commands
-  (sequences of joint positions over time).
-- **`gripper_action_controller`** — handles the gripper, accepts simple open/close
-  commands.
-- **`joint_state_broadcaster`** — publishes `/joint_states` so everyone knows the
-  current pose.
-
-You don't run ros2_control as a separate terminal — it's started by the Gazebo launch
-file automatically. But it's important to know it exists, because when "the plan looks
-correct in RViz but the arm doesn't move in Gazebo", the most likely culprit is a
-controller name mismatch.
-
 ## Two ways to launch RViz
 
 **Option A — bundled with the Gazebo launcher.** Drop the `use_rviz:=false` flag and
@@ -108,8 +81,9 @@ After Step 1 you had a Gazebo world. After Step 2 (adding RViz) you can:
 
 ## What's still missing
 
-You still can't make the arm move on purpose. Gazebo gives you the world, ros2_control
-gives you the joint-control plumbing, but nobody's *deciding* where to move yet. That's
-MoveIt's job.
+You still can't make the arm move on purpose. Gazebo gives you the world, but nobody's
+*deciding* where to move yet — and there's no plumbing yet to push commands from
+high-level code down to the joints. Both pieces (the planning brain and the controller
+layer beneath it) come together in the next doc.
 
 → Next: [03-moveit.md](03-moveit.md)
