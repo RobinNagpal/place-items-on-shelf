@@ -146,9 +146,10 @@ on a low-cost hobby arm (myCobot 280 Pi). For that profile:
   — running an open VLA on a cheap arm is increasingly viable as a research
   exercise.
 
-When Layer 03 (software / AI) lands, the table from Layer 02 plus this
-snapshot become the inputs to "build vs. buy" for the perception and
-manipulation stack.
+Layer 03 ([software stack](03-software-stack/README.md)) takes the
+table from Layer 02 plus this snapshot as inputs to "build vs. buy"
+for the perception and manipulation stack — see in particular
+[`03-software-stack/06-ai-and-foundation-models.md`](03-software-stack/06-ai-and-foundation-models.md).
 
 ## How to keep this file fresh
 

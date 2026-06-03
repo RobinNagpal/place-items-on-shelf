@@ -11,7 +11,7 @@ fast.
 
 ## How this is organised
 
-Two layers so far, each in its own subfolder:
+Three layers so far, each in its own subfolder:
 
 - **[`01-finalize-requirements/`](01-finalize-requirements/)** — Figure
   out what the robot has to do. Just thinking and writing — no shopping,
@@ -20,11 +20,17 @@ Two layers so far, each in its own subfolder:
   hardware. One file per piece (arm, gripper, sensors, mount, power,
   control hardware, network, cables, safety, operator interface). Each
   file lists the common / popular options and what each is best for.
+- **[`03-software-stack/`](03-software-stack/)** — Pick all the
+  software that runs on top of the hardware. One file per piece
+  (operating system, middleware, vendor SDKs, motion planning,
+  perception, AI / foundation models, simulation, task orchestration,
+  logging, build & deploy). Same shape as Layer 2.
 
 Read the subfolder READMEs for the order inside each layer.
 
-A later layer (to be written) will cover the **software side** — what
-software you run on top of the hardware list you finish with.
+A later layer (to be written) will cover **integration, testing, and
+deployment** — how you go from "all the pieces work alone" to "the
+cell runs unattended for a week and we trust it."
 
 ## Reference (not a numbered layer)
 

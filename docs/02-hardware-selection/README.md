@@ -72,9 +72,10 @@ Layer-1 task spec, this is enough to start procurement.
 You also have a clear picture of the **physical setup**: where every piece
 sits, how cables run, who has access, how a human steps in if needed.
 
-## What's next (later layer)
+## What's next
 
-Layer 3 (to be written) will cover the **software side**: given the
-hardware list you finish with here, what perception, planning, and control
-software do you build vs. inherit from open libraries vs. buy from a
-vendor?
+Layer 3 — [`../03-software-stack/`](../03-software-stack/) — takes
+this hardware list and turns it into a working stack of software:
+operating system, middleware, vendor SDKs, motion planning, perception,
+AI / foundation models, simulation, orchestration, logging, and the
+build-and-deploy pipeline. One file per piece, just like Layer 2.
