@@ -37,8 +37,11 @@ per piece**, in the order you'd usually decide them.
    PCL, depth pipelines, pose estimation. Turning camera pixels into
    "there's a cylinder at (x, y, z)."
 6. **[06-ai-and-foundation-models.md](06-ai-and-foundation-models.md)** —
-   YOLO, SAM, GraspNet, VLAs. When perception + planning isn't enough and
-   you want the robot to learn or generalise.
+   YOLO, SAM, GraspNet, VLAs. Imitation learning vs. reinforcement
+   learning. Datasets and training frameworks (LeRobot, Open
+   X-Embodiment). Teleop rigs (ALOHA, GELLO, SO-100). When perception
+   + planning isn't enough and you want the robot to learn or
+   generalise.
 7. **[07-simulation.md](07-simulation.md)** — Gazebo, Isaac Sim, MuJoCo,
    PyBullet. Where you test before touching real hardware.
 8. **[08-task-orchestration.md](08-task-orchestration.md)** — Behaviour
