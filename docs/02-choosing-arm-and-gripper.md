@@ -48,6 +48,9 @@ The next layer (Layer 03) will cover *what software you need* in detail. For
 now: keep "what AI / perception is included?" as one column in your hardware
 comparison table. Don't treat it as an afterthought.
 
+For a current snapshot of arms and humanoid platforms that ship with AI
+already integrated, see [`latest-robots.md`](latest-robots.md).
+
 ## How to choose the arm: the criteria
 
 For each candidate arm, match it against the numbers in your Layer 1 task
@@ -145,6 +148,8 @@ at a higher level instead of writing perception/planning code from scratch.
 - **Mech-Mind / Photoneo bin-picking systems** — these are vision + software
   systems you bolt onto any of the above arms; together they form an
   "AI-included" stack.
+- See [`latest-robots.md`](latest-robots.md) for the rapidly-evolving
+  humanoid + foundation-model-driven category that further blurs the line.
 
 ## How to choose the gripper (end-effector)
 
@@ -275,6 +280,9 @@ Once you have a shortlist of arm + gripper combinations that physically meet
 your task spec, Layer 03 will look at the **software side**: what perception,
 planning, and control stack each combination implies — and how much of that
 work the platform already does for you.
+
+For an in-the-moment view of the newest hardware (and the rapidly-changing
+humanoid / AI-included segment), see [`latest-robots.md`](latest-robots.md).
 
 ## Sources
 
