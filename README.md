@@ -15,15 +15,33 @@ A project for picking and placing objects with a small 6-DOF robot arm in simula
 
 Four programs running in four terminals coordinate all of this.
 
+## Getting started
+
+- **Brand-new install, want to actually run things?** Start at
+  [`robots/mycobot-280-pi/docs/setup/`](robots/mycobot-280-pi/docs/setup/) — four
+  ordered docs that take a fresh Ubuntu 24.04 to a running pick-and-place demo.
+- **Want to understand the system without running it?** Skip setup and read
+  [`robots/mycobot-280-pi/docs/concepts/01-gazebo.md`](robots/mycobot-280-pi/docs/concepts/01-gazebo.md)
+  first.
+
 ## Docs
 
 The plain-English walkthrough lives in
 [`robots/mycobot-280-pi/docs/`](robots/mycobot-280-pi/docs/). Start with
 [`docs/README.md`](robots/mycobot-280-pi/docs/README.md) for the reading order
-(concepts → deep-dives → recipes → reference).
+(setup → concepts → deep-dives → recipes → reference).
 
 ## Source
 
+- [`robots/mycobot-280-pi/`](robots/mycobot-280-pi/) — everything specific to
+  the myCobot 280 Pi. See its
+  [`README.md`](robots/mycobot-280-pi/README.md) for the per-robot overview.
 - [`robots/mycobot-280-pi/cobot280_moveit_task/`](robots/mycobot-280-pi/cobot280_moveit_task/) —
   our minimal custom MoveIt 2 task package (the "hello world" path that uses
   `MoveGroupInterface` directly).
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the branch / PR workflow, code
+conventions, and documentation conventions. AI agents working in this repo
+should start at [`CLAUDE.md`](CLAUDE.md).
