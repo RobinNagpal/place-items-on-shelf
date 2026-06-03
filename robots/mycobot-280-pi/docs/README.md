@@ -1,16 +1,13 @@
-# myCobot 280 Pi — Documentation
+# myCobot 280 Pi — Concepts in Plain English
 
-These docs explain **how to set up, run, and understand** the myCobot 280 Pi
-simulation pipeline. They're written for someone new to ROS 2 robotics who
-wants the whole pick-and-place demo from the ground up — not just "the
-commands" but *what each piece does* and *why we need it*.
+These docs explain **what each piece of the simulation does** and **why we need it**, without
+diving into code. They're written for someone new to ROS 2 robotics who wants to understand
+the whole pick-and-place demo from the ground up.
 
 The docs are grouped by purpose, not by date added:
 
-- **Setup** — get from a clean Ubuntu install to a running demo. Skip if your
-  workspace is already built.
-- **Concepts** — read these once setup is done. They build a mental model of the
-  four programs that make the demo work.
+- **Concepts** — read these first, in order. They build a mental model of the four programs
+  that make the demo work.
 - **Deep dives** — once you've read the concepts, these explain *how* perception and planning
   actually work under the hood. Skip them if you only care about running the demo.
 - **Recipes** — short "how to do X" guides. Use as needed.
@@ -18,15 +15,7 @@ The docs are grouped by purpose, not by date added:
 
 ## Reading order
 
-### Setup (start here if nothing is installed yet)
-
-0. **[setup/README.md](setup/README.md)** — section index. Walks four ordered
-   docs covering system prerequisites, workspace + upstream, this repo's
-   package, and the first run. Output: you can launch
-   `ros2 launch cobot280_moveit_task move_to_named_pose.launch.py` and watch the
-   arm move.
-
-### Concepts (start here if your install already works)
+### Concepts (start here)
 
 1. **[concepts/01-gazebo.md](concepts/01-gazebo.md)** — Gazebo, the "physics sandbox"
    where the robot lives. Run *just this* and you see a robot you can't move yet.
