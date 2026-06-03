@@ -44,9 +44,11 @@ Which side of the spectrum is right for you depends on Layer 1's task spec:
   user points at") → strongly consider an arm that already bundles AI
   perception. Re-implementing that stack yourself is a project, not a feature.
 
-The next layer (Layer 03) will cover *what software you need* in detail. For
-now: keep "what AI / perception is included?" as one column in your hardware
-comparison table. Don't treat it as an afterthought.
+Layer 03 finishes the hardware side by adding **sensors** (cameras,
+force/torque, tactile, proximity, safety). Layer 04 then covers the
+software / AI stack in detail. For now, while you're still building your
+arm + gripper shortlist: keep "what AI / perception is included?" as one
+column. Don't treat it as an afterthought.
 
 For a current snapshot of arms and humanoid platforms that ship with AI
 already integrated, see [`latest-robots.md`](latest-robots.md).
@@ -64,7 +66,7 @@ spec:
 | **Repeatability** | How exactly the arm returns to the same point twice. | Match against "Precision required" — but note repeatability is *not* absolute accuracy; see the glossary entry in `robots/mycobot-280-pi/docs/reference/glossary.md`. |
 | **Speed (max joint velocity, cycle time)** | How fast the arm can complete a typical move. | Match against "Cycle time". |
 | **Safety class / collaborative?** | Whether it can safely share workspace with humans (ISO 10218, ISO/TS 15066). | If "Humans nearby? Yes" in your spec, a cobot or rated industrial arm with safety scanners is mandatory. |
-| **Software / SDK** | What you talk to the arm with — ROS 2, vendor SDK, web API, none. | Strongly tied to Layer 03. If you want to write code, you need an open interface. |
+| **Software / SDK** | What you talk to the arm with — ROS 2, vendor SDK, web API, none. | Strongly tied to Layer 04 (software). If you want to write code, you need an open interface. |
 | **AI / perception included?** | Does it ship with a camera, object detector, grasp policy? | Cuts your software work dramatically when the task allows it. |
 | **Budget** | Total cost incl. controller, software licenses, accessories. | A hard filter — drops most options on most projects. |
 
@@ -238,9 +240,10 @@ Meets task spec?     yes / no    yes / no    yes / no
 Total cost:          ___         ___         ___
 ```
 
-The narrowed list (usually 2–3 rows) becomes the input for Layer 03 (software
-and AI capabilities), where you ask "given this hardware, what do I need to
-build vs. what's already there?".
+The narrowed list (usually 2–3 rows) becomes the input for Layer 03
+(sensors), which adds the perception hardware that the arm + gripper alone
+can't provide. Layer 04 then asks the software question — "given the full
+hardware spec, what do I build vs. inherit?".
 
 ## Common mistakes at this layer
 
@@ -277,9 +280,15 @@ things genuinely help:
 ## What's next
 
 Once you have a shortlist of arm + gripper combinations that physically meet
-your task spec, Layer 03 will look at the **software side**: what perception,
-planning, and control stack each combination implies — and how much of that
-work the platform already does for you.
+your task spec, **the hardware side isn't done yet**: Layer 03 picks the
+**sensors** that go with the arm (cameras, force/torque, tactile, safety),
+because they are physical, mounted, payload-eating hardware that has to be
+decided alongside the arm and gripper — not later.
+
+Only after the full hardware spec is locked in does Layer 04 ask the
+**software side**: what perception, planning, control, and task-logic stack
+each combination implies, and how much of that work the platform already
+does for you.
 
 For an in-the-moment view of the newest hardware (and the rapidly-changing
 humanoid / AI-included segment), see [`latest-robots.md`](latest-robots.md).

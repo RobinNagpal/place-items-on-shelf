@@ -36,10 +36,18 @@ Every doc in this series follows the same shape:
    industrial) and grippers (parallel, vacuum, soft, etc.), and why the
    software/AI question must be considered *in parallel* with the hardware
    choice rather than after it.
+3. **[03-sensors.md](03-sensors.md)** — The rest of the hardware side:
+   sensors. Which sensor families matter for arm-mounted use (2D RGB, RGBD
+   depth cameras, force/torque, tactile, proximity, safety scanners),
+   where they mount (eye-in-hand vs eye-to-hand vs gripper-integrated),
+   the common / popular names in each family (Intel RealSense, Orbbec,
+   Photoneo, Zivid, ATI, Robotiq FT, SICK, ...), and the practical
+   considerations (payload weight, FOV, working range, ROS 2 driver
+   availability) that turn "looks good" into "actually mountable".
 
 *(More layers will be added one at a time. This series is intentionally being
-written slowly — each layer thoroughly before the next. Layer 03 will cover
-the software / AI stack that pairs with the hardware shortlist.)*
+written slowly — each layer thoroughly before the next. Layer 04 will cover
+the software / AI stack that pairs with the finished hardware spec.)*
 
 ## Reference docs (not numbered layers)
 
