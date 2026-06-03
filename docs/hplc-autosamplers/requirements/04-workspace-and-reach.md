@@ -55,6 +55,21 @@ shuttle in a hypothetical v2) bridges the gap.
 | Rack slot height         | ~50 mm above bench                                    |
 | Barcode reader height    | Window centred ~80 mm above bench                    |
 
+### The reference HPLC's own footprint
+
+The reference instrument is the **Agilent 1290 Infinity II
+Vialsampler** (see
+[`01-task-and-objects.md`](01-task-and-objects.md) for sourcing).
+Its own cube is:
+
+- **324 mm wide × 396 mm deep × 468 mm tall** (12.8 × 15.6 × 18.4 in)
+- **19 kg** without sample cooler
+- Drawer opens toward the operator on the **396 mm-deep** face.
+
+This means the HPLC needs roughly **35 × 45 cm** of bench area of
+its own, **plus** the 40 × 40 cm robot cell next to it. Budget at
+least **~80 × 50 cm of bench length** for the combined setup.
+
 ## Reach required
 
 The arm must reach:
@@ -118,6 +133,7 @@ The arm must plan motions that avoid:
 
 - [myCobot 280 Pi Specifications — Elephant Robotics](https://www.elephantrobotics.com/en/mycobot-280-pi-2023-specifications/)
 - [Universal Robots UR3e specifications page](https://www.universal-robots.com/products/ur3-robot/)
-- [Agilent autosampler tray geometry overview](https://www.agilent.com/en/product/liquid-chromatography/hplc-supplies-accessories/autosampler-fraction-collector-supplies-for-hplc/sample-trays-for-hplc)
+- [Agilent autosampler trays and drawers (catalogue)](https://www.agilent.com/en/product/liquid-chromatography/hplc-supplies-accessories/autosampler-fraction-collector-supplies-for-hplc/sample-trays-for-hplc)
+- [Agilent 1290 Infinity II Vialsampler data sheet (PDF, hpst.cz)](https://hpst.cz/sites/default/files/oldfiles/5991-6286en.pdf) — instrument cube 324 × 396 × 468 mm, 19 kg.
 
 → Next: [`05-practical-limits.md`](05-practical-limits.md)
