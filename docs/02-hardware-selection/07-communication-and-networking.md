@@ -1,235 +1,103 @@
 # Communication And Networking
 
-A robot cell has many pieces — the arm, the controller, a PLC, an IPC, a
-camera or two, sometimes a Jetson, sometimes a network printer or a
-warehouse system. They all need to talk to each other.
+The cell has many parts — arm, controller, IPC, cameras, sometimes a
+PLC. They all have to talk.
 
-This file is about **how the pieces talk** — the protocols, the cables,
-the switches, the network design.
+## Two kinds of "talk"
 
-## The two kinds of "talk"
+1. **Control talk** — short messages, can't be late. "Joint 1, move to
+   angle X in 2 ms." A late message = a crash.
+2. **Data talk** — bigger messages, timing is loose. Camera frames,
+   logs, dashboards. A few hundred ms of jitter is fine.
 
-Roughly speaking, communication in a robot cell splits into two worlds:
+Most production cells run both — on separate networks, or with traffic
+priority.
 
-1. **Real-time / control talk** — short messages, very predictable
-   timing, can't be late. Examples: "joint 1, go to angle 2.3 rad in
-   2 ms." A late message here is a crash.
-2. **Plain data talk** — bigger messages, timing not as strict. Examples:
-   a camera frame to a vision PC, a log entry to a database, a status
-   update to a dashboard. A few hundred ms of jitter is fine.
+## The protocols you'll meet
 
-Different protocols are designed for one or the other. Most cells run
-both, on either separate networks or with traffic prioritisation.
+| Protocol | Use it for | Used by |
+|----------|------------|---------|
+| **Ethernet (TCP/IP, UDP/IP)** | Anything non-real-time | ROS 2, most cameras, PLC outside-world links |
+| **ROS 2 / DDS** | Talking between ROS nodes | Every ROS 2 system |
+| **EtherCAT** | Hard real-time motion (µs cycles) | Beckhoff TwinCAT, industrial drives |
+| **PROFINET** | Real-time on Siemens factories | Siemens-based plants |
+| **EtherNet/IP** | Real-time on Allen-Bradley factories | Rockwell-based plants |
+| **Modbus TCP / RTU** | Old simple sensors and PLCs | Legacy machinery |
+| **CAN / CANopen** | Some servo drives, internal device buses | Franka internals, automotive |
+| **USB 3 / USB-C** | Depth cameras, F/T sensors | Prototypes |
+| **GigE Vision** | Industrial cameras over Ethernet | Basler, FLIR, IDS |
+| **Serial (RS-232/485)** | One specific old device | Scales, barcode readers |
+| **Wireless (WiFi, 5G)** | Data only, **never** control | Mobile robots, dashboards |
 
-## Common protocols
+Rule of thumb: default to plain Ethernet. Use an industrial protocol
+only when something forces it.
 
-### Standard Ethernet (TCP/IP, UDP/IP)
+## Network design — two networks, not one
 
-The same Ethernet your home WiFi runs on top of. Not real-time, but very
-flexible.
+Most production cells have **two physical networks**:
 
-**Used by:** ROS 2 (over DDS), most cameras (RTSP / GigE Vision), most
-PLCs for "talk-to-the-outside-world" messages, web dashboards, file
-transfers.
+1. **Control network** — deterministic. EtherCAT, PROFINET, or a
+   dedicated Ethernet segment with PLC, drives, safety. Not on the
+   internet.
+2. **Information network** — IT. IPC, cameras (sometimes), dashboards,
+   the factory uplink.
 
-**Best for:** anything that doesn't need hard real-time. The default
-choice unless something else forces you off it.
+Keep them apart so:
 
-### ROS 2 / DDS
+- A noisy IT cable doesn't stall a control protocol.
+- A security incident on IT can't reach motion control.
 
-ROS 2 uses DDS (Data Distribution Service) on top of standard
-Ethernet — a publish/subscribe layer with discovery, QoS, and partitioning.
+Hardware you'll need:
 
-**Used by:** every ROS 2 system. Default to talk between ROS nodes on
-the same machine, on the same LAN, or across machines.
+- **Industrial switches** — Hirschmann, Moxa, Cisco IE. Managed in
+  production.
+- **Cables** — Cat6 / Cat6a for Gigabit. Cat5e for EtherCAT.
+- **Connectors** — RJ45 (office); **M12 / M8** (industrial, vibration-
+  and water-resistant).
+- **Time sync** — PTP if multiple systems must agree on "now"; NTP
+  otherwise.
 
-**Best for:** research, prototypes, and increasingly production. Good for
-tying together perception, planning, and control on Linux.
+## What to check
 
-### EtherCAT
-
-Industrial Ethernet, real-time, deterministic. Master-slave architecture
-where messages get processed "on the fly" as they pass each device.
-
-**Used by:** Beckhoff TwinCAT systems, lots of industrial servo drives,
-some force/torque sensors, some safety devices.
-
-**Best for:** high-performance motion control. Cycle times in the µs.
-
-### PROFINET
-
-Industrial Ethernet, real-time, Siemens-led standard.
-
-**Used by:** Siemens-based factories. Most German industrial integrations.
-
-**Best for:** Siemens-heavy production lines.
-
-### EtherNet/IP
-
-Industrial Ethernet, Allen-Bradley/Rockwell-led standard. (Yes — confusing
-name; it's not the same as Ethernet/IP-in-the-internet sense.)
-
-**Used by:** Rockwell-based US factories.
-
-**Best for:** American industrial plants standardised on Allen-Bradley.
-
-### Modbus TCP and Modbus RTU
-
-Old, simple, very widely supported. TCP version runs on Ethernet; RTU
-runs on RS-485 serial.
-
-**Used by:** legacy devices, simple sensors, low-end PLCs, building
-automation.
-
-**Best for:** talking to old machinery or cheap sensors.
-
-### CAN bus / CANopen
-
-A low-bandwidth bus designed for cars. Used in some servo drives, robot
-arms (Franka talks CAN internally), and joysticks.
-
-**Used by:** automotive, some robot internals, some legacy industrial.
-
-**Best for:** internal device-to-device talk; rarely something you pick
-yourself.
-
-### USB 3 / USB-C
-
-Generic USB. Used by most depth cameras (RealSense, Orbbec), some F/T
-sensors, some controllers.
-
-**Used by:** cameras and "developer-friendly" hardware.
-
-**Best for:** quick prototyping. Less reliable than Ethernet in
-production (cables wiggle out).
-
-### GigE Vision
-
-Camera-specific protocol on top of Gigabit Ethernet. Very common in
-industrial vision.
-
-**Used by:** Basler, FLIR, IDS, Allied Vision cameras.
-
-**Best for:** industrial machine vision. Long cable runs (up to 100 m
-with PoE).
-
-### Serial (RS-232, RS-485)
-
-Old. Slow. Still everywhere.
-
-**Used by:** legacy sensors, weighing scales, barcode readers, RFID
-readers.
-
-**Best for:** talking to one specific old device. Convert to USB or
-Ethernet if you can.
-
-### Wireless (WiFi, Bluetooth, 5G)
-
-For data, sometimes fine. For control, **no** — too much jitter, can
-drop out.
-
-**Used by:** mobile robots over WiFi, smartphone teach pendants, status
-dashboards.
-
-**Best for:** non-critical status and data. Not for control of motion.
-
-## Network design
-
-Most cells have at least **two networks**:
-
-1. **Control network** — the deterministic one. EtherCAT, PROFINET, or a
-   dedicated Ethernet segment with the PLC, drives, and safety devices.
-   Not connected to the internet.
-2. **Information network** — the IT one. The IPC, the cameras (sometimes),
-   the dashboard PC, the connection to the rest of the factory or the
-   cloud.
-
-Keeping them separate matters because:
-
-- A noisy IT network can stall a control protocol if they share wires.
-- A security incident on the IT side shouldn't be able to reach the
-  motion control.
-
-Pieces you'll need:
-
-- **Industrial Ethernet switches** — rugged, DIN-rail-mounted. Brands:
-  **Hirschmann, Moxa, Cisco IE, N-Tron, Phoenix Contact**.
-- **Cables rated for the protocol** — Cat6 or Cat6a for Gigabit. For
-  EtherCAT, often Cat5e is enough.
-- **Connectors** — RJ45 for office use; **M12 / M8** for industrial,
-  vibration-resistant.
-- **Cable runs through cable carriers** (the next file).
-
-## How a typical small cell talks
-
-A common small cell (cobot + vision PC + camera + safety scanner):
-
-```
-[Wall outlet] -- power --> [UR controller] -- Ethernet --> [Office switch]
-                              |                                  |
-                              |                                  |
-                          Ethernet                          Ethernet
-                              |                                  |
-                              v                                  v
-                          [Safety relay]                    [Linux IPC]
-                                                           (ROS 2 + RealSense
-                                                              over USB3)
-                                                                  |
-                                                              Ethernet
-                                                                  |
-                                                                  v
-                                                          [Office / cloud]
-```
-
-A bigger production cell adds a PLC, a separate control switch, a
-PROFINET or EtherCAT line to drives, and a clear firewall between the
-two networks.
-
-## What to check when designing the network
-
-| Check | Why it matters |
-|-------|---------------|
-| **Cable length** | Ethernet is rated 100 m. Longer = repeaters or fibre. |
-| **Cable category** (Cat5e / 6 / 6a) | Higher = more bandwidth, more EMI tolerance. |
-| **EMI environment** | Welders, big motors, VFDs generate noise. Shielded cable, ferrites, separation. |
-| **IP rating of connectors** | M12 connectors for wet / dirty environments. RJ45 plastic clips break. |
-| **Switch managed or unmanaged?** | Managed = configurable, supports VLANs and QoS. Production = managed. |
-| **Power over Ethernet (PoE)?** | Powers some cameras and access points over the data cable. Saves a separate PSU. |
-| **Network isolation** | Control segment must be physically or logically separate from IT. |
-| **Time sync** | If multiple systems must agree on "now" (data fusion, logging), use **PTP** (Precision Time Protocol) or at minimum NTP. |
+| Check | Why |
+|-------|-----|
+| **Cable length** | Ethernet is 100 m max. Longer = repeaters or fibre. |
+| **EMI environment** | Welders and VFDs need shielded cable and separation. |
+| **IP rating of connectors** | M12 for wet/dirty environments. RJ45 plastic clips break. |
+| **Managed switch?** | Production = yes. |
+| **PoE?** | Powers small cameras and access points over the data cable. |
+| **Network isolation** | Control physically or logically separate from IT. |
 
 ## Output of this file — your network plan
 
 ```
-Control protocol:        EtherCAT / PROFINET / Ethernet-IP / Modbus / TCP / ...
-Control network switch:  ___ (managed / unmanaged)
-IT network switch:       ___
+Control protocol:        EtherCAT / PROFINET / EtherNet/IP / TCP / ...
+Control switch:          ___ (managed / unmanaged)
+IT switch:               ___
 Cable category:          Cat ___
-Connector type:          RJ45 / M12 / M8 / mixed
+Connectors:              RJ45 / M12 / M8 / mixed
 Cable length budget:     ___ m
 PoE used?:               yes / no
-Wireless?:               yes / no (and for what)
+Wireless?:               yes / no — what for
 Time sync:               none / NTP / PTP
 Firewall between nets?:  yes / no
 ```
 
 ## Common mistakes
 
-1. **One flat network for everything.** Then a camera's bandwidth spike
-   stalls the PLC's heartbeat. Always separate control and information.
-2. **WiFi for control.** It will drop out. Always.
-3. **Unmanaged switch in production.** No QoS, no VLAN, no diagnosis when
-   something goes wrong.
-4. **Forgetting cable shielding.** A VFD next door turns your Ethernet
-   into noise.
-5. **Wrong protocol for the device.** Trying to drive a PROFINET drive
-   from a non-Siemens master is a multi-day exercise.
-6. **No documentation of IP addresses.** A year later, nobody knows what
-   192.168.1.42 was.
+1. **One flat network for everything.** A camera bandwidth spike stalls
+   the PLC heartbeat.
+2. **WiFi for control.** It will drop out.
+3. **Unmanaged switch in production.** No QoS, no VLAN, no diagnosis.
+4. **No cable shielding near VFDs.** Ethernet turns to noise.
+5. **Wrong protocol for the device.** Driving a PROFINET drive from a
+   non-Siemens master = days of work.
+6. **No IP-address documentation.** A year later, nobody knows what
+   192.168.1.42 is.
 
 ## What's next
 
-You've designed the network. Now you have to actually **run the cables**
-through a moving system without breaking them.
+The network is planned. Now: how to run the cables on a moving arm
+without breaking them.
 
 → Next: [08-cable-management.md](08-cable-management.md)
