@@ -143,6 +143,89 @@ tell the arm where the vial is in the world. To get from that
 in 2D first. Item 4 is "can the robot *see* a vial in real time?".
 "Can it *reach* the vial it sees?" is later.
 
+### 6. Is the "frame" we feed YOLO the same thing as the raw image?
+
+Yes. **Frame, image, and the contents of `sensor_msgs/Image` are
+all the same thing** for our purposes — one 640×480 grid of pixels
+from one rendering tick of the camera.
+
+The labels can be confusing:
+
+| Term you hear         | What it actually is in this exercise                          |
+|-----------------------|---------------------------------------------------------------|
+| **Raw image**         | The pixel grid the camera produced, uncompressed.             |
+| **Frame**             | One image in the camera's stream.                             |
+| **`sensor_msgs/Image`** | The ROS message that wraps one frame, plus a header.        |
+| **`image_raw` topic** | The topic name for **uncompressed** frames. Convention only — Ultralytics never sees the name. |
+
+In the node, `cv_bridge` strips the ROS header off the message and
+hands the raw numpy pixels to YOLO. No conversion, no resize, no
+filtering between the camera and the model. *"What YOLO sees == what
+the camera rendered."*
+
+### 7. Does YOLO really run on **every** frame? What about a 1-hour run?
+
+Yes, by default. At 30 FPS that is **108,000 inferences per hour**.
+That sounds heavy and it is, so real systems almost never run the
+detector at full camera rate for a full hour. Common patterns:
+
+| Pattern                                    | When to use it                              |
+|--------------------------------------------|---------------------------------------------|
+| **Full rate (30 Hz)**                      | Closed-loop tracking — the box must follow a vial as someone drags it. The bar for this exercise. |
+| **Throttled (e.g. 5 Hz)**                  | The arm only needs an updated rack/tray map every few seconds — pre-pick, between picks. Drop frames at the subscription with `rclpy`'s timer + latest-frame cache. |
+| **Event-driven**                           | The arm pauses at a known "scan" pose, asks for one inference, then moves. Standard production pattern — one detection per pick. |
+| **Triggered by a service call**            | A higher-level node calls `/yolo/perceive_now` only when it actually needs a fresh detection. Cheapest of all. |
+
+For the autosampler v1 (load ~100 vials, ~15 s per vial, ~25 min
+total), the **event-driven** pattern is the right answer:
+
+1. Move arm to overhead scan pose.
+2. Call YOLO → get list of vials in the rack.
+3. For each vial, pick + place. The detector does NOT run during
+   the motion.
+4. Re-scan only when the rack changes (new batch loaded).
+
+That collapses 108,000 inferences/hour to maybe **5–20**.
+
+This exercise keeps the full 30 Hz path so the *"drag a vial,
+watch the box follow"* check in the checklist is easy to satisfy.
+Wrapping the same node in a "scan-then-stop" service is a few
+lines and lands in a later perception exercise.
+
+### 8. YOLO is 2D — can MoveIt use that directly to pick a vial?
+
+**Not directly.** MoveIt plans in 3D in the arm's base frame, so it
+needs `(X, Y, Z)` in metres and an orientation. YOLO gives
+`(u, v)` in pixels. Pixels alone cannot drive a pick.
+
+The bridge from "pixel box" to "pose MoveIt can plan to" is one of
+these four:
+
+| Bridge                             | Where it appears                              |
+|------------------------------------|-----------------------------------------------|
+| **Fixed-z plane assumption**       | If the object sits on a *known* surface (rack top at z = 0.825 m, tray top at z = 0.810 m), you can back-project the pixel through the camera intrinsics onto that z-plane. Works for upright vials in their slots — the v1 trick. |
+| **Depth per pixel (RGB-D)**        | A depth camera gives `z` for every pixel. Combined with intrinsics, you get `(X, Y, Z)` directly. **Item 8** does exactly this. |
+| **Slot index lookup**              | The rack and tray have *known* grids. YOLO classifies "vial in slot B3"; a hardcoded table converts slot → world coordinate. The v1 pick-and-place from **exercise 21** uses this pattern. |
+| **ArUco / fiducial markers**       | Stick a printable marker on the rack corner. OpenCV gives its **full 6-DoF pose** from one image. Then every slot's world coord follows from the rack's pose. **Item 10**. |
+
+So YOLO is still useful — it answers questions the arm needs but
+cannot get any other way:
+
+- **"Is there a vial in slot B3?"** → drives which slots to skip.
+- **"Is the rack roughly where we expected?"** → coarse pose check
+  before reaching in.
+- **"Is the tray slot already occupied?"** → safety gate before a
+  place.
+- **"Which red caps are in the rack?"** → LIMS-subset queries.
+
+In v1 the typical flow is: **YOLO says which slot, the slot table
+turns that into a world pose, MoveIt plans the pick.** YOLO never
+talks to MoveIt directly; the slot table sits between them.
+
+The full path "pure-pixel YOLO box → arm motion" is only correct
+after exercises 8, 11, and 12 have been done. Until then, use one
+of the four bridges above.
+
 ## Workflow at a glance
 
 ```
