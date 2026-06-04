@@ -1,0 +1,7 @@
+# Python dependencies for exercise 03 (tiny YOLO).
+# Install with:  pip install -r requirements.txt
+#
+# ultralytics ships the YOLOv8 model code, the trainer, and the val
+# loop in one package. It pulls in torch + torchvision as transitive
+# deps, so no explicit pin here.
+ultralytics>=8.2.0

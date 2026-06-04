@@ -1,0 +1,36 @@
+# Ultralytics-style dataset spec for the autosampler YOLO.
+#
+# `path` is the dataset root. `train`, `val`, `test` are paths to
+# folders of .jpg images, relative to `path`. Ultralytics looks for
+# matching .txt labels under `<path>/labels/<split>/<stem>.txt` for
+# every image at `<path>/images/<split>/<stem>.jpg`.
+#
+# The directory layout is the YOLO standard:
+#
+#   data/synthetic_autosampler/
+#   ├── images/{train,val,test}/*.jpg
+#   └── labels/{train,val,test}/*.txt
+#
+# Each label file holds one detection per line, in normalised YOLO
+# format:  `<class_id> <cx> <cy> <w> <h>` where all four numbers are
+# fractions of image width / height. Class ids match the `names:`
+# list below (0 = vial, 1 = empty_slot, ...).
+#
+# These paths point at a FAKE local dataset that does not exist yet.
+# Exercise 5 (auto-label from Gazebo ground truth) is the planned
+# source. Until then, scripts read from this path and will fail with
+# a clear "dataset not found" error.
+
+path: ./data/synthetic_autosampler
+train: images/train
+val:   images/val
+test:  images/test
+
+# Five classes, picked for the v1 HPLC-autosampler cell.
+# See README.md, section "The five classes", for the rationale.
+names:
+  0: vial          # any capped vial standing in a rack or tray slot
+  1: empty_slot    # an empty hole in either the rack or the tray
+  2: rack_edge     # corner / outer edge of the source 5x10 rack
+  3: tray_edge     # corner / outer edge of the 10x10 Agilent tray
+  4: cap_red       # red PP cap (colour-coded subset of `vial`)

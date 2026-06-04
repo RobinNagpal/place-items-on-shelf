@@ -81,7 +81,7 @@ implement.
 Distinct ways to use a camera in an arm cell — modern ML, classical CV,
 and calibration.
 
-- [ ] **3. Train a tiny YOLO on a custom 5-class dataset**
+- [x] **3. Train a tiny YOLO on a custom 5-class dataset** — see [`../exercises/03-tiny-yolo/`](../exercises/03-tiny-yolo/)
   - **Goal:** Fine-tune YOLOv8-nano on ~200 labeled images of 5
     household objects (cup, marker, screwdriver, cube, screw).
   - **Why it matters:** Object detection is the most common perception

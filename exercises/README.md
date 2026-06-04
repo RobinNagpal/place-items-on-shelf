@@ -43,6 +43,7 @@ come from
 |---|---|---|---|
 | 1 | [`01-custom-gazebo-world/`](01-custom-gazebo-world/) | A.1 — Gazebo world of the autosampler cell | done |
 | 2 | [`02-read-and-annotate-urdf/`](02-read-and-annotate-urdf/) | A.2 — URDF + reach check against the cell | done |
+| 3 | [`03-tiny-yolo/`](03-tiny-yolo/) | B.3 — Tiny YOLO fine-tuned on a 5-class autosampler dataset | done |
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |
