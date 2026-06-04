@@ -1,0 +1,44 @@
+# Exercises
+
+Small, self-contained implementations of the items in
+[`../docs/learning-checklist.md`](../docs/learning-checklist.md). One
+subfolder per item. Each folder is independent — you do not have to
+work through them in order.
+
+## How each exercise folder is laid out
+
+Every folder follows the same shape:
+
+```
+NN-short-slug/
+├── README.md              # what it does, in plain English
+├── ARCHITECTURE.md        # folder tree and what each file owns
+├── IMPLEMENTATION_NOTES.md# engineering decisions and trade-offs
+└── <code / annotation files for this exercise>
+```
+
+The three doc files exist for different readers:
+
+- **`README.md`** — for someone meeting the exercise for the first time.
+  Concept-level: what it does, the workflow, the data flow, an example run.
+- **`ARCHITECTURE.md`** — for someone editing the code. Lists every file
+  in the folder and what it is responsible for.
+- **`IMPLEMENTATION_NOTES.md`** — for someone debugging it. Why each
+  library, what the algorithm does, the assumptions, the failure modes.
+
+If an exercise has no code (e.g. a "read and annotate" task), the
+annotation file replaces the code, but the three docs still apply.
+
+See [`../CLAUDE.md`](../CLAUDE.md#when-implementing-a-learning-checklist-item)
+for the full convention.
+
+## Implemented so far
+
+| # | Folder | Checklist item | Status |
+|---|---|---|---|
+| 1 | [`01-custom-gazebo-world/`](01-custom-gazebo-world/) | A.1 — Create a custom Gazebo world | done |
+| 2 | [`02-read-and-annotate-urdf/`](02-read-and-annotate-urdf/) | A.2 — Read and annotate the arm's URDF | done |
+
+The numbers match the item numbers in
+[`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you
+implement a new item, add a row here and a `[x]` tick in the checklist.

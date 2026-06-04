@@ -48,7 +48,7 @@ a separate PR — link will resolve after both merge).
 These are mostly *configure and observe* tasks — no algorithms to
 implement.
 
-- [ ] **1. Create a custom Gazebo world**
+- [x] **1. Create a custom Gazebo world** — see [`../exercises/01-custom-gazebo-world/`](../exercises/01-custom-gazebo-world/)
   - **Goal:** Build a simple SDF world file with a flat table, the arm
     mounted on the table, and 3 coloured cubes spawned on top.
   - **Why it matters:** Every later exercise needs a scene to play in.
@@ -62,7 +62,7 @@ implement.
     12 mm × 32 mm vial cylinders with caps, and the bench-mounted
     myCobot. This world is the canvas every later exercise uses.
 
-- [ ] **2. Read and annotate the arm's URDF (no code)**
+- [x] **2. Read and annotate the arm's URDF (no code)** — see [`../exercises/02-read-and-annotate-urdf/`](../exercises/02-read-and-annotate-urdf/)
   - **Goal:** Open the arm's URDF file, draw the kinematic tree on
     paper, and label which `<link>` is which physical part, which
     `<joint>` rotates around which axis, and what each joint limit is.
