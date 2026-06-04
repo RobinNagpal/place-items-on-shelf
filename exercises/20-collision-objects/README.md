@@ -120,6 +120,52 @@ Two ways to confirm the planner really is using the obstacles:
    straight-line (it would actually clip the wall in real hardware)
    and Goal B succeeds (the arm tries to descend into vial_a1).
 
+## Common beginner questions
+
+**Which approach (exercise 18 or 19) does this exercise use to send
+the goals?**
+
+This exercise uses the **exercise-19 approach** — `setPoseTarget`
+with arbitrary `(x, y, z, roll, pitch, yaw)` in the arm's `base_link`
+frame. The single line that proves it is at
+`collision_demo/src/collision_demo.cpp:151`:
+
+```cpp
+arm.setPoseTarget(target, kTipLink);
+```
+
+There is **no** `setNamedTarget("...")` call (the exercise-18 way)
+anywhere in the file.
+
+Why we picked the 19 approach over the 18 approach:
+
+|  | Exercise 18 (`setNamedTarget`) | This exercise (`setPoseTarget`) |
+|---|---|---|
+| Input | a name like `"home"` or `"ready"` | arbitrary `(x, y, z, roll, pitch, yaw)` |
+| Where targets come from | the SRDF (`mycobot_280.srdf`) | inline in our C++ |
+| Can target arbitrary points? | No — only the SRDF's named poses | Yes — any point in space |
+| Inverse kinematics | not needed (joints already in SRDF) | needed; `move_group` runs KDL |
+
+The exercise-18 approach can only reach poses someone wrote into the
+SRDF ahead of time. Upstream `mycobot_280.srdf` only defines two:
+`home` and `ready`. Exercise 20 has to demonstrate:
+
+- "**route around** the housing wall to reach above `vial_a3`" — an
+  arbitrary point above the back row.
+- "**refuse** a descent onto `vial_a1`" — an arbitrary point 1 cm
+  above the red-cap vial.
+
+Neither of those is in the SRDF. Adding them would require editing
+the upstream SRDF (we don't fork it; see exercise 18's
+IMPLEMENTATION_NOTES). So the natural way to write these goals is
+`setPoseTarget` calls — the exercise-19 pattern.
+
+**Short answer:** **Exercise 20 = exercise 19 + obstacles.** Pose
+goals are sent the exercise-19 way; only the planning-scene setup
+is new. Exercise 21 will mix BOTH approaches: named poses for
+`home` / gripper open / close, plus Cartesian pose goals for the
+above-vial / descend / lift / above-dest / release coordinates.
+
 ## What "Done when" means here
 
 The checklist says: a goal under the table is rejected, and adding a

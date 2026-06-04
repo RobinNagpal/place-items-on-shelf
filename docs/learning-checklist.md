@@ -398,7 +398,8 @@ trajectory math yourself.
     already-loaded slot. The planner then refuses to lower the arm
     onto an occupied slot.
 
-- [ ] **21. Hardcoded pick-and-place sequence — instructions only**
+- [x] **21. Hardcoded pick-and-place sequence — instructions only** —
+  implemented in [`../exercises/21-hardcoded-pick-and-place/`](../exercises/21-hardcoded-pick-and-place/).
   - **Goal:** Write a script with a hard-coded list of 5 poses
     (`home → above_cube → grasp_cube → above_shelf → release_pose`).
     Hand each one to MoveIt in order, open/close the gripper between

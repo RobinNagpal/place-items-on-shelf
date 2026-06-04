@@ -46,6 +46,7 @@ come from
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |
+| 21 | [`21-hardcoded-pick-and-place/`](21-hardcoded-pick-and-place/) | D.21 — Hardcoded pick-and-place: 18 + 19 + 20 stitched together | done |
 
 The numbers match the item numbers in
 [`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you

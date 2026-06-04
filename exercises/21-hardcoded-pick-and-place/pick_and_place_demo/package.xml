@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>pick_and_place_demo</name>
+  <version>0.1.0</version>
+  <description>
+    Hardcoded 11-step pick-and-place for one vial in the HPLC
+    autosampler cell. Mixes named SRDF states (arm home, gripper
+    open/closed) with Cartesian pose targets (above-pick / grasp /
+    above-drop / release) and bench/rack/tray/wall collision objects.
+    Implements checklist item 21 (autosampler tie-in).
+  </description>
+  <maintainer email="2021guneet@gmail.com">Ryan</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <depend>tf2</depend>
+  <depend>moveit_ros_planning_interface</depend>
+
+  <exec_depend>mycobot_moveit_config</exec_depend>
+  <exec_depend>mycobot_gazebo</exec_depend>
+  <exec_depend>mycobot_description</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
