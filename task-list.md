@@ -15,7 +15,7 @@ below maps directly to the same item number in that file.
 
 - [x] **3.** Train a tiny YOLO on a custom 5-class dataset.
 - [x] **4.** Run YOLO live on a Gazebo camera feed.
-- [ ] **5.** Score detections automatically against Gazebo ground truth.
+- [x] **5.** Score detections automatically against Gazebo ground truth.
 - [ ] **6.** Tiny classifier quantized for an edge CPU.
 
 ## Friday — 2026-06-05

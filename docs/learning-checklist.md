@@ -105,7 +105,7 @@ and calibration.
     publish a `vials_in_rack` topic listing each detected vial's
     slot index. The pick-and-place script subscribes to it.
 
-- [ ] **5. Score detections automatically against Gazebo ground truth**
+- [x] **5. Score detections automatically against Gazebo ground truth** — see [`../exercises/05-score-detections-vs-gazebo/`](../exercises/05-score-detections-vs-gazebo/)
   - **Goal:** Use Gazebo's model-state topic as ground truth, compute
     per-frame IoU and a running mAP — no manual labeling.
   - **Why it matters:** You cannot improve a perception model you
