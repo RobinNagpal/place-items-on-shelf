@@ -38,6 +38,16 @@ Read the subfolder READMEs for the order inside each layer.
 Layer 5+ (fleet operations, continuous improvement) is **out of
 scope for now** — get one cell rock-solid first.
 
+## Practice (alongside the walkthrough)
+
+If you want to *learn the skills* the walkthrough assumes — perception,
+motion planning, IK, RL, imitation learning, VLAs, LLM routing — work
+through the small, self-contained software exercises in:
+
+- **[`learning-checklist.md`](learning-checklist.md)** — Around 20
+  arm-focused, software-only practice projects. Each takes a day or two,
+  runs entirely in simulation, and stands on its own.
+
 ## Reference (lives inside Layer 2)
 
 The "latest robots" snapshot is part of hardware selection — it lives
