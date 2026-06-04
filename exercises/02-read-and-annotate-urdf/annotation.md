@@ -15,8 +15,13 @@ We use the same fork the rest of this project uses:
 [`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2)
 (the repo referenced by [`robots/mycobot-280-pi/cobot280_moveit_task/`](../../robots/mycobot-280-pi/cobot280_moveit_task/)).
 
-The arm is built up from a small tree of xacro files. To understand the
-joints and structure, read these in order:
+The arm is built up from a small tree of `.urdf.xacro` files. If the
+`.urdf.xacro` extension is new to you, read
+[`../01-custom-gazebo-world/robot-arm-urdf-primer.md`](../01-custom-gazebo-world/robot-arm-urdf-primer.md)
+first — it explains the format and walks through what each file in
+that tree contributes.
+
+To understand the joints and structure, read these in order:
 
 | Path in the upstream repo | What it defines |
 |---|---|

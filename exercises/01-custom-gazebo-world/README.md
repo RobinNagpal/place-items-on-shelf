@@ -124,10 +124,13 @@ loads the model from there.
 
 The actual arm definition lives upstream at
 [`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2),
-in [`mycobot_description/urdf/robots/mycobot_280.urdf.xacro`](https://github.com/automaticaddison/mycobot_ros2/blob/main/mycobot_description/urdf/robots/mycobot_280.urdf.xacro)
-and [`mycobot_description/urdf/mech/mycobot_280_arm.urdf.xacro`](https://github.com/automaticaddison/mycobot_ros2/blob/main/mycobot_description/urdf/mech/mycobot_280_arm.urdf.xacro).
-Exercise [`../02-read-and-annotate-urdf/`](../02-read-and-annotate-urdf/)
-opens those files and pulls out every link, joint, axis, and limit.
+across two `.urdf.xacro` files. See
+**[`robot-arm-urdf-primer.md`](robot-arm-urdf-primer.md)** in this
+folder — it explains what the `.urdf.xacro` extension means and walks
+through both files (the top-level composer and the arm definition)
+section by section. Exercise [`../02-read-and-annotate-urdf/`](../02-read-and-annotate-urdf/)
+then pulls every link, joint, axis, and limit out of those files into
+one table.
 
 ## Run it
 

@@ -7,6 +7,7 @@
 ├── README.md
 ├── ARCHITECTURE.md
 ├── IMPLEMENTATION_NOTES.md
+├── robot-arm-urdf-primer.md
 └── worlds/
     └── autosampler_cell.sdf
 ```
@@ -19,6 +20,10 @@
   Everything later exercises spawn into the scene (camera, MoveIt
   collision objects, additional vials) gets added on top of this file
   or copied and extended from it.
+- **`robot-arm-urdf-primer.md`** — explains the `.urdf.xacro` file
+  extension and walks through the two upstream xacro files that
+  actually define the arm the SDF includes. Read this before opening
+  the arm's URDF for the first time.
 - **`README.md`, `ARCHITECTURE.md`, `IMPLEMENTATION_NOTES.md`** —
   for human readers only. No build step depends on them.
 
