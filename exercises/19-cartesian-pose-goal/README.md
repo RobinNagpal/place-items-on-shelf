@@ -90,6 +90,48 @@ How world ↔ base_link coordinates relate: the arm base is at world
 [`../01-custom-gazebo-world/worlds/autosampler_cell.sdf`](../01-custom-gazebo-world/worlds/autosampler_cell.sdf).
 So `world_to_base = (world_x + 0.18, world_y, world_z − 0.775)`.
 
+## Common beginner questions
+
+**Are the four targets points in mid-air? Are they "on top of the vials"?**
+
+Each target is just an `(x, y, z, roll, pitch, yaw)` — a coordinate in
+space, not an object. Yes, the `above_*` targets are points hanging in
+mid-air: 5 cm above the corner of the rack / tray. We picked the
+**corner** of the rack, not the centre of a specific vial, because
+corners stay comfortably inside the 280 mm reach envelope and the
+demo's purpose is to show the *IK loop*, not to grasp anything.
+
+**Do we need to know the exact pose of a vial to do real picks?**
+
+Yes — eventually. For a real pick you have two options:
+
+1. **Hardcoded grid.** The SDF puts the rack at a known pose and the
+   wells are on a known 9-mm pitch grid, so vial `A1` is at
+   `rack_pose + (0, 0, 0)`, `A2` at `rack_pose + (0.009, 0, 0)` and so
+   on. No perception needed; you just compute.
+2. **Perception.** A camera detects the vial pose at runtime
+   (covered later in the checklist, items 36-40 — depth camera + tag
+   detection).
+
+Exercise 21 (full hardcoded pick-and-place) uses option 1.
+
+**What if I run the code twice and the vial moved between runs?**
+
+This exercise never grasps anything, so the world doesn't change.
+But the question matters once you add a gripper (exercise 17 + 21).
+
+The target poses are **fixed coordinates in space** — `setPoseTarget`
+doesn't know what is or isn't at that pose. On the second run the arm
+will happily descend onto an empty spot and close the gripper on air.
+
+The fix is **state tracking** outside of MoveIt: a small piece of
+logic that remembers which wells are full and which are empty, and
+picks the next target accordingly. Production cells do this with a
+state machine (typically in a BehaviorTree or just a script).
+Exercise 20 adds another piece of the same puzzle — telling MoveIt
+"don't go into a slot that already has a vial in it" via collision
+objects.
+
 ## What "Done when" means here
 
 The checklist says **end-effector arrives within 5 mm and 2°**. After

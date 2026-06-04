@@ -382,7 +382,8 @@ trajectory math yourself.
     above_dest → lower → release`. MoveIt solves the IK at each
     step; you only supply the poses.
 
-- [ ] **20. Collision avoidance — add a table to the planning scene**
+- [x] **20. Collision avoidance — add a table to the planning scene** —
+  implemented in [`../exercises/20-collision-objects/`](../exercises/20-collision-objects/).
   - **Goal:** Insert a static box representing the table into MoveIt's
     planning scene. Verify the planner goes *around* it, not through
     it. Repeat with a second box representing a wall.

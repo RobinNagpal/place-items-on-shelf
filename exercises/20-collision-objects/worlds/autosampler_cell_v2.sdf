@@ -1,0 +1,246 @@
+<?xml version="1.0" ?>
+<!--
+  autosampler_cell_v2.sdf
+
+  Same bench / arm / rack / tray / vials as exercise 1's
+  autosampler_cell.sdf, PLUS two new objects that exercise 20 cares
+  about:
+
+    1. autosampler_housing_back_wall - a tall static wall behind the
+       peripherals. Represents the back panel of a real autosampler
+       housing. Both physical (so vials can rest against it) and a
+       MoveIt collision object (so the planner refuses to drive the
+       arm into it).
+
+    2. no_fly_a1_marker - a SEMI-TRANSPARENT visual cylinder above
+       vial_a1, marking the "no-fly volume" over an already-loaded
+       slot. Visual only - no physical collision in Gazebo. The
+       corresponding *MoveIt* collision object is created in
+       collision_demo.cpp; the SDF marker just makes the zone visible
+       in RViz / Gazebo so a watcher can see what the planner is
+       avoiding.
+
+  This file is intentionally NOT a remix or include of the v1 world.
+  We keep it standalone so a learner can diff the two files and see
+  exactly which models were added.
+
+  Run:
+      ros2 launch mycobot_gazebo mycobot.gazebo.launch.py \\
+        world:=$(pwd)/exercises/20-collision-objects/worlds/autosampler_cell_v2.sdf
+
+  See ../../01-custom-gazebo-world/worlds/autosampler_cell.sdf for the
+  primer on every SDF tag used here.
+-->
+<sdf version="1.7">
+  <world name="autosampler_cell_v2">
+
+    <include><uri>model://sun</uri></include>
+    <include><uri>model://ground_plane</uri></include>
+
+    <!-- Bench: 600 x 400 x 50 mm slab. Static so it cannot be pushed. -->
+    <model name="bench">
+      <static>true</static>
+      <pose>0 0 0.75 0 0 0</pose>
+      <link name="top">
+        <visual name="v">
+          <geometry><box><size>0.6 0.4 0.05</size></box></geometry>
+          <material><ambient>0.5 0.35 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.6 0.4 0.05</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!--
+      myCobot 280 at the back of the bench, on its bench mount.
+      Pose puts the base on top of the bench (z = 0.775 m = bench top).
+      Resolves via GAZEBO_MODEL_PATH / GZ_SIM_RESOURCE_PATH.
+    -->
+    <include>
+      <name>mycobot_280</name>
+      <uri>model://mycobot_280</uri>
+      <pose>-0.18 0 0.775 0 0 0</pose>
+    </include>
+
+    <!-- Source rack (same as v1). -->
+    <model name="source_rack">
+      <static>true</static>
+      <pose>0.05 0.12 0.80 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.09 0.18 0.05</size></box></geometry>
+          <material><ambient>0.9 0.9 0.95 1</ambient><diffuse>0.9 0.9 0.95 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.09 0.18 0.05</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Tray + alignment plate (same as v1). -->
+    <model name="tray_alignment_plate">
+      <static>true</static>
+      <pose>0.05 -0.12 0.785 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.16 0.16 0.02</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.16 0.16 0.02</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="autosampler_tray">
+      <static>true</static>
+      <pose>0.05 -0.12 0.80 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.14 0.14 0.01</size></box></geometry>
+          <material><ambient>0.12 0.12 0.14 1</ambient><diffuse>0.12 0.12 0.14 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.14 0.14 0.01</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Three vials (same as v1). vial_a1 has the no-fly marker over it below. -->
+    <model name="vial_a1">
+      <pose>-0.018 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body">
+          <pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_a3">
+      <pose>0.000 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body">
+          <pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.1 0.5 0.9 1</ambient><diffuse>0.1 0.5 0.9 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_a5">
+      <pose>0.018 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body">
+          <pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.1 0.7 0.2 1</ambient><diffuse>0.1 0.7 0.2 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!--
+      NEW IN v2 (exercise 20)
+
+      autosampler_housing_back_wall
+      A vertical wall standing behind the rack and tray. Represents the
+      autosampler housing. Has BOTH a visual and a collision shape, so
+      anything (an arm link, a misaligned vial) will physically hit it
+      in sim. The MoveIt planning scene will also know about it (added
+      by collision_demo.cpp), so the planner refuses paths that pass
+      through it.
+
+      Position chosen so the wall stands 1 cm clear of the rack's back
+      edge (rack back at y = +0.21), 400 mm tall above the bench top.
+    -->
+    <model name="autosampler_housing_back_wall">
+      <static>true</static>
+      <pose>0 0.23 0.975 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.6 0.02 0.4</size></box></geometry>
+          <material>
+            <ambient>0.7 0.7 0.75 1</ambient>
+            <diffuse>0.7 0.7 0.75 1</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.6 0.02 0.4</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!--
+      NEW IN v2 (exercise 20)
+
+      no_fly_a1_marker
+      A semi-transparent yellow cylinder hovering above vial_a1's cap,
+      marking the "no-fly volume" over an already-loaded slot.
+
+      VISUAL ONLY - we deliberately omit <collision>. Gazebo physics
+      ignores this. The arm can pass through it without bumping.
+
+      The matching MoveIt collision object IS created at runtime by
+      collision_demo.cpp; that is what makes the planner refuse to
+      lower into this slot. The SDF marker is here so a beginner can
+      SEE the zone the planner is avoiding (otherwise the no-fly
+      volume would be invisible in Gazebo).
+
+      Geometry: radius 0.02 m, height 0.10 m, centred at
+      (vial_a1 x, vial_a1 y, vial_cap_top + 0.05) =
+      (-0.018, 0.160, 0.905).
+    -->
+    <model name="no_fly_a1_marker">
+      <static>true</static>
+      <pose>-0.018 0.160 0.905 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><cylinder><radius>0.02</radius><length>0.10</length></cylinder></geometry>
+          <material>
+            <ambient>0.95 0.85 0.1 0.3</ambient>
+            <diffuse>0.95 0.85 0.1 0.3</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
