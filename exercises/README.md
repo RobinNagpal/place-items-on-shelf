@@ -47,6 +47,7 @@ come from
 | 4 | [`04-yolo-live-on-gazebo-camera/`](04-yolo-live-on-gazebo-camera/) | B.4 — YOLO live on a Gazebo overhead camera, publishing `vision_msgs/Detection2DArray` | done |
 | 5 | [`05-score-detections-vs-gazebo/`](05-score-detections-vs-gazebo/) | B.5 — Auto-score `/yolo/detections` against Gazebo model-state ground truth (IoU, running TP/FP/FN) | done |
 | 7 | [`07-instance-segmentation/`](07-instance-segmentation/) | B.7 — YOLOv8-seg live on the Gazebo camera; publishes detections + instance mask + overlay | done |
+| 8 | [`08-depth-to-3d-centroid/`](08-depth-to-3d-centroid/) | B.8 — Depth camera + instance mask → 3D centroid per object on `/objects/centroids` | done |
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |

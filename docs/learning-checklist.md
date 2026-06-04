@@ -166,7 +166,11 @@ and calibration.
     #34 from vial #35 reliably, and check "the slot to the right is
     empty" before reaching in.
 
-- [ ] **8. Depth-camera point cloud → object centroid**
+- [x] **8. Depth-camera point cloud → object centroid** —
+  see [`exercises/08-depth-to-3d-centroid/`](../exercises/08-depth-to-3d-centroid/)
+  for the detector-guided implementation (mask + depth lookup, not
+  pure RANSAC). The exercise README also explains where pure point-
+  cloud geometry would still be worth doing.
   - **Goal:** With an RGB-D camera in sim, segment the table plane
     using RANSAC, cluster what's left, and return each cluster's
     centroid in the arm's base frame.
