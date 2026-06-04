@@ -110,6 +110,23 @@ sheet. Visual meshes (`mycobot_description/meshes/mycobot_280/visual/*.dae`)
 are simplified to boxes / cylinders for the collision shape so the
 planner runs fast.
 
+## SRDF named poses (from `mycobot_280.srdf`)
+
+The SRDF that ships alongside the URDF defines two named arm poses.
+Both are referenced by exercise 18 (joint-space hello world).
+
+| Pose | `link1_to_link2` | `link2_to_link3` | `link3_to_link4` | `link4_to_link5` | `link5_to_link6` | `link6_to_link6_flange` |
+|---|---|---|---|---|---|---|
+| `home` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `ready` | 0 | 0 | 1.5708 | 1.5708 | 0 | 0 |
+
+`home` is the "all zeros" straight-up T-pose. `ready` folds the elbow
+(joint 3) and wrist pitch (joint 4) up to π/2 each — the forearm
+points straight up and the wrist points straight forward. The gripper
+ends up above and in front of the shoulder, well clear of the bench
+plane. That's why exercise 18 reuses `ready` as the **park-between-trays**
+pose for the autosampler cell.
+
 ## Reach check against the autosampler cell
 
 From [`../01-custom-gazebo-world/worlds/autosampler_cell.sdf`](../01-custom-gazebo-world/worlds/autosampler_cell.sdf):

@@ -352,7 +352,7 @@ The simple idea: **you describe what you want, MoveIt figures out the
 joint angles, the trajectory, and the timing.** You do not write IK or
 trajectory math yourself.
 
-- [ ] **18. Joint-space "hello world" with MoveIt**
+- [x] **18. Joint-space "hello world" with MoveIt** — see [`../exercises/18-joint-space-hello-moveit/`](../exercises/18-joint-space-hello-moveit/)
   - **Goal:** Move the arm to a hard-coded joint configuration from a
     20-line Python or C++ script using `MoveGroupInterface`.
   - **Why it matters:** Smallest possible end-to-end test that the
