@@ -207,7 +207,10 @@ and calibration.
     fingers closing across the diameter". One pattern handles every
     vial type the autosampler accepts.
 
-- [ ] **10. ArUco marker 6-DoF pose estimation**
+- [x] **10. ArUco marker 6-DoF pose estimation** —
+  see [`exercises/10-aruco-pose/`](../exercises/10-aruco-pose/).
+  Plain RGB image → `cv2.aruco.detectMarkers` + `cv2.solvePnP` →
+  one 6-DoF pose per marker on `/aruco/markers`.
   - **Background (plain English):** ArUco markers are printable square
     black-and-white tags that look like simplified QR codes. Each one
     encodes a unique ID. When a *calibrated* camera sees one, OpenCV

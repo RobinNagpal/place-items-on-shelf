@@ -28,7 +28,7 @@ below maps directly to the same item number in that file.
   autosamplers use a top-down 3-finger cap gripper; the 2-finger
   antipodal grasp item 9 plans does not apply to vials at 14 mm
   centres.*
-- [ ] **10.** ArUco marker 6-DoF pose estimation.
+- [x] **10.** ArUco marker 6-DoF pose estimation.
 - [ ] **11.** Camera intrinsics calibration. *Deferred — Gazebo
   publishes exact intrinsics from the SDF; this is a real-world
   checkerboard procedure with little simulation value.*
