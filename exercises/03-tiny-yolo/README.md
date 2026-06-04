@@ -41,6 +41,36 @@ overlapping boxes into the single best one. The output is the
 
 The five class IDs we train on are listed in [`dataset.yaml`](dataset.yaml).
 
+## How the model knows what to detect
+
+Only because **the labels tell it**. There is no magic. Each training
+image has a `.txt` next to it listing every box and its class id:
+
+```
+0 0.21 0.18 0.04 0.10        # class 0 (vial)
+4 0.21 0.13 0.03 0.03        # class 4 (cap_red)
+```
+
+The trainer learns "pixels that look like this go with class N". If
+you never label a class, the trained model has no idea it exists.
+
+### Single-class vs multi-class detection
+
+| Mode               | When to use                                 | How to set up                                     |
+|--------------------|---------------------------------------------|---------------------------------------------------|
+| **Single-class**   | You only need *"is `X` here?"*               | One line under `names:` in `dataset.yaml`, label only that class in the `.txt` files. |
+| **Multi-class**    | You need to tell several object types apart | Multiple lines under `names:`, label every class you care about. |
+
+The same `train.py` and `validate.py` handle both — only the data
+and `dataset.yaml` change. We picked **multi-class with 5 labels**
+because one detector then answers three different questions per
+frame (where is the rack, where is the tray, which slots are full),
+which is cheaper than running three models.
+
+> **Important:** if you cut the dataset down to one class but forget
+> to update `dataset.yaml`, training crashes with a class-id
+> mismatch. The two must stay in sync.
+
 ## Why YOLO is the right first perception step
 
 Three reasons:
@@ -100,16 +130,45 @@ Inputs and outputs at a glance:
 | Train | `dataset.yaml`, `data/.../images/train`, `data/.../labels/train` | `runs/detect/<run_name>/weights/best.pt` and training plots   |
 | Validate | `best.pt`, `dataset.yaml`, `data/.../{images,labels}/test`       | prints mAP@0.5, mAP@0.5:0.95, per-class breakdown; exit code  |
 
+## How we measure it — what is mAP?
+
+Built up in five steps:
+
+1. **TP / FP / FN.** For one box, the model is right (**TP**) if it
+   says "object here" *and* the real object is there *and* the
+   boxes overlap enough. A false alarm is an **FP**. A missed
+   object is an **FN**.
+2. **Overlap = IoU.** Intersection-over-Union — overlapping area
+   divided by combined area. `1.0` = same box, `0.0` = no overlap.
+   The standard "match" cutoff is **IoU ≥ 0.5**.
+3. **Precision** = correct boxes / boxes drawn. **Recall** = real
+   objects found / real objects present.
+4. Every box has a 0–1 **confidence**. Sweeping the confidence
+   threshold from 0 to 1 produces a **precision-recall curve**.
+   **AP** (Average Precision) for one class is the area under that
+   curve.
+5. **mAP** = mean AP across classes. **mAP@0.5** uses the 0.5 IoU
+   cutoff; **mAP@0.5:0.95** averages mAP at IoU 0.5, 0.55, …, 0.95
+   (stricter — punishes loose boxes).
+
+Cheat sheet for reading a score:
+
+| Score      | What it means                                       |
+|------------|-----------------------------------------------------|
+| 0.9 – 1.0  | Excellent.                                          |
+| 0.7 – 0.9  | Good. Checklist "Done when" bar is here.            |
+| 0.5 – 0.7  | Working, but expect mistakes.                       |
+| < 0.5      | Unreliable — usually means too little training data.|
+
 ## What "Done when" means here
 
 The checklist asks for **mAP@0.5 above 0.7 on a held-out test set**.
 
-- mAP@0.5 = mean Average Precision when a predicted box is counted
-  as "correct" if its IoU with the ground-truth box is ≥ 0.5.
-- A score of 1.0 = perfect; 0.7 is a strong baseline on a clean
-  synthetic dataset.
-- `validate.py` prints this number and exits non-zero if it is below
-  0.70, so it is easy to drop into CI later.
+- `validate.py` prints `metrics.box.map50` (the headline number),
+  `metrics.box.map` (the stricter mAP@0.5:0.95), and a **per-class**
+  breakdown so we can see *which* class is dragging the average.
+- The script exits non-zero if mAP@0.5 < 0.70, so it drops into CI
+  later without extra wiring.
 
 ## Example run
 
@@ -140,6 +199,41 @@ python validate.py
 ```
 
 (Numbers above are illustrative — the dataset is not generated yet.)
+
+## Using `best.pt` to predict on a new image
+
+Training writes the network to a single `.pt` file (~6 MB for
+YOLOv8-nano) under `runs/detect/<name>/weights/`. Inference is then
+three lines:
+
+```python
+from ultralytics import YOLO
+
+model = YOLO("runs/detect/autosampler_yolov8n/weights/best.pt")
+results = model("scene.jpg")        # path, numpy image, or list
+
+for box in results[0].boxes:
+    cls  = int(box.cls[0])                # 0 = vial, 1 = empty_slot, ...
+    conf = float(box.conf[0])             # 0.0 – 1.0 confidence
+    xyxy = box.xyxy[0].tolist()           # [x1, y1, x2, y2] in pixels
+    print(results[0].names[cls], conf, xyxy)
+```
+
+Sample output for one frame:
+
+```
+vial    0.93  [184, 322, 226, 414]
+vial    0.88  [241, 320, 282, 413]
+cap_red 0.81  [186, 324, 222, 358]
+```
+
+`conf` is the **0–1 confidence** for that specific box —
+1.0 = "completely sure", 0.0 = "almost certainly not". Ultralytics
+keeps boxes with `conf >= 0.25` by default at predict time. Save an
+annotated image with `results[0].save("out.jpg")`.
+
+That same `best.pt` is what exercise 4 will load inside a ROS 2
+node to run on every Gazebo camera frame.
 
 ## What this exercise is **not**
 
