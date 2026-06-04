@@ -93,7 +93,7 @@ and calibration.
     detector tells the script which source slots still have vials,
     which tray slots are free, and roughly where the rack/tray are.
 
-- [ ] **4. Run YOLO live on a Gazebo camera feed**
+- [x] **4. Run YOLO live on a Gazebo camera feed** — see [`../exercises/04-yolo-live-on-gazebo-camera/`](../exercises/04-yolo-live-on-gazebo-camera/)
   - **Goal:** Stream RGB from a virtual camera, run YOLO every frame,
     publish bounding boxes on a ROS 2 topic, and overlay them in RViz.
   - **Why it matters:** Closed-loop perception in sim is the first step

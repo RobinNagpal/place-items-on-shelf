@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>yolo_live_demo</name>
+  <version>0.1.0</version>
+  <description>
+    Subscribes to the Gazebo overhead camera, runs a YOLOv8 .pt
+    checkpoint on every frame, publishes detections as
+    vision_msgs/Detection2DArray and an annotated image for RViz.
+    Exercise 4 of the place-items-on-shelf learning checklist.
+  </description>
+  <maintainer email="dev@example.com">place-items-on-shelf</maintainer>
+  <license>MIT</license>
+
+  <!-- All deps are runtime (Python). No build step besides ament_python. -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>vision_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+
+  <!-- ros_gz_image bridges the Gazebo camera topic into ROS 2. -->
+  <exec_depend>ros_gz_image</exec_depend>
+
+  <!-- ultralytics is a PyPI dep, not a ROS package. -->
+  <!-- Install with: pip install ultralytics (see README). -->
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

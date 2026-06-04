@@ -1,0 +1,207 @@
+<?xml version="1.0" ?>
+<!--
+  autosampler_cell_with_camera.sdf
+
+  Exercise 1's world + an overhead RGB camera. We do not modify the
+  canonical exercise 1 world; this file is the v1 cell with one
+  extra <model> bolted on top, so the YOLO live demo in exercise 4
+  has something to subscribe to.
+
+  ============================================================
+  WHAT IS A GAZEBO CAMERA SENSOR?
+
+  In SDF, a camera is a <sensor type="camera"> attached to a <link>
+  inside a <model>. Gazebo renders the scene from that link's pose
+  every frame and publishes the resulting image on a Gazebo
+  Transport topic (here: /overhead_camera/image_raw).
+
+  Gazebo Transport is NOT ROS. To get the same image onto a ROS 2
+  topic, we run `ros_gz_image image_bridge` in the launch file (see
+  yolo_live_demo/launch/yolo_live.launch.py). The bridge rewrites
+  each frame as sensor_msgs/Image and forwards it.
+
+  KEY CAMERA TAGS
+
+    <horizontal_fov>   field of view in radians (1.05 rad ~ 60 degrees)
+    <image>            output resolution and pixel format
+    <clip>             near/far depth clipping planes (metres)
+    <update_rate>      how many frames per second to render
+    <topic>            Gazebo Transport topic the frames publish on
+
+  PLACEMENT
+
+  The camera looks straight down (pitch = +pi/2) from 0.5 m above
+  the centre of the bench. That gives a clean top-down view of both
+  the source rack and the destination tray - perfect for YOLO to
+  spot vials, empty slots, and the rack/tray edges.
+
+  ============================================================
+-->
+<sdf version="1.7">
+  <world name="autosampler_cell">
+
+    <include><uri>model://sun</uri></include>
+    <include><uri>model://ground_plane</uri></include>
+
+    <!-- Bench: 600 x 400 x 50 mm slab. Static so it cannot be pushed. -->
+    <model name="bench">
+      <static>true</static>
+      <pose>0 0 0.75 0 0 0</pose>
+      <link name="top">
+        <visual name="v">
+          <geometry><box><size>0.6 0.4 0.05</size></box></geometry>
+          <material><ambient>0.5 0.35 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.6 0.4 0.05</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- myCobot 280 at the back of the bench. -->
+    <include>
+      <name>mycobot_280</name>
+      <uri>model://mycobot_280</uri>
+      <pose>-0.18 0 0.775 0 0 0</pose>
+    </include>
+
+    <!-- Source rack: 5 x 10 wells, MicroSolv-style. -->
+    <model name="source_rack">
+      <static>true</static>
+      <pose>0.05 0.12 0.80 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.09 0.18 0.05</size></box></geometry>
+          <material><ambient>0.9 0.9 0.95 1</ambient><diffuse>0.9 0.9 0.95 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.09 0.18 0.05</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Destination tray + alignment plate. -->
+    <model name="tray_alignment_plate">
+      <static>true</static>
+      <pose>0.05 -0.12 0.785 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.16 0.16 0.02</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.16 0.16 0.02</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="autosampler_tray">
+      <static>true</static>
+      <pose>0.05 -0.12 0.80 0 0 0</pose>
+      <link name="body">
+        <visual name="v">
+          <geometry><box><size>0.14 0.14 0.01</size></box></geometry>
+          <material><ambient>0.12 0.12 0.14 1</ambient><diffuse>0.12 0.12 0.14 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.14 0.14 0.01</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Three vials with red / blue / green caps in the back row. -->
+    <model name="vial_a1">
+      <pose>-0.018 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body"><pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap"><pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+    <model name="vial_a3">
+      <pose>0.000 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body"><pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap"><pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.1 0.5 0.9 1</ambient><diffuse>0.1 0.5 0.9 1</diffuse></material>
+        </visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+    <model name="vial_a5">
+      <pose>0.018 0.160 0.841 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass>
+          <inertia><ixx>1.0e-6</ixx><iyy>1.0e-6</iyy><izz>0.5e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="body"><pose>0 0 -0.002 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.028</length></cylinder></geometry>
+          <material><ambient>0.85 0.9 0.9 0.8</ambient><diffuse>0.85 0.9 0.9 0.8</diffuse></material>
+        </visual>
+        <visual name="cap"><pose>0 0 0.014 0 0 0</pose>
+          <geometry><cylinder><radius>0.0045</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.1 0.7 0.2 1</ambient><diffuse>0.1 0.7 0.2 1</diffuse></material>
+        </visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!--
+      Overhead camera, 0.5 m above the bench centre, looking straight
+      down. Static (no physics). One <link> with a <sensor type="camera">.
+      Gazebo Sim renders to /overhead_camera/image_raw at 30 Hz.
+    -->
+    <model name="overhead_camera">
+      <static>true</static>
+      <pose>0.05 0 1.30 0 1.5708 0</pose>   <!-- 0.5 m above bench centre, pitch = +pi/2 = straight down -->
+      <link name="optical_frame">
+        <sensor name="overhead_cam" type="camera">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <topic>overhead_camera/image_raw</topic>
+          <camera>
+            <horizontal_fov>1.0472</horizontal_fov>   <!-- 60 deg -->
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.05</near>
+              <far>3.0</far>
+            </clip>
+          </camera>
+        </sensor>
+      </link>
+    </model>
+
+    <!--
+      Make Gazebo Sim actually run the camera sensor system. Without
+      this <plugin>, the sensor declaration above is inert and no
+      frames are published.
+    -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+  </world>
+</sdf>
