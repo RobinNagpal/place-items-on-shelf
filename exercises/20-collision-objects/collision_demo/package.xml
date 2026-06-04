@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>collision_demo</name>
+  <version>0.1.0</version>
+  <description>
+    Adds bench / rack / tray / housing-wall / no-fly collision objects
+    to MoveIt's planning scene for the HPLC autosampler cell, then
+    runs two Cartesian goals: one that the planner has to route around
+    the housing wall (succeeds), and one whose target sits inside the
+    no-fly cylinder over an already-loaded vial slot (refused).
+    Implements checklist item 20 (autosampler tie-in).
+  </description>
+  <maintainer email="2021guneet@gmail.com">Ryan</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <depend>tf2</depend>
+  <depend>moveit_ros_planning_interface</depend>
+
+  <exec_depend>mycobot_moveit_config</exec_depend>
+  <exec_depend>mycobot_gazebo</exec_depend>
+  <exec_depend>mycobot_description</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

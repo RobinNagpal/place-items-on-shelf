@@ -48,7 +48,7 @@ a separate PR — link will resolve after both merge).
 These are mostly *configure and observe* tasks — no algorithms to
 implement.
 
-- [ ] **1. Create a custom Gazebo world**
+- [x] **1. Create a custom Gazebo world** — see [`../exercises/01-custom-gazebo-world/`](../exercises/01-custom-gazebo-world/)
   - **Goal:** Build a simple SDF world file with a flat table, the arm
     mounted on the table, and 3 coloured cubes spawned on top.
   - **Why it matters:** Every later exercise needs a scene to play in.
@@ -62,7 +62,7 @@ implement.
     12 mm × 32 mm vial cylinders with caps, and the bench-mounted
     myCobot. This world is the canvas every later exercise uses.
 
-- [ ] **2. Read and annotate the arm's URDF (no code)**
+- [x] **2. Read and annotate the arm's URDF (no code)** — see [`../exercises/02-read-and-annotate-urdf/`](../exercises/02-read-and-annotate-urdf/)
   - **Goal:** Open the arm's URDF file, draw the kinematic tree on
     paper, and label which `<link>` is which physical part, which
     `<joint>` rotates around which axis, and what each joint limit is.
@@ -352,7 +352,7 @@ The simple idea: **you describe what you want, MoveIt figures out the
 joint angles, the trajectory, and the timing.** You do not write IK or
 trajectory math yourself.
 
-- [ ] **18. Joint-space "hello world" with MoveIt**
+- [x] **18. Joint-space "hello world" with MoveIt** — see [`../exercises/18-joint-space-hello-moveit/`](../exercises/18-joint-space-hello-moveit/)
   - **Goal:** Move the arm to a hard-coded joint configuration from a
     20-line Python or C++ script using `MoveGroupInterface`.
   - **Why it matters:** Smallest possible end-to-end test that the
@@ -363,7 +363,8 @@ trajectory math yourself.
     pose between trays, where the arm is fully out of the
     autosampler drawer's path so a tech can swap trays.
 
-- [ ] **19. Cartesian pose goal — MoveIt as the IK solver**
+- [x] **19. Cartesian pose goal — MoveIt as the IK solver** —
+  implemented in [`../exercises/19-cartesian-pose-goal/`](../exercises/19-cartesian-pose-goal/).
   - **Goal:** Ask MoveIt to move the end-effector to a target XYZ +
     orientation (e.g. "10 cm above the red cube, gripper facing
     down"). MoveIt solves the inverse kinematics (target pose →
@@ -381,7 +382,8 @@ trajectory math yourself.
     above_dest → lower → release`. MoveIt solves the IK at each
     step; you only supply the poses.
 
-- [ ] **20. Collision avoidance — add a table to the planning scene**
+- [x] **20. Collision avoidance — add a table to the planning scene** —
+  implemented in [`../exercises/20-collision-objects/`](../exercises/20-collision-objects/).
   - **Goal:** Insert a static box representing the table into MoveIt's
     planning scene. Verify the planner goes *around* it, not through
     it. Repeat with a second box representing a wall.
@@ -396,7 +398,8 @@ trajectory math yourself.
     already-loaded slot. The planner then refuses to lower the arm
     onto an occupied slot.
 
-- [ ] **21. Hardcoded pick-and-place sequence — instructions only**
+- [x] **21. Hardcoded pick-and-place sequence — instructions only** —
+  implemented in [`../exercises/21-hardcoded-pick-and-place/`](../exercises/21-hardcoded-pick-and-place/).
   - **Goal:** Write a script with a hard-coded list of 5 poses
     (`home → above_cube → grasp_cube → above_shelf → release_pose`).
     Hand each one to MoveIt in order, open/close the gripper between
@@ -413,12 +416,35 @@ trajectory math yourself.
     from the rack and tray geometry, execute in order. No learning,
     only barcode reading on top.
 
+- [x] **22. Straight-line Cartesian path — `computeCartesianPath`** —
+  implemented in [`../exercises/22-cartesian-path-following/`](../exercises/22-cartesian-path-following/).
+  - **Goal:** Trace a *straight line* in end-effector space between
+    two poses (or through a list of waypoints) instead of letting
+    the planner pick whatever joint-space path it likes. Use
+    `MoveGroupInterface::computeCartesianPath`.
+  - **Why it matters:** Joint-space planning (items 18 and 19) cares
+    only about endpoints — the gripper can take a curved Cartesian
+    path between them. Some operations (descending into a vial well,
+    pouring, drawer insertion) need a *straight* end-effector path
+    or the wrist clips the rim. `computeCartesianPath` is the
+    standard MoveIt 2 way to do that.
+  - **Done when:** The function returns `fraction = 1.0` for a 5 cm
+    vertical descent into the rack area, and you can see the
+    end-effector trace a vertical line in RViz's planned-path view
+    (no curve, no wrist wobble).
+  - **Time:** 2–4 hours.
+  - **Autosampler tie-in:** every well descent / lift in the v1
+    pick-and-place becomes a Cartesian path call: the gripper drops
+    straight down, closes, lifts straight back up. Removes the
+    chance that the joint-space planner takes a tilted approach
+    that grazes the rack rim.
+
 ## E. Learning — RL, imitation, and LLMs (sim-only)
 
 All four work entirely in simulation. No hardware needed for any of
 them.
 
-- [ ] **22. Behavior cloning from one teleop demo**
+- [ ] **23. Behavior cloning from one teleop demo**
   - **Goal:** Record a 60-second teleop trajectory (keyboard or
     gamepad → sim arm) for a reach task. Train a small MLP to map
     `(joint state → next action)`. Replay it in sim.
@@ -432,7 +458,7 @@ them.
     small policy that handles slight tray misalignment more
     smoothly than the hard-coded version.
 
-- [ ] **23. PPO reinforcement learning on a reach task**
+- [ ] **24. PPO reinforcement learning on a reach task**
   - **Goal:** Train a Stable-Baselines3 PPO agent.
     Observation = joint positions + target XYZ.
     Reward = -distance. Episode = 200 steps.
@@ -446,7 +472,7 @@ them.
     rack is rotated 3°" or "one slot is broken", then deploy the
     learned policy once it is reliable.
 
-- [ ] **24. Tiny VLA inspection (no execution)**
+- [ ] **25. Tiny VLA inspection (no execution)**
   - **Goal:** Feed a sim image plus an instruction ("pick the red
     cube") to a small VLA model like OpenVLA, log the predicted
     7-DoF action — do **not** execute it on the arm.
@@ -460,7 +486,7 @@ them.
     predicted action lands anywhere near that vial — sets your
     expectations before considering a VLA for a real lab cell.
 
-- [ ] **25. LLM-as-router with a human in the loop**
+- [ ] **26. LLM-as-router with a human in the loop**
   - **Goal:** Detect objects with YOLO (item 4), hand the JSON to a
     small LLM along with a natural-language instruction ("pick the
     green one"), have the LLM emit the chosen object ID, send that

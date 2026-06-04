@@ -27,3 +27,7 @@ The plain-English walkthrough lives in
 - [`robots/mycobot-280-pi/cobot280_moveit_task/`](robots/mycobot-280-pi/cobot280_moveit_task/) —
   our minimal custom MoveIt 2 task package (the "hello world" path that uses
   `MoveGroupInterface` directly).
+- [`exercises/`](exercises/) — small, self-contained implementations of the
+  items in [`docs/learning-checklist.md`](docs/learning-checklist.md). One
+  subfolder per item, each with a `README.md`, an `ARCHITECTURE.md`, and an
+  `IMPLEMENTATION_NOTES.md`.
