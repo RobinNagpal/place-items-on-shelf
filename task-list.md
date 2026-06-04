@@ -24,10 +24,15 @@ below maps directly to the same item number in that file.
 
 - [x] **7.** Instance segmentation — pixel masks instead of bounding boxes.
 - [x] **8.** Depth-camera point cloud → object centroid.
-- [ ] **9.** Depth-based grasp-point estimation.
+- [ ] **9.** Depth-based grasp-point estimation. *Deferred — real
+  autosamplers use a top-down 3-finger cap gripper; the 2-finger
+  antipodal grasp item 9 plans does not apply to vials at 14 mm
+  centres.*
 - [ ] **10.** ArUco marker 6-DoF pose estimation.
-- [ ] **11.** Camera intrinsics calibration.
-- [ ] **12.** Hand-eye calibration (camera ↔ end-effector).
+- [ ] **11.** Camera intrinsics calibration. *Deferred — Gazebo
+  publishes exact intrinsics from the SDF; this is a real-world
+  checkerboard procedure with little simulation value.*
+- [x] **12.** Hand-eye calibration (camera ↔ arm base).
 - [ ] **13.** Classical colour segmentation (no ML).
 - [ ] **14.** Barcode / QR-code reader on simulated labels.
 

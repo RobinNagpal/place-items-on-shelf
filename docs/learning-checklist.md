@@ -253,7 +253,10 @@ and calibration.
     even 0.5 px reprojection error is roughly 1 mm in the world.
     Always do this first.
 
-- [ ] **12. Hand-eye calibration (camera ↔ end-effector)**
+- [x] **12. Hand-eye calibration (camera ↔ end-effector)** —
+  see [`exercises/12-hand-eye-calibration/`](../exercises/12-hand-eye-calibration/).
+  Our overhead camera is fixed in the world, so the exercise solves
+  the **eye-to-hand** variant (`T_base_cam` instead of `T_ee_cam`).
   - **Background (plain English):** The camera sees the world in *its
     own* coordinate frame. The arm moves in *its own* coordinate
     frame. **Hand-eye calibration** figures out the rigid transform
