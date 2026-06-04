@@ -2,22 +2,85 @@
 <!--
   autosampler_cell.sdf
 
-  Minimal Gazebo world for the HPLC autosampler tray-loading cell
-  (see ../../../docs/hplc-autosamplers/requirements/). Implements
-  checklist item A.1, autosampler tie-in.
+  A Gazebo world for the HPLC autosampler tray-loading cell.
+  Implements checklist item A.1 (autosampler tie-in).
+
+  ============================================================
+  WHAT IS AN SDF FILE?
+
+  SDF = Simulation Description Format. It is an XML file that tells
+  the Gazebo simulator what to put in the scene and where: lights,
+  floor, table, robot, objects. Gazebo reads this file and renders
+  the 3D world from it. We never run this file directly; we hand it
+  to Gazebo: "gazebo this_file.sdf" or "gz sim this_file.sdf".
+
+  THE MAIN TAGS USED IN THIS FILE
+
+    <sdf version="1.7">     wraps the whole document. Says which
+                            SDF version the file is written in.
+    <world>                 the top-level container. One per file.
+                            Holds every object that exists in the
+                            simulation.
+    <include><uri>          load a pre-built model from a model
+                            database (e.g. model://sun pulls in
+                            Gazebo's built-in sun).
+    <model>                 one object in the world (the bench,
+                            the rack, a vial, the arm). A model
+                            has links and (optionally) joints.
+    <static>                if true, physics ignores the model.
+                            It cannot fall, be pushed, or wobble.
+                            The bench and rack are static; vials
+                            are not.
+    <pose>                  six numbers "x y z roll pitch yaw".
+                            Metres and radians. Position +
+                            orientation of the model in the world.
+    <link>                  one rigid body inside a model. A cube
+                            has one link; the arm has many.
+    <visual>                what the GUI draws for a link (colour
+                            and shape).
+    <collision>             the shape physics uses for contacts
+                            (often a simpler version of the visual).
+    <geometry>              the shape itself: <box>, <cylinder>,
+                            <sphere>, or <mesh>.
+    <material>              the surface colours: <ambient> (base
+                            colour under shade), <diffuse> (the
+                            main visible colour). Four numbers:
+                            red green blue alpha, each 0..1.
+    <inertial>              mass + inertia tensor. Required on any
+                            non-static link so physics knows how
+                            it should move.
+
+  HOW THE THREE VIALS GET DIFFERENT COLOURS
+
+  Each vial is a separate <model> with one <link>. Inside that
+  link there are TWO <visual> blocks — one for the glass body and
+  one for the cap — each with its own <material>. To make the cap
+  red, we set <ambient> and <diffuse> to "0.8 0.1 0.1 1" (mostly
+  red with a tiny amount of green and blue, fully opaque). Blue
+  is "0.1 0.5 0.9 1", green is "0.1 0.7 0.2 1". The glass bodies
+  all share the same pale-blue translucent material — same numbers
+  in every vial — so only the cap colour changes between the
+  three vial models.
+
+  ============================================================
 
   Layout (top-down, +X = forward, +Y = left):
 
-      arm at (-0.18, 0)               left arrow: back-centre of bench
+      arm at (-0.18, 0)                back-centre of bench
                   |
-        rack (5x10) at (0.05, +0.12)   left arrow: left peripheral
-        tray (10x10) at (0.05, -0.12)  left arrow: right peripheral
+        rack (5x10) at (0.05, +0.12)   left peripheral
+        tray (10x10) at (0.05, -0.12)  right peripheral
 
   All peripherals sit inside a 40 x 40 cm cell centred on the arm,
   per requirements/04-workspace-and-reach.md. Three vials are spawned
   in the back row of the rack just to show the geometry.
 
   Units: metres. Bench top at z = 0.775 m.
+
+  The arm itself is included from the upstream URDF at
+  automaticaddison/mycobot_ros2 → mycobot_description/urdf/robots/
+  mycobot_280.urdf.xacro. See ../../02-read-and-annotate-urdf/
+  annotation.md for the full link/joint breakdown.
 -->
 <sdf version="1.7">
   <world name="autosampler_cell">
