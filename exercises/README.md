@@ -34,10 +34,15 @@ for the full convention.
 
 ## Implemented so far
 
+Each implementation targets the **HPLC autosampler tie-in** noted on
+that checklist item — dimensions, layout, and the reference products
+come from
+[`../docs/hplc-autosamplers/requirements/`](../docs/hplc-autosamplers/requirements/).
+
 | # | Folder | Checklist item | Status |
 |---|---|---|---|
-| 1 | [`01-custom-gazebo-world/`](01-custom-gazebo-world/) | A.1 — Create a custom Gazebo world | done |
-| 2 | [`02-read-and-annotate-urdf/`](02-read-and-annotate-urdf/) | A.2 — Read and annotate the arm's URDF | done |
+| 1 | [`01-custom-gazebo-world/`](01-custom-gazebo-world/) | A.1 — Gazebo world of the autosampler cell | done |
+| 2 | [`02-read-and-annotate-urdf/`](02-read-and-annotate-urdf/) | A.2 — URDF + reach check against the cell | done |
 
 The numbers match the item numbers in
 [`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you

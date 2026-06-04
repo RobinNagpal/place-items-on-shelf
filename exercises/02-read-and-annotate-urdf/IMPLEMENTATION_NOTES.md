@@ -2,127 +2,65 @@
 
 ## Why a doc and not a script
 
-The checklist item explicitly says "no code". The point of the exercise
-is to **build a mental model of the arm**, not to generate the document.
-A script that prints the same table would let the reader skip the part
+The checklist item says "no code". The point of the exercise is to
+*build a mental model of the arm*, not to generate the document. A
+script that prints the same table would let the reader skip the part
 that matters.
 
-We still write the table down because:
-
-1. Other exercises need to look these numbers up quickly.
-2. Re-reading 800 lines of xacro every time is wasteful.
-3. Putting a human summary next to the URDF makes drift visible the
-   next time upstream changes a limit.
+We still write everything down because every later exercise needs to
+look these numbers up quickly, and the autosampler reach check has to
+land *before* anyone wires up MoveIt.
 
 ## Which URDF source we used
 
-We use the URDF that ships with
-[`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2),
-specifically `mycobot_description/urdf/mycobot_280.urdf.xacro` and the
-matching SRDF in `mycobot_moveit_config/config/mycobot_280/`. That
-matches what the rest of this repo already references — see the
-`cobot280_moveit_task` README.
+`automaticaddison/mycobot_ros2`, branch `main`. The repo's
+`cobot280_moveit_task` already references this fork, so we stay
+consistent. The Elephant Robotics official ROS 2 port uses different
+link names; do not mix.
 
-There are at least three URDFs floating around for the myCobot 280:
+If upstream tightens a limit, the table in `annotation.md` will lie.
+The mitigation is small: re-read the URDF whenever you clone a new
+version, and update the table. The whole table is ~12 numbers.
 
-| Source | When to use |
-|---|---|
-| **automaticaddison/mycobot_ros2** | what this repo uses, has a working Gazebo + MoveIt 2 setup |
-| **elephantrobotics/mycobot_ros2** | the vendor's own ROS 2 port, sometimes lags behind on Jazzy |
-| **elephantrobotics/mycobot_ros** | the ROS 1 original — link names differ |
+## Why we copied joint axes rather than guessed
 
-If you swap sources, **the link and joint names may change**. The
-*structure* (six revolute joints, base→shoulder→elbow→wrist1→wrist2→
-roll) will not.
+Two URDFs that produce the same physical motion can list completely
+different axis vectors, because the `<axis>` is in the parent link's
+frame and the parent's `<origin>` rotates that frame. Reading the
+axis from the URDF directly is the only reliable approach.
 
-## Why the joint axes were copied, not computed
+## Why the reach check uses simple Euclidean distance
 
-Joint axes look obvious when you look at the arm — joint 1 is clearly
-vertical, joint 6 clearly rolls the gripper. But the *exact* axis
-vector in the URDF (e.g. `0 0 1` vs `1 0 0`) depends on how the parent
-link is oriented in its `<origin>` block. Two URDFs that produce the
-same physical motion can list completely different axis vectors.
+The arm's reach envelope is *roughly* a sphere of 280 mm radius
+around the base. It is not exactly that — the envelope is dented by
+joint limits and self-collision near the base — but flat
+`sqrt(Δx² + Δy²)` against 280 mm is a safe *upper* check at the bench
+level (z ≈ arm-base z): any point that fails the flat check is
+definitely unreachable. Points that pass the flat check may still be
+unreachable; for those, run MoveIt's IK in exercise 19 to confirm.
 
-So we copy the axes verbatim from the URDF rather than guess them from
-the arm's appearance. If you fork the URDF, re-read the `<axis>` tags
-and update the table.
+For a first-pass "does this layout even make sense?" filter, the
+flat check is exactly the right tool.
 
-## Why we use radians not degrees in the table
+## Trade-off — scaling down the rack and tray
 
-The URDF is in radians. MoveIt is in radians. `joint_states` is in
-radians. Translating to degrees once on paper helps human intuition,
-but the source of truth must be the radian value — that is the number
-the planner and the controllers actually use. The table lists both for
-that reason.
+The SDF uses 90 × 180 mm for the rack (catalogue is ~110 × 220 mm)
+and 140 × 140 mm for the tray (catalogue is under 300 × 400 mm). We
+took the requirements geometry and shrunk it just enough that the
+far corners come inside reach. The cost: the SDF is no longer 1:1
+with the catalogue products. The gain: the v1 cell physically
+fits the chosen arm.
 
-## Trade-off: copying limit values vs linking to upstream
+If we ever swap to a longer arm (myCobot 320, UR3e), restore the
+catalogue footprints.
 
-The cleanest alternative would be to not duplicate the numbers at all
-and instead say "see the URDF". We did not do that because:
+## Failure modes (in *using* the annotation)
 
-1. The URDF is in a different repo — readers have to clone it before
-   they can answer the simplest question ("what's the limit on
-   joint 3?").
-2. Limits change rarely. The maintenance cost of duplicating them is
-   low.
-
-The trade-off: if upstream tightens a limit and we forget to update
-`annotation.md`, the doc lies. Mitigation: pin the upstream commit hash
-in this notes file when we copy values, and re-verify on each new
-release.
-
-Pinned reference (when this exercise was written):
-`automaticaddison/mycobot_ros2`, branch `main`. If the numbers in
-`annotation.md` drift from upstream, treat the URDF as the truth and
-update the doc.
-
-## Assumptions about the gripper
-
-The annotation includes the parallel-jaw gripper section only as a
-*conditional* tree — "if a gripper is loaded on top". The base URDF
-ships without one; the gripper is a separate xacro that gets included
-in the MoveIt config. If you fork without a gripper, ignore the gripper
-table.
-
-The two-finger prismatic limits in the annotation (`0..0.03 m`) are
-representative for the parallel jaw in the addison fork. The
-Elephant Robotics adaptive gripper has different limits and a different
-joint structure — re-annotate if you swap to that gripper.
-
-## Failure cases (in *using* the annotation)
-
-- **MoveIt rejects a joint goal silently** — your goal probably exceeds
-  the limits in the annotation. Re-check against the radian column
-  (not the degree column — rounding can mislead).
-- **Arm "wobbles" near a singularity in RViz** — joints 4 and 5 line
-  up. This is a kinematic property of the arm, not a URDF bug. The
-  annotation does not list singularities; if a later exercise needs
-  them, add a separate doc.
-- **Frames in RViz are not where you expect** — the URDF's `<origin>`
-  blocks define the link-to-link offsets, not just the joint axes. The
-  annotation focuses on joint axes; for full origin offsets, read the
-  URDF directly.
-
-## Debugging tips
-
-- `xacro mycobot_280.urdf.xacro > mycobot_280.urdf` first — pure URDF
-  is easier to read than xacro with macros.
-- `check_urdf mycobot_280.urdf` from `liburdfdom-tools` prints the
-  parsed tree and fails loud if the URDF is malformed. Run this before
-  trusting any annotation you produced yourself.
-- `urdf_to_graphiz mycobot_280.urdf` writes a PDF of the kinematic
-  tree. Stick it next to `annotation.md` on the same screen while you
-  fill in the tables.
-
-## Things this exercise intentionally does *not* do
-
-- No measurement of mass / inertia values. The annotation lists the
-  total mass for sanity, but the per-link inertia tensors are not
-  copied — they are noisy, vendor-tuned, and rarely useful to a human
-  reader.
-- No discussion of `<transmission>` or `<gazebo>` tags. Those matter
-  for `ros2_control` and the Gazebo simulation plugin respectively;
-  they get their own treatment when the relevant later exercises need
-  them.
-- No comparison with a different arm. The point is to know *this* arm
-  cold.
+- **MoveIt rejects a goal pose silently** — out of reach. Re-run the
+  Δx, Δy arithmetic for that pose against 280 mm.
+- **Arm reaches the pose in RViz but cannot in Gazebo** — a joint
+  limit was tighter than the annotation table claims (upstream
+  drift). Re-check `<limit>` tags in your local URDF.
+- **TF frames not where expected** — `<axis>` is correct but `<origin>`
+  rotations differ between forks. The annotation only covers axes,
+  not origins; read the URDF for the rest.

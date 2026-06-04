@@ -1,113 +1,49 @@
-# 01 — Create a custom Gazebo world
+# 01 — Custom Gazebo world (autosampler cell)
 
-A minimal Gazebo simulation scene with a table, the myCobot 280 arm, and
-three coloured cubes on the table top. Implements checklist item **A.1**
-from [`../../docs/learning-checklist.md`](../../docs/learning-checklist.md).
+A minimal Gazebo world for the HPLC autosampler tray-loading cell.
+Implements checklist item **A.1** (autosampler tie-in) from
+[`../../docs/learning-checklist.md`](../../docs/learning-checklist.md).
+Dimensions follow
+[`../../docs/hplc-autosamplers/requirements/`](../../docs/hplc-autosamplers/requirements/).
 
-## What this is
+## What's in the scene
 
-A single SDF file ([`worlds/pick_place_world.sdf`](worlds/pick_place_world.sdf))
-that describes a virtual world. Gazebo loads the file and renders a 3D
-scene you can fly around in and interact with.
+- **Bench** (600 × 400 × 50 mm) — the table the cell sits on.
+- **myCobot 280 Pi** at the back-centre of the bench, mounted on the
+  bench top.
+- **Source rack** (90 × 180 × 50 mm) at the front-left — a stand-in for
+  the MicroSolv 5 × 10 rack from
+  [`requirements/01-task-and-objects.md`](../../docs/hplc-autosamplers/requirements/01-task-and-objects.md).
+- **Destination tray on alignment plate** at the front-right — a
+  stand-in for the Agilent 100-position 10 × 10 classic tray.
+- **Three 12 × 32 mm vials** in the back row of the rack with red,
+  blue, and green PP caps — enough to verify pick poses against later
+  exercises.
 
-## Main workflow
+All peripherals fit inside the 40 × 40 cm cell centred on the arm,
+matching [`requirements/04-workspace-and-reach.md`](../../docs/hplc-autosamplers/requirements/04-workspace-and-reach.md).
 
-1. You launch Gazebo and point it at the SDF file.
-2. Gazebo reads the SDF, downloads any referenced models (sun,
-   ground_plane, mycobot_280), and renders the scene.
-3. You see the table, the arm in its home pose, and three cubes.
-4. You drag any cube with the mouse — it moves and reacts to gravity.
-
-That's the whole exercise. No code runs. Everything is declarative.
-
-## Core concepts
-
-- **SDF (Simulation Description Format)** — an XML format that describes
-  a world: lights, ground, objects (called *models*), their shapes,
-  colours, masses, and starting positions.
-- **Model** — one object in the world. A model has one or more *links*
-  (rigid bodies) glued together by *joints*. A cube is a model with one
-  link. A robot arm is a model with many links and joints.
-- **Static vs dynamic model** — `<static>true</static>` means physics
-  ignores the model (it cannot move, cannot be pushed). The table is
-  static. The cubes are not — they fall under gravity and you can drag
-  them.
-- **`<include>`** — load a model from a model database instead of writing
-  it out inline. We use this for the sun, the ground plane, and the
-  myCobot arm.
-- **Pose** — six numbers: x y z roll pitch yaw. Units are metres and
-  radians. The world origin is at `(0, 0, 0)`; +Z is up.
-
-## Libraries / frameworks used
-
-- **Gazebo** — the simulator. Two flavours work with this file:
-  - **Gazebo Classic 11** (`gazebo` command) — older but most ROS 2
-    tutorials still use it.
-  - **Gazebo Sim / Ignition Gazebo Garden+** (`gz sim` command) — the
-    new line. Same SDF, different launch command.
-- **myCobot 280 Gazebo model** — comes from the upstream
-  [`automaticaddison/mycobot_ros2`](https://github.com/automaticaddison/mycobot_ros2)
-  repo. We do *not* duplicate it here; we reference it by URI.
-
-## Data flow
-
-```
-       pick_place_world.sdf
-                |
-                v
-   +------------+------------+
-   |   Gazebo (gazebo / gz)   |   <-- parses SDF, builds scene
-   +------------+------------+
-                |
-                v
-   +-------------------------+
-   |   3D GUI window         |
-   |   - table               |
-   |   - myCobot 280 arm     |
-   |   - 3 cubes (draggable) |
-   +-------------------------+
-```
-
-## Inputs
-
-- The SDF file itself.
-- The Gazebo model database (for `sun`, `ground_plane`).
-- The `mycobot_280` Gazebo model on your model path.
-
-## Outputs
-
-- A live Gazebo window. No files are written. Nothing is published on a
-  ROS topic — perception and motion live in later exercises.
-
-## Example execution
+## Run it
 
 ```bash
-# Step 1: Make sure the myCobot model is on Gazebo's search path.
-# Adjust the path to wherever you cloned automaticaddison/mycobot_ros2.
+# Point Gazebo at the upstream myCobot model.
 export GAZEBO_MODEL_PATH=~/ros2_ws/src/mycobot_ros2/mycobot_description/models:$GAZEBO_MODEL_PATH
-# For Gazebo Sim Garden+ use this instead:
+# Or for Gazebo Sim Garden+:
 # export GZ_SIM_RESOURCE_PATH=~/ros2_ws/src/mycobot_ros2/mycobot_description/models:$GZ_SIM_RESOURCE_PATH
 
-# Step 2: Launch Gazebo on the world.
-gazebo exercises/01-custom-gazebo-world/worlds/pick_place_world.sdf
-# Or on Garden+:
-# gz sim exercises/01-custom-gazebo-world/worlds/pick_place_world.sdf
+gazebo exercises/01-custom-gazebo-world/worlds/autosampler_cell.sdf
+# Or: gz sim exercises/01-custom-gazebo-world/worlds/autosampler_cell.sdf
 ```
 
-When the window opens you should see:
+You should see the bench, the arm in its zero pose, the white rack
+with three capped vials on the back row, and the dark tray on its
+alignment plate. Dragging a vial with the mouse should move it; the
+rack, tray, and bench should stay put.
 
-- A flat grey ground.
-- A brown table at hip height.
-- The myCobot 280 mounted at the back edge of the table, in its zero
-  (home) pose.
-- A red, a green, and a blue cube on the table top.
-
-Click and drag any cube with the mouse. It should slide on the table and
-fall off the edge if you push it too far. That's the **Done when** check
-from the checklist.
+That's the "Done when" check.
 
 ## What's next
 
-Once this world opens, you have a scene every later exercise can re-use:
-[`02-read-and-annotate-urdf/`](../02-read-and-annotate-urdf/) studies the
-arm that appears in this world.
+Exercise [`02-read-and-annotate-urdf/`](../02-read-and-annotate-urdf/)
+uses this layout to confirm every rack and tray slot is inside the
+myCobot's reach.
