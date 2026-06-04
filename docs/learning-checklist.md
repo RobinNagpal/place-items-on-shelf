@@ -143,7 +143,7 @@ and calibration.
     frame on-device — important for the GMP audit trail (no images
     leaving the lab network).
 
-- [ ] **7. Instance segmentation — pixel masks instead of bounding boxes**
+- [x] **7. Instance segmentation — pixel masks instead of bounding boxes** — see [`../exercises/07-instance-segmentation/`](../exercises/07-instance-segmentation/)
   - **Background (plain English):** YOLO draws a *rectangle* around an
     object. Most of that rectangle is actually background. **Instance
     segmentation** goes further — it labels every pixel that belongs

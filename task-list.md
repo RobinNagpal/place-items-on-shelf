@@ -22,7 +22,7 @@ below maps directly to the same item number in that file.
 
 ### Finish perception
 
-- [ ] **7.** Instance segmentation — pixel masks instead of bounding boxes.
+- [x] **7.** Instance segmentation — pixel masks instead of bounding boxes.
 - [ ] **8.** Depth-camera point cloud → object centroid.
 - [ ] **9.** Depth-based grasp-point estimation.
 - [ ] **10.** ArUco marker 6-DoF pose estimation.
