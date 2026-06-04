@@ -47,6 +47,7 @@ come from
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |
 | 21 | [`21-hardcoded-pick-and-place/`](21-hardcoded-pick-and-place/) | D.21 — Hardcoded pick-and-place: 18 + 19 + 20 stitched together | done |
+| 22 | [`22-cartesian-path-following/`](22-cartesian-path-following/) | D.22 — Straight-line Cartesian path (`computeCartesianPath`) | done |
 
 The numbers match the item numbers in
 [`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you
