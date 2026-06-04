@@ -130,6 +130,35 @@ ros2 topic hz /yolo_seg/instance_mask
 ros2 run rqt_image_view rqt_image_view /yolo_seg/image_annotated
 ```
 
+## Still 2D — and that's why camera placement matters
+
+A mask is just a `H × W` array of booleans over the **image plane**.
+No depth is attached to any pixel. To turn it into a 3D pose the
+arm can plan to, you need the same four bridges as plain YOLO
+(see exercise 04's question 8): **RGB-D depth (item 8)**, a
+**fixed-z plane** assumption, a **slot-index lookup**, or
+**ArUco markers (item 10)**. Segmentation does not replace those —
+it just hands the bridge a cleaner 2D input.
+
+Where masks win once depth lands: `mask + depth_map` gives a clean
+cluster of 3D points for that one object, while `bbox + depth_map`
+also drags in surrounding table. That's why the v1 sequence is
+**item 7 (mask) → item 8 (depth) → item 9 (PCA grasp)**.
+
+Because we are still 2D today, **camera placement is load-bearing**:
+
+- **Top-down (what the SDF uses):** almost no occlusion, the
+  fixed-z trick works because every vial top is at the same known
+  height. Cheapest recipe for v1.
+- **Side view:** vials at the back hide behind the front row —
+  masks cannot fix that.
+- **Eye-in-hand (gripper-mounted):** great for final approach,
+  needs hand-eye calibration (item 12) to be useful.
+
+The more constraints baked into the camera placement, the less
+calibration math you need later. Move the camera and you re-open
+exercises 11 and 12.
+
 ## What this exercise is **not**
 
 - **Not a full mask scorer** — the IoU comparison logic from
