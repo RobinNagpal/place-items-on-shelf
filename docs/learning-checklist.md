@@ -363,7 +363,8 @@ trajectory math yourself.
     pose between trays, where the arm is fully out of the
     autosampler drawer's path so a tech can swap trays.
 
-- [ ] **19. Cartesian pose goal — MoveIt as the IK solver**
+- [x] **19. Cartesian pose goal — MoveIt as the IK solver** —
+  implemented in [`../exercises/19-cartesian-pose-goal/`](../exercises/19-cartesian-pose-goal/).
   - **Goal:** Ask MoveIt to move the end-effector to a target XYZ +
     orientation (e.g. "10 cm above the red cube, gripper facing
     down"). MoveIt solves the inverse kinematics (target pose →
