@@ -283,7 +283,7 @@ and calibration.
     Without it, ±2 mm placement is impossible. Re-run any time the
     camera is bumped.
 
-- [ ] **13. Classical colour segmentation (no ML)**
+- [x] **13. Classical colour segmentation (no ML)** — see [`../exercises/13-color-segmentation/`](../exercises/13-color-segmentation/)
   - **Goal:** Find the red cube in a cluttered Gazebo scene using only
     HSV thresholds + connected components.
   - **Why it matters:** When colour is reliable, classical CV is

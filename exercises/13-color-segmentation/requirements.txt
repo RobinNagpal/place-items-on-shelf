@@ -1,0 +1,8 @@
+# Python dependencies for exercise 13 (colour segmentation, no ML).
+# Install with:  pip install -r requirements.txt
+#
+# OpenCV gives us: cv2.cvtColor (BGR -> HSV), cv2.inRange (threshold),
+# cv2.morphologyEx (clean up noise), cv2.connectedComponentsWithStats
+# (label every blob + return centroid, bbox, area).
+opencv-python>=4.8
+numpy>=1.24

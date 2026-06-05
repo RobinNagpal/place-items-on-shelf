@@ -1,0 +1,3 @@
+# Demo writes rendered + annotated PNGs here.
+output/
+__pycache__/
