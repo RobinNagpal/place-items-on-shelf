@@ -454,7 +454,8 @@ trajectory math yourself.
 All four work entirely in simulation. No hardware needed for any of
 them.
 
-- [ ] **23. Behavior cloning from one teleop demo**
+- [x] **23. Behavior cloning from one teleop demo** —
+  implemented in [`../exercises/23-behavior-cloning-reach/`](../exercises/23-behavior-cloning-reach/).
   - **Goal:** Record a 60-second teleop trajectory (keyboard or
     gamepad → sim arm) for a reach task. Train a small MLP to map
     `(joint state → next action)`. Replay it in sim.
