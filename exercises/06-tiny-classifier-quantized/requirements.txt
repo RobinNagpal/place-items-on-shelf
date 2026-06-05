@@ -1,0 +1,15 @@
+# Python dependencies for exercise 06 (tiny classifier, quantized).
+# Install with:  pip install -r requirements.txt
+#
+# torch + torchvision give us MobileNetV3-Small with ImageNet weights
+# plus the ImageFolder dataloader and standard transforms.
+#
+# onnxruntime is the runtime we measure FPS against (single CPU
+# core). The `quantization` subpackage handles the static INT8
+# post-training quantization step.
+torch>=2.1
+torchvision>=0.16
+onnx>=1.15
+onnxruntime>=1.17
+numpy>=1.24
+pillow>=10.0

@@ -118,7 +118,7 @@ and calibration.
     confuses adjacent vials. Sets the perception bar before going
     near real glass.
 
-- [ ] **6. Tiny classifier quantized for an edge CPU**
+- [x] **6. Tiny classifier quantized for an edge CPU** — see [`../exercises/06-tiny-classifier-quantized/`](../exercises/06-tiny-classifier-quantized/)
   - **Background (plain English):** A "tiny classifier" is a small,
     fast neural network that fits on a low-power computer next to the
     robot (Raspberry Pi, Jetson Nano) instead of a beefy cloud server.
