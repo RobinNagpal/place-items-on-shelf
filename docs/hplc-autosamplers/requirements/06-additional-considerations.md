@@ -158,7 +158,7 @@ This is a **buy-off-the-shelf** timeline. No custom hardware.
 
 A **scripted 1,000-vial acceptance run** in the target lab:
 
-- 10 trays × 96 vials + a few partial racks.
+- 10 trays × 100 vials (v1 reference tray) — or equivalent partial-rack runs that total 1,000 vials.
 - Real vials, real barcodes, real LIMS.
 - Pass criteria:
   - **≥ 99 % correct placements**.

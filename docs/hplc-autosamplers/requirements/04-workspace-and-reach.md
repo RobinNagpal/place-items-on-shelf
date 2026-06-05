@@ -30,9 +30,9 @@ tray over when the robot finishes.
                │                 │
    ┌───────────┴──┐      ┌───────┴──────┐      ┌──────────────┐
    │ barcode      │      │ inbound rack │      │ destination  │
-   │ reader       │      │ (48 vials)   │      │ tray on      │
+   │ reader       │      │ (50 vials)   │      │ tray on      │
    │              │      │              │      │ alignment    │
-   └──────────────┘      └──────────────┘      │ plate (96)   │
+   └──────────────┘      └──────────────┘      │ plate (100)  │
                                                 └──────────────┘
                                                 ← tray is on the BENCH
 ```

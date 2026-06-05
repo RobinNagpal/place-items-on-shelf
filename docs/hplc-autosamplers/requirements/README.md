@@ -1,5 +1,11 @@
 # HPLC Autosampler — Requirements
 
+**Status:** v1 **finalized** 2026-06-05. The numbers are pinned to
+the v1 reference vial / rack / tray / instrument named in
+[`00-spec-summary.md`](00-spec-summary.md) and
+[`01-task-and-objects.md`](01-task-and-objects.md). Layer 2 (hardware
+selection) may proceed against this spec.
+
 This folder is **the requirements for the project**. Every later
 hardware and software choice gets filtered through these numbers, so
 **the requirements are the starting point** — not the arm, not the
@@ -19,6 +25,10 @@ tray-loading task.
 
 ## Read these in order
 
+0. **[`00-spec-summary.md`](00-spec-summary.md)** — **the one-page
+   task specification**. Numbers from every other file in this folder,
+   on one page. Read this first; drop into the long-form files only
+   for the rationale and sources behind a specific number.
 1. **[`01-task-and-objects.md`](01-task-and-objects.md)** — the task
    one-liner plus the **objects** the robot touches (vials, racks,
    trays) with real dimensions from public datasheets.

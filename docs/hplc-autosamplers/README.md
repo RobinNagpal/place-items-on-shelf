@@ -38,10 +38,17 @@ Five short files, read in order:
 
 ## What's in requirements/
 
-Six short files plus a README, each answering a slice of the Layer-1
-questions for this specific project. See
-[`requirements/README.md`](requirements/README.md) for the order and
-the format.
+Seven short files plus a README:
+
+- **[`requirements/00-spec-summary.md`](requirements/00-spec-summary.md)** —
+  the **one-page task specification**. The actual Layer-1 deliverable
+  — every other file in `requirements/` is the rationale and sources
+  behind a number in this summary. **Read this first.** (Status: v1
+  **finalized** 2026-06-05.)
+- Files `01-` through `06-` — the long-form answers to each slice of
+  the Layer-1 questions. See
+  [`requirements/README.md`](requirements/README.md) for the order
+  and the format.
 
 ## Where this fits in the rest of the docs
 

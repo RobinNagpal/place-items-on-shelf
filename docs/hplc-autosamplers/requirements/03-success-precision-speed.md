@@ -93,8 +93,11 @@ shift length**:
 
 Target: **10–20 seconds per vial**. At 15 seconds per vial:
 
-- A 48-vial rack loads in **~12 minutes**.
-- A 96-vial tray loads in **~24 minutes**.
+- A 50-vial rack loads in **~12.5 minutes**.
+- A 100-vial tray loads in **~25 minutes**.
+
+(Numbers pinned to the v1 reference rack and tray — see
+[`01-task-and-objects.md`](01-task-and-objects.md).)
 
 Cycle time breakdown (rough budget):
 
