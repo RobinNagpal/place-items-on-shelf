@@ -43,6 +43,13 @@ come from
 |---|---|---|---|
 | 1 | [`01-custom-gazebo-world/`](01-custom-gazebo-world/) | A.1 — Gazebo world of the autosampler cell | done |
 | 2 | [`02-read-and-annotate-urdf/`](02-read-and-annotate-urdf/) | A.2 — URDF + reach check against the cell | done |
+| 3 | [`03-tiny-yolo/`](03-tiny-yolo/) | B.3 — Tiny YOLO fine-tuned on a 5-class autosampler dataset | done |
+| 4 | [`04-yolo-live-on-gazebo-camera/`](04-yolo-live-on-gazebo-camera/) | B.4 — YOLO live on a Gazebo overhead camera, publishing `vision_msgs/Detection2DArray` | done |
+| 5 | [`05-score-detections-vs-gazebo/`](05-score-detections-vs-gazebo/) | B.5 — Auto-score `/yolo/detections` against Gazebo model-state ground truth (IoU, running TP/FP/FN) | done |
+| 7 | [`07-instance-segmentation/`](07-instance-segmentation/) | B.7 — YOLOv8-seg live on the Gazebo camera; publishes detections + instance mask + overlay | done |
+| 8 | [`08-depth-to-3d-centroid/`](08-depth-to-3d-centroid/) | B.8 — Depth camera + instance mask → 3D centroid per object on `/objects/centroids` | done |
+| 10 | [`10-aruco-pose/`](10-aruco-pose/) | B.10 — ArUco 6-DoF pose from a single RGB frame; one Detection3D per marker | done |
+| 12 | [`12-hand-eye-calibration/`](12-hand-eye-calibration/) | B.12 — Eye-to-hand calibration via `cv2.calibrateHandEye`; closes the camera-frame ↔ base-frame gap | done |
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |

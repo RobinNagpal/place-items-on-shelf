@@ -81,7 +81,7 @@ implement.
 Distinct ways to use a camera in an arm cell — modern ML, classical CV,
 and calibration.
 
-- [ ] **3. Train a tiny YOLO on a custom 5-class dataset**
+- [x] **3. Train a tiny YOLO on a custom 5-class dataset** — see [`../exercises/03-tiny-yolo/`](../exercises/03-tiny-yolo/)
   - **Goal:** Fine-tune YOLOv8-nano on ~200 labeled images of 5
     household objects (cup, marker, screwdriver, cube, screw).
   - **Why it matters:** Object detection is the most common perception
@@ -93,7 +93,7 @@ and calibration.
     detector tells the script which source slots still have vials,
     which tray slots are free, and roughly where the rack/tray are.
 
-- [ ] **4. Run YOLO live on a Gazebo camera feed**
+- [x] **4. Run YOLO live on a Gazebo camera feed** — see [`../exercises/04-yolo-live-on-gazebo-camera/`](../exercises/04-yolo-live-on-gazebo-camera/)
   - **Goal:** Stream RGB from a virtual camera, run YOLO every frame,
     publish bounding boxes on a ROS 2 topic, and overlay them in RViz.
   - **Why it matters:** Closed-loop perception in sim is the first step
@@ -105,7 +105,7 @@ and calibration.
     publish a `vials_in_rack` topic listing each detected vial's
     slot index. The pick-and-place script subscribes to it.
 
-- [ ] **5. Score detections automatically against Gazebo ground truth**
+- [x] **5. Score detections automatically against Gazebo ground truth** — see [`../exercises/05-score-detections-vs-gazebo/`](../exercises/05-score-detections-vs-gazebo/)
   - **Goal:** Use Gazebo's model-state topic as ground truth, compute
     per-frame IoU and a running mAP — no manual labeling.
   - **Why it matters:** You cannot improve a perception model you
@@ -143,7 +143,7 @@ and calibration.
     frame on-device — important for the GMP audit trail (no images
     leaving the lab network).
 
-- [ ] **7. Instance segmentation — pixel masks instead of bounding boxes**
+- [x] **7. Instance segmentation — pixel masks instead of bounding boxes** — see [`../exercises/07-instance-segmentation/`](../exercises/07-instance-segmentation/)
   - **Background (plain English):** YOLO draws a *rectangle* around an
     object. Most of that rectangle is actually background. **Instance
     segmentation** goes further — it labels every pixel that belongs
@@ -166,7 +166,11 @@ and calibration.
     #34 from vial #35 reliably, and check "the slot to the right is
     empty" before reaching in.
 
-- [ ] **8. Depth-camera point cloud → object centroid**
+- [x] **8. Depth-camera point cloud → object centroid** —
+  see [`exercises/08-depth-to-3d-centroid/`](../exercises/08-depth-to-3d-centroid/)
+  for the detector-guided implementation (mask + depth lookup, not
+  pure RANSAC). The exercise README also explains where pure point-
+  cloud geometry would still be worth doing.
   - **Goal:** With an RGB-D camera in sim, segment the table plane
     using RANSAC, cluster what's left, and return each cluster's
     centroid in the arm's base frame.
@@ -203,7 +207,10 @@ and calibration.
     fingers closing across the diameter". One pattern handles every
     vial type the autosampler accepts.
 
-- [ ] **10. ArUco marker 6-DoF pose estimation**
+- [x] **10. ArUco marker 6-DoF pose estimation** —
+  see [`exercises/10-aruco-pose/`](../exercises/10-aruco-pose/).
+  Plain RGB image → `cv2.aruco.detectMarkers` + `cv2.solvePnP` →
+  one 6-DoF pose per marker on `/aruco/markers`.
   - **Background (plain English):** ArUco markers are printable square
     black-and-white tags that look like simplified QR codes. Each one
     encodes a unique ID. When a *calibrated* camera sees one, OpenCV
@@ -249,7 +256,10 @@ and calibration.
     even 0.5 px reprojection error is roughly 1 mm in the world.
     Always do this first.
 
-- [ ] **12. Hand-eye calibration (camera ↔ end-effector)**
+- [x] **12. Hand-eye calibration (camera ↔ end-effector)** —
+  see [`exercises/12-hand-eye-calibration/`](../exercises/12-hand-eye-calibration/).
+  Our overhead camera is fixed in the world, so the exercise solves
+  the **eye-to-hand** variant (`T_base_cam` instead of `T_ee_cam`).
   - **Background (plain English):** The camera sees the world in *its
     own* coordinate frame. The arm moves in *its own* coordinate
     frame. **Hand-eye calibration** figures out the rigid transform
