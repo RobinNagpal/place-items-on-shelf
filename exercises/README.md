@@ -50,11 +50,14 @@ come from
 | 8 | [`08-depth-to-3d-centroid/`](08-depth-to-3d-centroid/) | B.8 — Depth camera + instance mask → 3D centroid per object on `/objects/centroids` | done |
 | 10 | [`10-aruco-pose/`](10-aruco-pose/) | B.10 — ArUco 6-DoF pose from a single RGB frame; one Detection3D per marker | done |
 | 12 | [`12-hand-eye-calibration/`](12-hand-eye-calibration/) | B.12 — Eye-to-hand calibration via `cv2.calibrateHandEye`; closes the camera-frame ↔ base-frame gap | done |
+| 13 | [`13-color-segmentation/`](13-color-segmentation/) | B.13 — HSV-threshold cap segmenter; maps detections to rack-slot ids for LIMS colour subsets | done |
+| 14 | [`14-barcode-reader/`](14-barcode-reader/) | B.14 — Scan-station QR / barcode reader; spin-and-decode loop produces `(tray_slot, barcode)` for LIMS | done |
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |
 | 21 | [`21-hardcoded-pick-and-place/`](21-hardcoded-pick-and-place/) | D.21 — Hardcoded pick-and-place: 18 + 19 + 20 stitched together | done |
 | 22 | [`22-cartesian-path-following/`](22-cartesian-path-following/) | D.22 — Straight-line Cartesian path (`computeCartesianPath`) | done |
+| 23 | [`23-behavior-cloning-reach/`](23-behavior-cloning-reach/) | E.23 — Behavior cloning: 2-link arm imitates a Jacobian-pinv expert; 9/10 fresh targets within 3 cm | done |
 
 The numbers match the item numbers in
 [`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you

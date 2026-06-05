@@ -1,0 +1,18 @@
+# Python dependencies for exercise 14 (barcode / QR-code reader).
+# Install with:  pip install -r requirements.txt
+#
+# qrcode      -- pure-python QR generator, used by demo.py to print
+#                synthetic labels onto fake vial frames.
+# opencv-python -- image rendering + cv2.QRCodeDetector (the fallback
+#                  decoder if pyzbar / libzbar isn't installed).
+# numpy       -- image arrays.
+# pyzbar      -- the checklist's preferred decoder. Reads QR codes
+#                AND 1D barcodes (Code 128, UPC, ...). Needs the
+#                libzbar0 system library:
+#                    sudo apt install libzbar0      (Ubuntu / Debian)
+#                If it can't import, barcode_reader.py falls back to
+#                cv2.QRCodeDetector automatically.
+opencv-python>=4.8
+numpy>=1.24
+qrcode>=7.4
+pyzbar>=0.1.9

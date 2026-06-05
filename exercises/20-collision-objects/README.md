@@ -3,6 +3,12 @@
 Implements checklist item **20** from
 [`../../docs/learning-checklist.md`](../../docs/learning-checklist.md).
 
+> **New reader?** Start with
+> [`HOW_MOVEIT_KNOWS_THE_WORLD.md`](HOW_MOVEIT_KNOWS_THE_WORLD.md) —
+> a beginner explainer for "how does MoveIt know which objects to
+> avoid?" in simulation **and** in a real cell. The rest of this
+> file assumes you already get that mental model.
+
 ## What is happening (the concept)
 
 In exercises 18 and 19 the planner only thought about the arm itself.

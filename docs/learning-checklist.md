@@ -283,7 +283,7 @@ and calibration.
     Without it, ±2 mm placement is impossible. Re-run any time the
     camera is bumped.
 
-- [ ] **13. Classical colour segmentation (no ML)**
+- [x] **13. Classical colour segmentation (no ML)** — see [`../exercises/13-color-segmentation/`](../exercises/13-color-segmentation/)
   - **Goal:** Find the red cube in a cluttered Gazebo scene using only
     HSV thresholds + connected components.
   - **Why it matters:** When colour is reliable, classical CV is
@@ -296,7 +296,7 @@ and calibration.
     out "all red-cap vials" in one pass — useful when the LIMS asks
     for a specific subset of the rack.
 
-- [ ] **14. Barcode / QR-code reader on simulated labels**
+- [x] **14. Barcode / QR-code reader on simulated labels** — see [`../exercises/14-barcode-reader/`](../exercises/14-barcode-reader/)
   - **Goal:** Render QR codes on cube faces in Gazebo, decode them
     with `pyzbar`, and attach each decoded ID to its corresponding
     object in MoveIt's planning scene.
@@ -454,7 +454,8 @@ trajectory math yourself.
 All four work entirely in simulation. No hardware needed for any of
 them.
 
-- [ ] **23. Behavior cloning from one teleop demo**
+- [x] **23. Behavior cloning from one teleop demo** —
+  implemented in [`../exercises/23-behavior-cloning-reach/`](../exercises/23-behavior-cloning-reach/).
   - **Goal:** Record a 60-second teleop trajectory (keyboard or
     gamepad → sim arm) for a reach task. Train a small MLP to map
     `(joint state → next action)`. Replay it in sim.
