@@ -51,6 +51,7 @@ come from
 | 10 | [`10-aruco-pose/`](10-aruco-pose/) | B.10 — ArUco 6-DoF pose from a single RGB frame; one Detection3D per marker | done |
 | 12 | [`12-hand-eye-calibration/`](12-hand-eye-calibration/) | B.12 — Eye-to-hand calibration via `cv2.calibrateHandEye`; closes the camera-frame ↔ base-frame gap | done |
 | 13 | [`13-color-segmentation/`](13-color-segmentation/) | B.13 — HSV-threshold cap segmenter; maps detections to rack-slot ids for LIMS colour subsets | done |
+| 14 | [`14-barcode-reader/`](14-barcode-reader/) | B.14 — Scan-station QR / barcode reader; spin-and-decode loop produces `(tray_slot, barcode)` for LIMS | done |
 | 18 | [`18-joint-space-hello-moveit/`](18-joint-space-hello-moveit/) | D.18 — MoveIt hello world: home → park → home | done |
 | 19 | [`19-cartesian-pose-goal/`](19-cartesian-pose-goal/) | D.19 — Cartesian pose goal: MoveIt as the IK solver | done |
 | 20 | [`20-collision-objects/`](20-collision-objects/) | D.20 — Collision objects in the planning scene | done |

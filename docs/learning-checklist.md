@@ -296,7 +296,7 @@ and calibration.
     out "all red-cap vials" in one pass — useful when the LIMS asks
     for a specific subset of the rack.
 
-- [ ] **14. Barcode / QR-code reader on simulated labels**
+- [x] **14. Barcode / QR-code reader on simulated labels** — see [`../exercises/14-barcode-reader/`](../exercises/14-barcode-reader/)
   - **Goal:** Render QR codes on cube faces in Gazebo, decode them
     with `pyzbar`, and attach each decoded ID to its corresponding
     object in MoveIt's planning scene.
