@@ -46,6 +46,47 @@ That last dictionary is the whole point. The autosampler controller
 takes `[s for s, c in d.items() if c == "red"]` and hands the list
 to the pick-and-place script from exercise 21.
 
+## Quick answers (read this first)
+
+**One colour at a time, or many?** Both. `find_caps(image, "red")`
+returns only red caps; `find_all_caps(image)` returns red + blue +
+green in one call. Add a fourth colour by adding one entry to the
+`CAP_HSV_RANGES` dict in [`cap_segmenter.py`](cap_segmenter.py).
+
+**Will it match every red thing in the camera frame?** Yes — the
+threshold knows "red pixel", not "cap". Two things keep this from
+mattering in our scene: the **area filter** drops noise and
+oversize blobs, and the autosampler **bench has nothing else red
+on it**. For a busy lab room you would either crop to a rack ROI
+first, or run YOLO (exercise 3) and segment only inside the boxes
+it finds — same algorithm, smaller input.
+
+**What comes out, and how do I hand it to MoveIt?** A list of
+`CapDetection` objects, one per cap:
+
+| Field | What it is |
+|---|---|
+| `color` | "red" / "blue" / "green" |
+| `centroid_xy` | pixel (x, y) of the cap centre |
+| `bbox_xywh` | pixel bounding box |
+| `area_px` | blob size — closest thing to a confidence score |
+
+Same shape as YOLO's `Detection2DArray`: `color` plays the role of
+`class_id`, `area_px` is the rough confidence stand-in (classical
+CV has no real confidence — the threshold either matches or not).
+
+To drive MoveIt, two paths:
+
+- **Autosampler v1 (slots in known places):** call
+  `caps_to_slots(...)` → `{slot_id: color}` → look up the slot's
+  world XYZ from rack geometry → `setPoseTarget(pose)` (exercise 19
+  pattern).
+- **Rack moved or vial in arbitrary place:** plug in exercise 11
+  (intrinsics) + exercise 8 (depth) to convert the pixel centroid
+  to a 3D point in the camera frame, then exercise 12 (hand-eye)
+  to convert it to the robot's `base_link` frame, then
+  `setPoseTarget`.
+
 ## Why classical CV is the right answer here
 
 Three reasons we do **not** use a neural network for this:
