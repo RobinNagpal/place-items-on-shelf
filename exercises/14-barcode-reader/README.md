@@ -71,6 +71,62 @@ Two reasons:
    from source to tray, only for the vials we are actually
    loading. This is the order the spec calls for.
 
+## More common questions
+
+**What kind of gripper does the spinning?**
+No special gripper — the **wrist joint (J6)** does it. Every 6-DoF
+arm (including the myCobot 280) has J6 as a wrist rotate; nudging
+it spins whatever the gripper is holding around its own axis
+without moving the rest of the arm. Use a normal parallel-jaw
+gripper with rubber / silicone fingertips so the vial doesn't
+slip. A 4-DoF arm without a wrist rotate would need either a
+rotating gripper, or a scan station with 4 cameras (one per side).
+
+**How long does one scan take?**
+About **250 ms per spin step**: ~200 ms wrist nudge + ~30 ms
+camera frame wait + ~10 ms decode. The barcode is found at a
+random angle, so on average it reads after ~6 steps:
+**~1.5 seconds per vial average**, **~3 seconds worst case**.
+That comfortably fits the 10-20 second autosampler cycle.
+
+**Should the arm spin all 12 angles every time, or stop early
+when the barcode is detected?** Two valid designs:
+
+- **Option A — always spin all 12.** Deterministic timing
+  (~3 s per vial), no signalling needed between the camera and
+  the arm. Pick this when you want predictable cycle times — easy
+  to plan a batch around.
+- **Option B — stop early on first detection.** The arm decodes
+  after each step; the moment a code reads it leaves the scan
+  station for the tray. Saves ~half the scan time per vial
+  (~1.5 s average vs ~3 s). Pick this when throughput matters
+  more than predictability.
+
+The library we ship implements Option B: `spin_and_decode`
+breaks out of the loop the moment `decode_barcode` returns a
+code. So in a single-node setup (arm node runs the decoder
+itself) you get early-stop for free. For a two-node setup where
+a separate scanner node publishes `/barcode/decoded` and the arm
+subscribes, the arm leaves on the first published message —
+same early-stop behaviour, more wiring.
+
+**What information do we get from the barcode, and can we store
+it in a database with timestamps?**
+You get back **the exact text printed on the label** — a vial ID
+like `"B-2024-0117"`, a URL, a JSON blob, or whatever the lab
+chose to print. **Yes, store it.** Typical row:
+
+| Column | Example |
+|---|---|
+| `run_id` | `"run-2026-06-05-001"` |
+| `tray_slot` | `3` |
+| `barcode` | `"B-2024-0119"` |
+| `scanned_at` | `2026-06-05 11:32:47.812 UTC` |
+
+In production the arm controller does an HTTP POST / SQL insert
+the moment the spin loop returns success. The demo writes the
+same shape to `output/lims.csv` — same data, smaller plumbing.
+
 ## How it ties into other exercises
 
 - **Exercise 19** — `setPoseTarget` to drive the arm to
