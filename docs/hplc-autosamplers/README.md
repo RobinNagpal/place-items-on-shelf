@@ -28,13 +28,14 @@ Two sibling subfolders, plus this README.
 
 ## What's in research/
 
-Five short files, read in order:
+Six files, read in order:
 
 1. [`01-what-needs-to-be-done.md`](research/01-what-needs-to-be-done.md) — the whole task in one page.
-2. [`02-what-is-hplc-and-an-autosampler.md`](research/02-what-is-hplc-and-an-autosampler.md) — minimum background: vial standard, tray standard, what the autosampler does and does not do.
+2. [`02-what-is-hplc-and-an-autosampler.md`](research/02-what-is-hplc-and-an-autosampler.md) — vial standard, tray standard, where labs use HPLC, what's in the vials, how the technician sets up the machine, what fills the other slots when you verify one batch, and why different tests can't share a tray.
 3. [`03-manual-steps-today.md`](research/03-manual-steps-today.md) — sample prep, capping, tray loading, drawer. Includes the **rationale for loading on the bench** (not inside the instrument).
 4. [`04-why-automate-tray-loading.md`](research/04-why-automate-tray-loading.md) — why this step in particular, vs. the rest of the workflow.
 5. [`05-existing-solutions.md`](research/05-existing-solutions.md) — short, opinionated survey of the four commercial products closest to our problem (PAL RTC, HTA HT4000L, CTC HTS PAL, Andrew+) plus a couple of cobot demos and the one closest research paper.
+6. [`06-how-vials-are-prepared.md`](research/06-how-vials-are-prepared.md) — deep-dive on vial preparation: every common step, the equipment per step, and five worked recipes (dissolved tablet, content uniformity, plasma drug monitoring, groundwater pesticide, beverage caffeine, calibration standard).
 
 ## What's in requirements/
 
