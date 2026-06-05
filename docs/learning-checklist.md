@@ -483,7 +483,8 @@ them.
     rack is rotated 3°" or "one slot is broken", then deploy the
     learned policy once it is reliable.
 
-- [ ] **25. Tiny VLA inspection (no execution)**
+- [x] **25. Tiny VLA inspection (no execution)** —
+  implemented in [`../exercises/25-tiny-vla-inspection/`](../exercises/25-tiny-vla-inspection/).
   - **Goal:** Feed a sim image plus an instruction ("pick the red
     cube") to a small VLA model like OpenVLA, log the predicted
     7-DoF action — do **not** execute it on the arm.

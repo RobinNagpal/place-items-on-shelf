@@ -58,6 +58,7 @@ come from
 | 21 | [`21-hardcoded-pick-and-place/`](21-hardcoded-pick-and-place/) | D.21 — Hardcoded pick-and-place: 18 + 19 + 20 stitched together | done |
 | 22 | [`22-cartesian-path-following/`](22-cartesian-path-following/) | D.22 — Straight-line Cartesian path (`computeCartesianPath`) | done |
 | 23 | [`23-behavior-cloning-reach/`](23-behavior-cloning-reach/) | E.23 — Behavior cloning: 2-link arm imitates a Jacobian-pinv expert; 9/10 fresh targets within 3 cm | done |
+| 25 | [`25-tiny-vla-inspection/`](25-tiny-vla-inspection/) | E.25 — Tiny stand-in VLA (vision + text → 7-DoF action), prints + logs channels, no execution | done |
 
 The numbers match the item numbers in
 [`../docs/learning-checklist.md`](../docs/learning-checklist.md). When you
