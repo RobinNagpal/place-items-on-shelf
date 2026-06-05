@@ -85,7 +85,7 @@ The cycle time target is set by **HPLC run length** and **lab
 shift length**:
 
 - A typical HPLC injection takes **15–30 minutes per sample**, so
-  a 96-vial run takes **24–48 hours**.
+  a 100-vial run takes **25–50 hours**.
 - The instrument can load the next tray any time during that window,
   so loading speed is **not** the bottleneck of the run.
 - But loading speed **is** the bottleneck for **how many trays a
