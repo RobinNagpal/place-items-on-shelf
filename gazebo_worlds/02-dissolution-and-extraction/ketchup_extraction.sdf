@@ -131,22 +131,78 @@
     </model>
 
     <!-- ============================================================
-         Bench: 1000 x 600 x 50 mm laminated top. Static.
-         Centre at (0, 0); top surface at z = 0.900 m.
+         Bench: 1000 x 600 x 50 mm laminated top sitting on four
+         50 mm OD stainless-steel legs that go all the way down to
+         the ground. Static. Top surface at z = 0.900 m (standard
+         lab bench height); leg bottoms at z = 0.
          ============================================================ -->
     <model name="bench">
       <static>true</static>
-      <pose>0 0 0.875 0 0 0</pose>
-      <link name="top">
-        <visual name="v">
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <!-- Top slab. -->
+        <visual name="top">
+          <pose>0 0 0.875 0 0 0</pose>
           <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
           <material>
             <ambient>0.85 0.82 0.75 1</ambient>
             <diffuse>0.85 0.82 0.75 1</diffuse>
           </material>
         </visual>
-        <collision name="c">
+        <collision name="top_c">
+          <pose>0 0 0.875 0 0 0</pose>
           <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+        </collision>
+        <!-- 4 stainless legs, Ø50 mm x 850 mm, inset 30 mm from
+             each corner. Centred at z = 0.425 (ground to bench
+             bottom). -->
+        <visual name="leg_fr">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.60 0.60 0.63 1</diffuse>
+          </material>
+        </visual>
+        <collision name="leg_fr_c">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_fl">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.60 0.60 0.63 1</diffuse>
+          </material>
+        </visual>
+        <collision name="leg_fl_c">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_br">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.60 0.60 0.63 1</diffuse>
+          </material>
+        </visual>
+        <collision name="leg_br_c">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_bl">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.60 0.60 0.63 1</diffuse>
+          </material>
+        </visual>
+        <collision name="leg_bl_c">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
         </collision>
       </link>
     </model>
@@ -305,18 +361,34 @@
     </model>
 
     <!-- ============================================================
-         Ketchup source bottle: 14 oz Heinz glass bottle.
-           Body  : 55 mm OD glass, 180 mm tall (red contents visible
-                   through glass -> body painted red here).
-           Cap   : 30 mm OD red PP screw cap, 25 mm tall, sits on top.
-         Sits on the bench at (0.10, +0.25), so:
-           body centre z = 0.900 + 0.180 / 2 = 0.990
-           cap  centre z = 0.900 + 0.180 + 0.025 / 2 = 1.0925
+         Ketchup source bottle: Mitchell's / Heinz 14 oz glass
+         bottle. Has the classic tapered shoulder, not a straight
+         cylinder. Built from 6 stacked primitives (one link, six
+         visuals):
+
+           Body          Ø55 mm x 130 mm   (red glass)
+           Shoulder low  Ø48 mm x 10 mm    (taper start)
+           Shoulder mid  Ø38 mm x 10 mm    (taper middle)
+           Shoulder hi   Ø28 mm x 10 mm    (taper end)
+           Neck          Ø22 mm x 30 mm    (narrow column)
+           Cap           Ø28 mm x 18 mm    (white screw cap)
+
+         Total height: 130 + 10 + 10 + 10 + 30 + 18 = 208 mm.
+         SDF has no <cone> primitive in 1.7, so the curved
+         shoulder is faked with three short cylinders of
+         decreasing radius. The eye reads this as a smooth taper
+         from a few metres away.
+
+         Cream-coloured label band wraps the lower middle of the
+         body. Model pose puts the bottle base on the bench top
+         (z = 0.900), so every link-local z is measured from
+         there.
          ============================================================ -->
     <model name="ketchup_bottle">
-      <pose>0.10 0.25 0.990 0 0 0</pose>
+      <pose>0.10 0.25 0.900 0 0 0</pose>
       <link name="link">
         <inertial>
+          <pose>0 0 0.085 0 0 0</pose>
           <mass>0.500</mass>
           <inertia>
             <ixx>1.4e-3</ixx><iyy>1.4e-3</iyy><izz>1.9e-4</izz>
@@ -324,22 +396,55 @@
           </inertia>
         </inertial>
         <visual name="body">
-          <geometry><cylinder><radius>0.0275</radius><length>0.180</length></cylinder></geometry>
+          <pose>0 0 0.065 0 0 0</pose>
+          <geometry><cylinder><radius>0.0275</radius><length>0.130</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+        <visual name="shoulder_low">
+          <pose>0 0 0.135 0 0 0</pose>
+          <geometry><cylinder><radius>0.024</radius><length>0.010</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+        <visual name="shoulder_mid">
+          <pose>0 0 0.145 0 0 0</pose>
+          <geometry><cylinder><radius>0.019</radius><length>0.010</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+        <visual name="shoulder_high">
+          <pose>0 0 0.155 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.010</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+        <visual name="neck">
+          <pose>0 0 0.175 0 0 0</pose>
+          <geometry><cylinder><radius>0.011</radius><length>0.030</length></cylinder></geometry>
           <material>
             <ambient>0.55 0.05 0.05 1</ambient>
             <diffuse>0.70 0.05 0.05 1</diffuse>
           </material>
         </visual>
         <visual name="cap">
-          <pose>0 0 0.1025 0 0 0</pose>
-          <geometry><cylinder><radius>0.015</radius><length>0.025</length></cylinder></geometry>
+          <pose>0 0 0.199 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.018</length></cylinder></geometry>
           <material>
-            <ambient>0.60 0.05 0.05 1</ambient>
-            <diffuse>0.75 0.05 0.05 1</diffuse>
+            <ambient>0.90 0.90 0.90 1</ambient>
+            <diffuse>0.97 0.97 0.97 1</diffuse>
           </material>
         </visual>
         <visual name="label">
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.060 0 0 0</pose>
           <geometry><cylinder><radius>0.0276</radius><length>0.060</length></cylinder></geometry>
           <material>
             <ambient>0.95 0.95 0.90 1</ambient>
@@ -347,7 +452,8 @@
           </material>
         </visual>
         <collision name="c">
-          <geometry><cylinder><radius>0.0275</radius><length>0.205</length></cylinder></geometry>
+          <pose>0 0 0.104 0 0 0</pose>
+          <geometry><cylinder><radius>0.0275</radius><length>0.208</length></cylinder></geometry>
         </collision>
       </link>
     </model>
@@ -443,39 +549,45 @@
 
     <!-- ============================================================
          Spatula / lab scoop: 150 mm stainless tool.
-         Handle : 100 mm long, 5 mm OD cylinder.
-         Blade  : 50 x 12 x 2 mm flat scoop.
+         Sized up from the first draft so it is clearly visible
+         and easily clickable in the Gazebo GUI.
+           Handle : 100 mm long, 8 mm OD cylinder (was Ø5 mm).
+           Blade  : 50 x 25 x 4 mm flat scoop (was 50 x 12 x 2).
          Lies flat on the bench at (0.10, -0.05), handle along +X.
-         Handle centre z = 0.900 + 0.005 / 2 = 0.9025
+         Model pose z = 0.904 puts the handle cylinder centre 4 mm
+         above the bench top (so the cylinder rests on the bench).
+         The blade's local pose drops it by 2 mm so it also sits
+         flat on the bench top.
          ============================================================ -->
     <model name="spatula">
-      <pose>0.10 -0.05 0.9025 0 0 0</pose>
+      <pose>0.10 -0.05 0.904 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.015</mass>
+          <mass>0.030</mass>
           <inertia>
-            <ixx>3.0e-6</ixx><iyy>2.0e-5</iyy><izz>2.0e-5</izz>
+            <ixx>6.0e-6</ixx><iyy>4.0e-5</iyy><izz>4.0e-5</izz>
             <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
           </inertia>
         </inertial>
         <visual name="handle">
           <pose>0.025 0 0 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.0025</radius><length>0.100</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.004</radius><length>0.100</length></cylinder></geometry>
           <material>
-            <ambient>0.70 0.70 0.72 1</ambient>
-            <diffuse>0.85 0.85 0.88 1</diffuse>
+            <ambient>0.55 0.55 0.58 1</ambient>
+            <diffuse>0.78 0.78 0.80 1</diffuse>
           </material>
         </visual>
         <visual name="blade">
-          <pose>-0.050 0 0 0 0 0</pose>
-          <geometry><box><size>0.050 0.012 0.002</size></box></geometry>
+          <pose>-0.050 0 -0.002 0 0 0</pose>
+          <geometry><box><size>0.050 0.025 0.004</size></box></geometry>
           <material>
-            <ambient>0.70 0.70 0.72 1</ambient>
-            <diffuse>0.85 0.85 0.88 1</diffuse>
+            <ambient>0.55 0.55 0.58 1</ambient>
+            <diffuse>0.78 0.78 0.80 1</diffuse>
           </material>
         </visual>
         <collision name="c">
-          <geometry><box><size>0.150 0.012 0.005</size></box></geometry>
+          <pose>0 0 -0.002 0 0 0</pose>
+          <geometry><box><size>0.150 0.025 0.008</size></box></geometry>
         </collision>
       </link>
     </model>
