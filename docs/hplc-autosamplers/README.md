@@ -14,7 +14,7 @@ the **first real task** we apply that curriculum to.
 
 ## Structure
 
-Two sibling subfolders, plus this README.
+Three sibling subfolders, plus this README.
 
 - **[`research/`](research/)** — The "understand the problem" stage:
   what the task is, what HPLC actually is, what is still manual today,
@@ -25,6 +25,12 @@ Two sibling subfolders, plus this README.
   reference products (vial, rack, tray) pinned. **Requirements are
   the starting point** for every hardware and software choice in
   Layer 2.
+- **[`solutions/`](solutions/)** — The "how we actually build it"
+  stage, broken out **per use case** (paracetamol and ketchup) and
+  **per workflow step** (starting with Step 1 — weighing). Each case
+  picks its own hardware (a different robot arm and a different
+  dispenser) and lays out the ROS 2 / Gazebo / MoveIt 2 simulation
+  plan.
 
 ## What's in research/
 
@@ -36,6 +42,28 @@ Six files, read in order:
 4. [`04-why-automate-tray-loading.md`](research/04-why-automate-tray-loading.md) — why this step in particular, vs. the rest of the workflow.
 5. [`05-existing-solutions.md`](research/05-existing-solutions.md) — short, opinionated survey of the four commercial products closest to our problem (PAL RTC, HTA HT4000L, CTC HTS PAL, Andrew+) plus a couple of cobot demos and the one closest research paper.
 6. [`06-how-vials-are-prepared.md`](research/06-how-vials-are-prepared.md) — deep-dive on vial preparation: every common step, the equipment per step, and five worked recipes (dissolved tablet, content uniformity, plasma drug monitoring, groundwater pesticide, beverage caffeine, calibration standard).
+
+## What's in solutions/
+
+One subfolder per case (matching the two running examples used in the
+upstream [HPLC workflow primer](https://github.com/RobinNagpal/robotics-research/tree/main/03-hplc-autosampler/03-hplc-workflow)),
+each with three short markdown files:
+
+- **[`solutions/paracetamol/`](solutions/paracetamol/)** — the **easy**
+  case (dry powder, ~5 mg target). UR3e + Mettler Quantos.
+- **[`solutions/ketchup/`](solutions/ketchup/)** — the **hard** case
+  (sticky paste, ~5 g target). Franka Research 3 + Watson-Marlow
+  peristaltic pump.
+
+Each folder follows the same three-file layout:
+
+1. `README.md` — overview and headline picks.
+2. `01-existing-solutions.md` — how labs do this step today.
+3. `02-hardware-choice.md` — which robot + dispenser + balance + why.
+4. `03-simulation-workflow.md` — ROS 2 + Gazebo + MoveIt 2 plan.
+
+Start with [`solutions/README.md`](solutions/README.md) for the case
+split and how the two folders relate.
 
 ## What's in requirements/
 
