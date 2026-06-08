@@ -33,6 +33,46 @@ gazebo gazebo_worlds/03-dilution/ketchup_dilution.sdf
 gz sim gazebo_worlds/03-dilution/ketchup_dilution.sdf
 ```
 
+The world is **self-contained** — the sun (as a `<light>`) and the
+ground plane are defined inline rather than via
+`<include>model://sun</include>`, so no `GZ_SIM_RESOURCE_PATH` or
+Gazebo Fuel setup is required.
+
+### Run it on WSL (Ubuntu under Windows)
+
+If you cloned this repo into `~/ros2_ws/src/place-items-on-shelf` (the
+standard ROS 2 workspace layout):
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+gz sim gazebo_worlds/03-dilution/ketchup_dilution.sdf
+```
+
+If `gz: command not found`, install Gazebo Harmonic (matches ROS 2
+Jazzy) — see the
+[Step 2 README](../02-dissolution-and-extraction/README.md#run-it-on-wsl-ubuntu-under-windows)
+for the full apt setup. You do not need to `source /opt/ros/<distro>/setup.bash`
+just to run `gz sim` on an SDF — Gazebo is its own binary.
+
+On Windows 11 + WSL2 the GUI window pops up via WSLg automatically.
+On Windows 10 + WSL2 you need an X server running on the Windows side
+(VcXsrv, X410, MobaXterm) and:
+
+```bash
+export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+```
+
+before running `gz sim`.
+
+You should see a brown lab bench with: a small clear beaker holding a
+dark-red translucent column of ketchup extract (left), the two
+volumetric flasks side by side in the centre (10 mL near, 100 mL far),
+a pale-blue water bottle (far left), a 250 mL waste beaker (far
+right), a tall white pipette stand near the back with the blue-handled
+P1000 hanging from its arm, a light-blue tip rack with four white tip
+tops poking up, a black Sharpie lying flat at the back, and the yellow
+arm-base disc behind everything.
+
 ## What is on the bench
 
 All dimensions come from real off-the-shelf lab products. Frame

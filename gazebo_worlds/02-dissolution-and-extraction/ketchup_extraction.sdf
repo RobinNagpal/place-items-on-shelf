@@ -84,8 +84,51 @@
 <sdf version="1.7">
   <world name="ketchup_extraction_cell">
 
-    <include><uri>model://sun</uri></include>
-    <include><uri>model://ground_plane</uri></include>
+    <!-- Sun light defined inline (not via <include
+         model://sun>) so this world loads in gz sim without
+         needing Gazebo Fuel or GZ_SIM_RESOURCE_PATH set up. -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground plane defined inline (not via <include
+         model://ground_plane>) for the same portability reason.
+         100 x 100 m static grey plane. -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.60 0.60 0.60 1</ambient>
+            <diffuse>0.70 0.70 0.70 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
 
     <!-- ============================================================
          Bench: 1000 x 600 x 50 mm laminated top. Static.

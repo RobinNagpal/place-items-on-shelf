@@ -25,6 +25,45 @@ gazebo gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 gz sim gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 ```
 
+The world is **self-contained** — it defines the sun (as a `<light>`)
+and the ground plane inline rather than via `<include>model://sun</include>`,
+so no `GZ_SIM_RESOURCE_PATH` / Gazebo Fuel setup is required.
+
+### Run it on WSL (Ubuntu under Windows)
+
+If you cloned this repo into `~/ros2_ws/src/place-items-on-shelf` (the
+standard ROS 2 workspace layout):
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+gz sim gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
+```
+
+If `gz: command not found`, install Gazebo Harmonic (matches ROS 2
+Jazzy):
+
+```bash
+sudo apt update
+sudo apt install -y curl lsb-release gnupg
+sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt update
+sudo apt install -y gz-harmonic
+```
+
+(If you are on ROS 2 Humble, install Gazebo Classic 11 instead:
+`sudo apt install -y gazebo libgazebo-dev` and use the `gazebo`
+command, not `gz sim`.)
+
+You do **not** need to `source /opt/ros/<distro>/setup.bash` just to
+run `gz sim` on an SDF — that source command is for ROS 2 commands
+(`ros2 ...`), not Gazebo itself. Gazebo is its own binary.
+
+On Windows 11 + WSL2 the GUI window pops up via WSLg automatically.
+On Windows 10 + WSL2 you need an X server running on the Windows side
+(VcXsrv, X410, MobaXterm) and `export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}'):0.0`
+in WSL before running `gz sim`.
+
 You should see a brown lab bench with seven items on it: a red ketchup
 bottle on the left, a pale-blue solvent bottle on the right, a hot
 plate in the centre with a small clear beaker on its ceramic top, a
