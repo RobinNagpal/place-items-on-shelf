@@ -1,5 +1,7 @@
 # 02 — Dissolution / extraction (ketchup case)
 
+Run: `gz sim gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf`
+
 Gazebo world for HPLC workflow [**Step 2 — Dissolution / extraction**](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/02-dissolution-and-extraction.md),
 **ketchup case only**. The doc routine modelled here is: take the
 pre-weighed ~5 g sample from Step 1 → tip it into a beaker → add

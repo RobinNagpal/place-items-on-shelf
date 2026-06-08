@@ -1,0 +1,499 @@
+<?xml version="1.0" ?>
+<!--
+  ketchup_filtering.sdf
+
+  Gazebo world for HPLC workflow Step 4 (filtering), ketchup case
+  only. Mirrors the routine at:
+    robotics-research/03-hplc-autosampler/03-hplc-workflow/
+    04-filtering.md
+
+  The ketchup case is "spin -> pour off -> filter" (paracetamol is
+  just "filter"). The pulp left in the dilution from Step 3 has to
+  be centrifuged out first, then the clarified supernatant is
+  drawn into a syringe, pushed through a 0.45 um syringe filter,
+  and collected into a clean beaker.
+
+  WHAT IS THE SCENE?
+    A small lab bench laid out for the spin-pour-filter routine:
+    a benchtop swing-bucket centrifuge at the back of the bench;
+    a 4-tube rack holding 50 mL Falcon tubes (one with the
+    cloudy dilution about to be spun, one already spun with a
+    visible pellet + supernatant layer, two empty); the 100 mL
+    volumetric flask that came out of Step 3 (still carrying some
+    of the dilution); a 10 mL plastic syringe; a 25 mm Luer-lock
+    syringe filter; and a clean Pyrex 100 mL beaker to receive
+    the filtered liquid.
+
+  NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the bench
+  marks where the arm base will be bolted down.
+
+  Units: SI. Metres, kilograms, radians. Bench top at z = 0.900 m.
+-->
+<sdf version="1.7">
+  <world name="ketchup_filtering_cell">
+
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="c">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="v">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.60 0.60 0.60 1</ambient>
+            <diffuse>0.70 0.70 0.70 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Bench: 1000 x 600 x 50 mm top + 4x Ø50 mm steel legs.
+         Same as the other worlds for layout continuity.
+         ============================================================ -->
+    <model name="bench">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="top">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+          <material><ambient>0.85 0.82 0.75 1</ambient><diffuse>0.85 0.82 0.75 1</diffuse></material>
+        </visual>
+        <collision name="top_c">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+        </collision>
+        <visual name="leg_fr">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fr_c">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_fl">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fl_c">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_br">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_br_c">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_bl">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_bl_c">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Arm base marker - same position as the other worlds. -->
+    <model name="arm_base_marker">
+      <static>true</static>
+      <pose>-0.22 0.00 0.901 0 0 0</pose>
+      <link name="disc">
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>0.002</length></cylinder></geometry>
+          <material><ambient>0.95 0.80 0.10 1</ambient><diffuse>0.95 0.80 0.10 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Benchtop centrifuge (Hettich EBA 200-style swing-bucket).
+         Body  : 280 x 300 x 200 mm dark grey metal
+         Lid   : 250 mm OD x 50 mm white plastic dome (closed)
+         Panel : 80 x 30 x 5 mm black display, mid-front face
+         Total height 250 mm. Sits at the back-left of the bench.
+         ============================================================ -->
+    <model name="centrifuge">
+      <static>true</static>
+      <pose>-0.05 0.30 0.900 0 0 0</pose>
+      <link name="link">
+        <visual name="body">
+          <pose>0 0 0.100 0 0 0</pose>
+          <geometry><box><size>0.28 0.30 0.20</size></box></geometry>
+          <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.35 0.35 0.38 1</diffuse></material>
+        </visual>
+        <collision name="body_c">
+          <pose>0 0 0.100 0 0 0</pose>
+          <geometry><box><size>0.28 0.30 0.20</size></box></geometry>
+        </collision>
+        <visual name="lid">
+          <pose>0 0 0.225 0 0 0</pose>
+          <geometry><cylinder><radius>0.125</radius><length>0.050</length></cylinder></geometry>
+          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
+        </visual>
+        <collision name="lid_c">
+          <pose>0 0 0.225 0 0 0</pose>
+          <geometry><cylinder><radius>0.125</radius><length>0.050</length></cylinder></geometry>
+        </collision>
+        <visual name="display">
+          <pose>0.141 0 0.140 0 1.5708 0</pose>
+          <geometry><box><size>0.005 0.080 0.030</size></box></geometry>
+          <material>
+            <ambient>0.05 0.05 0.05 1</ambient>
+            <diffuse>0.10 0.10 0.10 1</diffuse>
+            <emissive>0.00 0.20 0.05 1</emissive>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Tube rack: 80 x 80 x 30 mm white acrylic block holding
+         4 Falcon 50 mL tubes in a 2 x 2 grid. The tubes ride high
+         enough that ~85 mm of each tube sticks above the rack.
+         Position: (0.00, +0.15).
+         ============================================================ -->
+    <model name="tube_rack">
+      <static>true</static>
+      <pose>0.00 0.15 0.915 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><box><size>0.08 0.08 0.030</size></box></geometry>
+          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.08 0.08 0.030</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Falcon 50 mL conical centrifuge tube (Corning 352070-style).
+         OD 30 mm, total length 115 mm, with a small Ø32 mm orange
+         PP cap on top. Simplified as a cylinder body + cap (no
+         cone tip - the rack hides the bottom anyway).
+
+         tube_pre  : carries the diluted ketchup, awaiting the spin.
+                     Body painted cloudy-reddish.
+         tube_post : already spun. Lower 15 mm = dark pellet, upper
+                     85 mm = clear-ish supernatant.
+         tube_empty_a / _empty_b : just empty glass.
+
+         All four sit in the 2x2 rack at (0.00, 0.15). Hole spacing
+         in the rack = 40 mm. Each tube body bottom is at the bench
+         top (z=0.900), so tube centre z = 0.900 + 0.115 / 2 = 0.9575.
+         ============================================================ -->
+    <model name="falcon_tube_pre">
+      <pose>-0.020 0.130 0.9575 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.025</mass>
+          <inertia>
+            <ixx>5.0e-5</ixx><iyy>5.0e-5</iyy><izz>1.5e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="body">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.18 0.12 0.70</ambient>
+            <diffuse>0.60 0.22 0.15 0.70</diffuse>
+          </material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.060 0 0 0</pose>
+          <geometry><cylinder><radius>0.016</radius><length>0.010</length></cylinder></geometry>
+          <material><ambient>0.85 0.40 0.05 1</ambient><diffuse>0.95 0.50 0.10 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="falcon_tube_post">
+      <pose>0.020 0.130 0.9575 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.025</mass>
+          <inertia>
+            <ixx>5.0e-5</ixx><iyy>5.0e-5</iyy><izz>1.5e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <!-- Pellet at the bottom (dark, opaque). -->
+        <visual name="pellet">
+          <pose>0 0 -0.050 0 0 0</pose>
+          <geometry><cylinder><radius>0.0145</radius><length>0.015</length></cylinder></geometry>
+          <material><ambient>0.30 0.08 0.04 1</ambient><diffuse>0.40 0.10 0.05 1</diffuse></material>
+        </visual>
+        <!-- Supernatant above (translucent light reddish). -->
+        <visual name="supernatant">
+          <pose>0 0 0.000 0 0 0</pose>
+          <geometry><cylinder><radius>0.0145</radius><length>0.085</length></cylinder></geometry>
+          <material>
+            <ambient>0.70 0.55 0.45 0.55</ambient>
+            <diffuse>0.85 0.65 0.55 0.55</diffuse>
+          </material>
+        </visual>
+        <!-- Outer glass wrap (clear). -->
+        <visual name="glass">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+          <material>
+            <ambient>0.88 0.92 0.95 0.30</ambient>
+            <diffuse>0.88 0.92 0.95 0.30</diffuse>
+          </material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.060 0 0 0</pose>
+          <geometry><cylinder><radius>0.016</radius><length>0.010</length></cylinder></geometry>
+          <material><ambient>0.85 0.40 0.05 1</ambient><diffuse>0.95 0.50 0.10 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="falcon_tube_empty_a">
+      <pose>-0.020 0.170 0.9575 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.015</mass>
+          <inertia>
+            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="glass">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+          <material>
+            <ambient>0.88 0.92 0.95 0.45</ambient>
+            <diffuse>0.88 0.92 0.95 0.45</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="falcon_tube_empty_b">
+      <pose>0.020 0.170 0.9575 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.015</mass>
+          <inertia>
+            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="glass">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+          <material>
+            <ambient>0.88 0.92 0.95 0.45</ambient>
+            <diffuse>0.88 0.92 0.95 0.45</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Source flask: 100 mL volumetric flask carried over from
+         Step 3, still holding a little of the diluted ketchup.
+         Same six-primitive build as in gazebo_worlds/03-dilution.
+         Position: (-0.05, -0.30).
+         ============================================================ -->
+    <model name="source_flask_100ml">
+      <pose>-0.05 -0.30 0.900 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <pose>0 0 0.090 0 0 0</pose>
+          <mass>0.150</mass>
+          <inertia>
+            <ixx>5.0e-4</ixx><iyy>5.0e-4</iyy><izz>5.0e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="foot">
+          <pose>0 0 0.0025 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <visual name="bulb">
+          <pose>0 0 0.035 0 0 0</pose>
+          <geometry><sphere><radius>0.030</radius></sphere></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <visual name="bulb_content">
+          <pose>0 0 0.030 0 0 0</pose>
+          <geometry><sphere><radius>0.024</radius></sphere></geometry>
+          <material>
+            <ambient>0.70 0.45 0.35 0.70</ambient>
+            <diffuse>0.85 0.55 0.40 0.70</diffuse>
+          </material>
+        </visual>
+        <visual name="neck">
+          <pose>0 0 0.135 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.140</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <visual name="ring">
+          <pose>0 0 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.00625</radius><length>0.001</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.030</radius><length>0.205</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         10 mL plastic syringe (BD Plastipak Luer-Lok 309604-style).
+           Barrel  : Ø16 x 90 mm clear cylinder
+           Plunger : Ø11 x 70 mm rod (pulled out half-way) +
+                     Ø22 x 4 mm thumb pad at the end
+           Tip     : Ø6 x 8 mm Luer cone at the other end
+         Total length ~140 mm. Lies flat on the bench at (0.10, 0.05),
+         length along Y.
+
+         Local +Z = barrel axis; pitch = pi/2 rotates +Z to +X.
+         Then yaw = -pi/2 rotates +X to -Y, so the barrel points
+         along -Y in the world. Net pose orientation (0, 1.5708,
+         -1.5708) ... actually a single roll = pi/2 around X
+         turns local +Z into world -Y, which is what we want for
+         the barrel to lie sideways with the Luer tip at -Y.
+         ============================================================ -->
+    <model name="syringe_10ml">
+      <pose>0.10 0.05 0.908 1.5708 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.025</mass>
+          <inertia>
+            <ixx>5.0e-6</ixx><iyy>4.0e-5</iyy><izz>4.0e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="barrel">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry><cylinder><radius>0.008</radius><length>0.090</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.92 0.95 0.45</ambient>
+            <diffuse>0.88 0.94 0.97 0.45</diffuse>
+          </material>
+        </visual>
+        <visual name="plunger">
+          <pose>0 0 0.080 0 0 0</pose>
+          <geometry><cylinder><radius>0.0055</radius><length>0.070</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.93 0.93 0.93 1</diffuse></material>
+        </visual>
+        <visual name="plunger_pad">
+          <pose>0 0 0.117 0 0 0</pose>
+          <geometry><cylinder><radius>0.011</radius><length>0.004</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.93 0.93 0.93 1</diffuse></material>
+        </visual>
+        <visual name="luer_tip">
+          <pose>0 0 -0.049 0 0 0</pose>
+          <geometry><cylinder><radius>0.003</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.93 0.93 0.93 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <pose>0 0 0.020 0 0 0</pose>
+          <geometry><cylinder><radius>0.011</radius><length>0.160</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Syringe filter: Millex-HV 0.45 um PVDF, 25 mm OD (P/N
+         SLHVR25NB).
+           Disc body : Ø25 x 7 mm white
+           Inlet     : Ø6 x 8 mm Luer-Lok female on one face
+           Outlet    : Ø3 x 8 mm tapered male on the opposite face
+         Lies flat on the bench at (0.10, -0.05), faces along Y.
+         ============================================================ -->
+    <model name="syringe_filter">
+      <pose>0.10 -0.05 0.9035 1.5708 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia>
+            <ixx>3.0e-7</ixx><iyy>3.0e-7</iyy><izz>5.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="disc">
+          <geometry><cylinder><radius>0.0125</radius><length>0.007</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="inlet">
+          <pose>0 0 0.0075 0 0 0</pose>
+          <geometry><cylinder><radius>0.003</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.93 0.93 0.93 1</diffuse></material>
+        </visual>
+        <visual name="outlet">
+          <pose>0 0 -0.0075 0 0 0</pose>
+          <geometry><cylinder><radius>0.002</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.93 0.93 0.93 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.0125</radius><length>0.023</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Receiving beaker: Pyrex 100 mL low-form, clean and empty.
+         Collects the filtered liquid coming out of the syringe.
+         Same dimensions as the Step 2 source beaker.
+         ============================================================ -->
+    <model name="receiving_beaker">
+      <pose>0.10 -0.20 0.935 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.075</mass>
+          <inertia>
+            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.90 0.92 0.50</ambient>
+            <diffuse>0.85 0.90 0.92 0.50</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+  </world>
+</sdf>

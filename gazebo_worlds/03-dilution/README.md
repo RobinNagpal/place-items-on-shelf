@@ -1,5 +1,7 @@
 # 03 — Dilution (ketchup case)
 
+Run: `gz sim gazebo_worlds/03-dilution/ketchup_dilution.sdf`
+
 A Gazebo world that mirrors HPLC workflow **Step 3 — Dilution**, for
 the **ketchup** example only. The workflow doc describes this as the
 "messy + uncertain" dilution:
