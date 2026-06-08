@@ -22,8 +22,7 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top is at
 | 5 | **Stir bar** | PTFE-coated octagonal magnet | Ø25 × 8 white | inside the beaker | 5 g | The thing the hot-plate magnet drags in a spin. **In sim it does not actually rotate** — see *Stir-bar limitation* below. |
 | 6 | **Ketchup bottle** | Heinz / Mitchell's 14 oz glass bottle | Body Ø55 × 130 + tapered shoulder (3 stacked discs) + neck Ø22 × 30 + cap Ø28 × 18 white; total 208 | (0.10, +0.25) | 500 g | The source jar of ketchup. Tapered shoulder mimics the real bottle silhouette. |
 | 7 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, -0.25) | 700 g | The diluent the doc names for ketchup. |
-| 8 | **Weigh boat + sample** | 60 mm white PS antistatic weigh boat | 60 × 60 × 15 + Ø25 × 6 red blob | (-0.05, +0.18) | 10 g | Carries the pre-weighed ~5 g ketchup from Step 1. |
-| 9 | **Spatula** | 150 mm stainless lab scoop | Handle Ø8 × 100, blade 50 × 25 × 4 | (0.10, -0.05) | 30 g | Lifts the ketchup blob from the weigh boat into the beaker. Sized up from the first draft so it is easily visible and clickable in the GUI. |
+| 8 | **Weigh boat + sample** | 60 mm white PS antistatic weigh boat | 60 × 60 × 15 + Ø25 × 6 red blob | (-0.05, +0.18) | 10 g | Carries the pre-weighed ~5 g ketchup from Step 1. The arm scoops directly out of the weigh boat with the beaker rim (or the gripper) — no separate spatula. |
 
 ### Stir-bar limitation
 

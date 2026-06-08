@@ -12,8 +12,8 @@
     5-HMF from ~5 g of ketchup into a beaker: a ketchup source
     bottle, a glass beaker (the extraction vessel), a solvent
     bottle (water / mild acid), a magnetic hot-plate stirrer, a
-    stir bar inside the beaker, a stainless spatula, and a weigh
-    boat carrying the pre-weighed ~5 g ketchup sample from Step 1.
+    stir bar inside the beaker, and a weigh boat carrying the
+    pre-weighed ~5 g ketchup sample from Step 1.
 
   NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the
   bench marks the spot where a future arm base will be bolted
@@ -44,9 +44,9 @@
           |    +0.18)        + beaker on top      |
           |                                       |
           |  [ketchup]      [hotplate cont.]      |
-          |  (0.10,         [spatula]   [solvent] |
-          |   +0.25)        (0.10,      (0.10,    |
-          |                  -0.05)      -0.25)   |
+          |  (0.10,                     [solvent] |
+          |   +0.25)                    (0.10,    |
+          |                              -0.25)   |
           |                                       |
           +=======================================+
           front of bench (X = +0.30)
@@ -69,8 +69,6 @@
     Stir bar        - 25 x 8 mm PTFE-coated octagonal magnet,
                       simplified to a small white cylinder sitting
                       at the bottom of the beaker.
-    Spatula         - 150 mm stainless lab scoop: 100 mm cylindrical
-                      handle + 50 mm flat scoop blade.
     Weigh boat      - 60 x 60 x 15 mm white PS antistatic weigh
                       boat with a small ketchup blob on top to
                       represent the 5 g pre-weighed sample.
@@ -543,51 +541,6 @@
         </visual>
         <collision name="c">
           <geometry><box><size>0.060 0.060 0.021</size></box></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         Spatula / lab scoop: 150 mm stainless tool.
-         Sized up from the first draft so it is clearly visible
-         and easily clickable in the Gazebo GUI.
-           Handle : 100 mm long, 8 mm OD cylinder (was Ø5 mm).
-           Blade  : 50 x 25 x 4 mm flat scoop (was 50 x 12 x 2).
-         Lies flat on the bench at (0.10, -0.05), handle along +X.
-         Model pose z = 0.904 puts the handle cylinder centre 4 mm
-         above the bench top (so the cylinder rests on the bench).
-         The blade's local pose drops it by 2 mm so it also sits
-         flat on the bench top.
-         ============================================================ -->
-    <model name="spatula">
-      <pose>0.10 -0.05 0.904 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.030</mass>
-          <inertia>
-            <ixx>6.0e-6</ixx><iyy>4.0e-5</iyy><izz>4.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="handle">
-          <pose>0.025 0 0 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.004</radius><length>0.100</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.55 0.58 1</ambient>
-            <diffuse>0.78 0.78 0.80 1</diffuse>
-          </material>
-        </visual>
-        <visual name="blade">
-          <pose>-0.050 0 -0.002 0 0 0</pose>
-          <geometry><box><size>0.050 0.025 0.004</size></box></geometry>
-          <material>
-            <ambient>0.55 0.55 0.58 1</ambient>
-            <diffuse>0.78 0.78 0.80 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <pose>0 0 -0.002 0 0 0</pose>
-          <geometry><box><size>0.150 0.025 0.008</size></box></geometry>
         </collision>
       </link>
     </model>
