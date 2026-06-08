@@ -1,170 +1,215 @@
 # 02 — Hardware choice for the paracetamol case
 
-The previous file ([`01-existing-solutions.md`](01-existing-solutions.md))
-showed that the **dosing balance does the milligram-level work**. Our
-robot arm only carries labware around it. So the arm shopping list is
-the easier one:
+We do **not** choose the arm and gripper from the weighing step alone.
+The same robot must also do the seven other workflow steps
+(dissolution → dilution → filter → vial transfer → cap → label →
+autosampler placement). If the choice works for Step 1 but breaks at
+Step 6, we have built the wrong cell.
 
-- **Reach** ≥ 40 cm — enough to span an in-rack vial, the balance pan,
-  and an outgoing vial slot on the same bench.
-- **Repeatability** ≤ 0.1 mm — the balance pan is 80 mm wide; ±1 mm
-  would already be fine; we ask for an order of magnitude tighter as
-  margin.
-- **Payload** ≥ 1 kg — a 100 mL volumetric flask weighs ~200 g empty,
-  ~280 g full. A 2 mL HPLC vial weighs ~10 g.
-- **Bench-friendly footprint** — must sit on the same 60 × 90 cm
-  benchtop as the balance.
-- **Open-source ROS 2 + Gazebo + MoveIt 2 support** — non-negotiable
-  for our sim-first workflow.
-- **Soft / force-limited motion** — the arm reaches inside a
-  glass-walled draft shield with the doors open. A bumped door breaks
-  glass and resets the day.
+This file walks all eight steps from the *gripper's point of view*,
+then picks an arm, then picks the dispenser.
 
-## The four candidate families
+## What every step asks the gripper to do
 
-Robot arms split into four geometry families. Each has a typical "what
-it is good at":
+Read this table top to bottom. Each row is one upstream workflow file,
+linked. The "Specialized station" column lists any non-arm hardware
+the cell needs.
 
-| Family | Geometry | Strength | Weakness |
+| # | Step | What the gripper physically does | Specialized station the arm presents labware to |
 |---|---|---|---|
-| **Industrial 6-axis** | 6 rotating joints, big base | Best repeatability, highest payload | Heavy, expensive, needs safety cage |
-| **Cobot** (collaborative 6-axis) | 6 rotating joints, force-limited | Safe near humans, easy to teach, good ROS support | Lower repeatability than industrial |
-| **SCARA** | 4 axes — two horizontal arms + one vertical + one wrist rotation | Very fast and precise in flat pick-and-place | Cannot tilt its tool, limited shape |
-| **Cartesian / gantry** | XYZ rails plus a rotating wrist | Cheap to build, very precise | Big footprint, restricted to right angles |
+| 1 | [Weighing](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/01-weighing.md) | Grip a 100 mL volumetric flask (35 mm neck), slide the draft-shield door | Mettler XPR analytical balance + Quantos QB1 powder doser |
+| 2 | [Dissolution](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/02-dissolution-and-extraction.md) | Grip the same flask, drop it into a fixed ultrasonic bath | Branson 1800 ultrasonic bath |
+| 3 | [Dilution](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/03-dilution.md) | Pick up an electronic pipette (25 mm handle), aim it into a 10 mL volumetric flask | Sartorius Picus pipette in a charging holster + tip rack |
+| 4 | [Filtering](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/04-filtering.md) | Grip a 10 mL syringe with a 0.45 µm filter on the tip, **press the plunger with controlled force** | Syringe-filter clamp on the bench |
+| 5 | [Transfer to vial](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/05-transfer-to-vial.md) | Hold the pipette over a 2 mL vial (12 mm OD), dispense | (uses the same pipette holster as step 3) |
+| 6 | [Capping](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/06-capping.md) | Grip a 10 mm screw cap, set it on the vial, **rotate the wrist to torque limit** | Cap dispenser (spring-loaded) |
+| 7 | [Labeling](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/07-labeling.md) | Hold the vial upright, present it to a label applicator | Zebra ZD421 printer + benchtop label wrapper |
+| 8 | [Placement](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/08-placement-in-autosampler.md) | Grip the 12 mm capped, labeled vial, place it into a numbered tray slot | Agilent 100-position autosampler tray |
 
-For loading a balance pan on a flat bench, **SCARA and Cartesian
-gantries are technically the best fit** — the motion is "lift, move
-horizontally, lower." But neither has a strong open-source ROS 2
-simulation story for beginners.
+Reading down the **last column**: every messy specialized motion
+(dosing powder, sonicating, applying labels) sits in a **stationary
+station**. The arm only ever shuttles labware between them. That is
+how we get away with one gripper.
 
-**Industrial 6-axis** is overkill. We do not need 0.02 mm repeatability
-and we do not want a safety cage in a teaching project.
+Reading down the **third column**: only two steps need anything beyond
+"grip and move." Step 4 needs **closing force** to push a plunger.
+Step 6 needs **wrist rotation with torque feedback** to screw on a
+cap. Both are standard cobot features.
 
-**Cobot** trades a tiny bit of precision for huge ROS / simulation
-support — and the precision we lose does not matter because the
-Quantos sets the mass.
+## Can one gripper do all eight steps? Yes.
 
-So the real choice is **SCARA (production answer) vs. cobot
-(beginner / simulation answer).** Below is the comparison.
+Concretely, the gripper has to handle:
 
-## The shortlist
+- Objects from **10 mm** (cap) to **50 mm** (flask body) wide.
+- **Glass**, so soft pads or low closing force.
+- **Plunger pressing** for Step 4 — gripper closes onto a plunger
+  cap and pushes down.
+- **Cap torquing** for Step 6 — the gripper holds the cap rigidly
+  while the arm's wrist rotates.
 
-### Option A — Epson G6-553S SCARA (the production answer)
+A single adaptive parallel-jaw gripper with a 0–50 mm stroke, soft
+silicone fingertips, and a force-control mode covers all four. No
+tool changer is needed. Nothing case-specific to paracetamol forces a
+second gripper.
 
-- **Reach:** 550 mm
-- **Payload:** 6 kg
-- **Repeatability:** ±0.015 mm in XY, ±0.010 mm in Z
-- **Tool:** any standard mechanical end-effector mounted on the
-  rotating Z-axis
-- **Approx. price (new):** ~$15,000
-- **ROS 2 support:** community xacro / URDF only — **no official
-  driver, no first-party Gazebo SDF**
-- **Vendor page:** <https://epson.com/For-Work/Robots/SCARA/Epson-G6-SCARA-Robots---550mm/p/RG6-553ST13>
+## Arm pick — Universal Robots UR5e
 
-In a real lab this is the right pick. The SCARA geometry matches the
-"lift, slide, drop" motion of balance loading exactly. Repeatability
-is over an order of magnitude tighter than any cobot. It is also
-faster — cycle times under one second for a typical pick-and-place.
+This is the arm we recommend for both cases (paracetamol and ketchup).
+The reasoning below is the same in
+[`../ketchup/02-hardware-choice.md`](../ketchup/02-hardware-choice.md);
+read it once.
 
-The catch: in our **sim-first** workflow this arm is hard to teach.
-Epson's official driver runs on Windows under their own RC+ language;
-there is no first-party `epson_description` URDF, no `epson_ros2`
-driver, and no Gazebo plugin from Epson. Community packages exist but
-they are not beginner-friendly and they drift behind the supported
-ROS distribution.
+**UR5e at a glance:**
 
-### Option B — Universal Robots UR3e (the project answer)
-
-- **Reach:** 500 mm
-- **Payload:** 3 kg
-- **Repeatability:** ±0.03 mm
-- **Built-in 6-axis force/torque sensor** in the wrist (useful for
-  draft-shield-door touch detection and "soft" approaches near
-  glass)
-- **Approx. price (new):** ~$28,000
-- **ROS 2 support:** **first-party** —
-  [`Universal_Robots_ROS2_Description`](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver)
-  for URDF,
-  [`Universal_Robots_ROS2_GZ_Simulation`](https://github.com/UniversalRobots/Universal_Robots_ROS2_GZ_Simulation)
-  for Gazebo, official MoveIt 2 config, and active community
-- **Vendor specs:** <https://www.universal-robots.com/media/1807464/ur3e_e-series_datasheets_web.pdf>
-
-A UR3e is twice the price of the Epson, and ten times less repeatable.
-For this task, neither difference matters. The flask just needs to
-land on an 80 mm pan; ±0.03 mm is laughably tight for that. And the
-Quantos still does the dispensing, so flask-position accuracy never
-turns into mass-measurement accuracy.
-
-What we gain is huge:
-
-- First-party Gazebo SDF and MoveIt config — anyone who follows the
-  upstream [Universal Robots ROS 2 docs](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver)
-  can replicate the simulation in an afternoon.
-- A wrist-mounted 6-axis force/torque sensor — handy for "stop the
-  moment the gripper touches the door."
-- Active community examples for exactly the kind of motion we need
-  (open a door, place an object, close a door).
-
-### Option C (rejected) — Mitsubishi RV-2FRL industrial 6-axis
-
-Specs are excellent (±0.02 mm, 2 kg payload, 504 mm reach, ~$13k
-used). But it is built for caged industrial cells, not a benchtop
-shared with a human technician. The safety-rated stop modes are weak
-without a contactor cabinet, and the ROS 2 driver
-([`mitsubishi_melfa_ros_driver`](https://github.com/Mitsubishi-Electric-Automation/mitsubishi_melfa_ros_driver))
-only recently came online. Skip for v1.
-
-### Option D (rejected) — myCobot 280 Pi
-
-Used elsewhere in this repo for the **tray loading** task (Step 8 of
-the workflow). For Step 1, the 280 mm reach is too short to span
-"in-rack vial + balance pan + scan station" without moving the
-balance — which we explicitly do not want, because every move of the
-balance forces a recalibration. The 280's repeatability (±0.5 mm) is
-borderline OK for an 80 mm pan but tight against the draft-shield
-opening. Skip it.
-
-## The decision
-
-We pick **Option B — Universal Robots UR3e**.
-
-The trade-off is explicit: **we trade ~$13k of price and 2× of
-nominal precision for a first-party ROS 2 / Gazebo / MoveIt 2 stack
-and a built-in force sensor.** In a beginner-friendly, sim-first
-project this is the right call, because:
-
-- the precision difference never reaches the measured mass,
-- the simulation tooling difference shows up on day one,
-- the force sensor gives us "do not break the glass door" out of the
-  box.
-
-If the project moves to real hardware at v2 and the budget is the
-binding constraint, switch to **Option A — Epson G6-553S SCARA**. The
-MoveIt-level workflow code we write against the UR3e ports to the
-SCARA with only the URDF changing — the planning, gripper, and
-balance-control logic stay the same.
-
-## Other hardware in the cell
-
-The arm is only one of six items. The complete shopping list:
-
-| Item | Pick | Why |
+| Spec | Value | Why it matters here |
 |---|---|---|
-| **Analytical balance** | Mettler Toledo XPR226 (220 g capacity, 0.1 mg readability) | Industry standard, drives Quantos directly |
-| **Powder doser** | Mettler Quantos QB1 + QH-series powder dosing head | The actual fine-precision dispenser. ±0.1 mg at 5 mg. |
-| **Robot arm** | Universal Robots UR3e | See the discussion above |
-| **Gripper** | Robotiq 2F-85 with soft silicone pads | Holds glass without cracking, 85 mm opening fits flasks |
-| **Wrist camera** | Intel RealSense D405 (close-range RGB-D) | Reads the vial barcode and verifies labware seating |
-| **Bench fiducial** | One ArUco tag on the balance base, one on the rack | Lets the arm re-zero its world frame after a bump |
+| Reach | **850 mm** | Spans an ~1.0 m bench cell from a central mount |
+| Payload | **5 kg** | Flask + cap + gripper ≈ 700 g — well within |
+| Joints | 6, including **continuous wrist rotation** | Wrist spin is what tightens the screw cap in step 6 |
+| Repeatability | ±0.03 mm | An order of magnitude tighter than any opening we aim at |
+| Built-in sensor | **6-axis wrist force/torque sensor** | Drives plunger push (step 4) and cap torque (step 6) |
+| Approx. price | ~$36,000 new | Mid-range cobot |
+| Simulation | First-party [`Universal_Robots_ROS2_Driver`](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver), [`Universal_Robots_ROS2_GZ_Simulation`](https://github.com/UniversalRobots/Universal_Robots_ROS2_GZ_Simulation), MoveIt 2 config | Best-supported arm in open-source robotics |
 
-The arm is not strictly necessary for a 5-tablet study — a human can
-load the Quantos in 60 seconds. The arm pays off when the workflow
-chains together: weigh → dissolve → dilute → filter → vial → cap →
-label → tray. With one arm running the whole eight-step chain
-unattended, the hourly throughput jumps from a few samples per hour to
-a few samples per minute.
+The UR5e's wrist FT sensor is the single feature that lets us avoid
+buying a more expensive joint-torque arm. It is good enough for the
+two force-sensitive steps in our list (push the plunger, twist the
+cap), and the Quantos doser handles the only step where milligram
+precision actually matters.
+
+### Competitor 1 (rejected) — Franka Research 3 (FR3)
+
+- 7 joints, **joint torque on every joint**, ±0.1 mm, 855 mm reach.
+- Approx. ~$15,000 at the research-academic price.
+- First-party `franka_ros2` + `franka_description`.
+
+Strong in theory. We rejected it for two reasons:
+
+1. **Payload is 3 kg.** Once we add the Robotiq Hand-E (~0.9 kg) plus
+   a syringe filled with solvent and connected to a filter (~0.6 kg),
+   we are at 1.5 kg with no headroom for the dynamic forces of a
+   pushing motion. UR5e gives us 5 kg.
+2. **Joint torques are wasted here.** They shine when the arm is the
+   dispenser (e.g. holding a peristaltic-pump nozzle). In our cell the
+   pump is on a *stationary* mount — bead-break detection moves out of
+   the arm and onto the balance's mass-vs-time signal. The UR5e wrist
+   FT sensor covers everything we actually do.
+
+If at v2 we put the pump on the arm, the FR3 becomes worth a
+revisit. For v1 the UR5e is plain better.
+
+### Competitor 2 (rejected) — Kinova Gen3 (7-DOF)
+
+- 7 joints, joint torques on every joint, 4 kg payload, **902 mm
+  reach** (best on paper).
+- Approx. ~$30,000.
+- Official `ros2_kortex` driver.
+
+We rejected it on **simulation maturity**. The Kinova Gazebo plugin
+lags ROS 2 releases by months, and the description URDF has been
+through breaking changes recently. The teaching value of "follow the
+upstream UR docs and have a sim running in an afternoon" is
+significant for this project. If Kinova's sim story stabilises at v2
+we revisit.
+
+## Gripper pick — Robotiq Hand-E
+
+Same gripper for both cases.
+
+| Spec | Value | Why it matters here |
+|---|---|---|
+| Stroke | **0–50 mm** | Spans the 10 mm cap to the 50 mm flask body |
+| Force | 20–185 N, **force-controlled** | Soft enough not to crack glass, strong enough to push a syringe plunger |
+| Finger pads | **Swappable silicone** | Grips glass without slipping |
+| Mass | 0.9 kg | Within UR5e payload |
+| Driver | First-party Robotiq UR Toolio + ROS 2 driver from [PickNik](https://github.com/PickNikRobotics/robotiq) | Drops in next to the UR5e simulation |
+| Approx. price | ~$5,000 | The smallest of Robotiq's lineup |
+
+### Why this single gripper covers all 8 steps
+
+| Step | Hand-E action |
+|---|---|
+| 1 | Grips the 35 mm flask neck at ~40 N. Slides the draft-shield door with the closed-fingertip contour. |
+| 2 | Same flask grip; carries it into the sonicator basket. |
+| 3 | Grips the 25 mm pipette handle at ~30 N. Pipette is electronic, so the dispense itself is a USB / Bluetooth command — no plunger to press. |
+| 4 | Grips the 16 mm syringe barrel, then **closes onto the plunger top with force-controlled motion** to push fluid through the filter. The wrist FT reads back-pressure. |
+| 5 | Pipette again. |
+| 6 | Grips a 10 mm cap from a spring-loaded cap dispenser. Wrist rotates with torque feedback to "firm but not jammed." |
+| 7 | Holds the vial upright; the label wrapper does the actual wrap. |
+| 8 | Grips the 12 mm vial body. Drops it into the tray slot. |
+
+### Gripper competitor 1 (rejected) — Robotiq 2F-85
+
+- 85 mm stroke (handles larger labware than we need).
+- Same ecosystem and driver as Hand-E.
+
+Rejected because **the larger stroke buys us nothing** here, and the
+2F-85's fingertip surfaces are coarser than Hand-E's, slightly less
+secure on small (12 mm) vials. Hand-E is the cleaner pick.
+
+### Gripper competitor 2 (rejected) — OnRobot RG2-FT
+
+- Built-in 6-axis force/torque sensor *in each finger* — exquisite
+  contact sensing.
+- Cost ~$10,000.
+
+Rejected because the **UR5e wrist FT already handles** our two
+force-sensitive steps, and RG2-FT is double the price of Hand-E with
+no other gain we can use.
+
+## Step 1 dispenser pick — Mettler Toledo XPR226 + Quantos QB1
+
+The arm and gripper are case-independent. The **Step 1 dispenser** is
+not — for paracetamol it must dose a dry powder to ±0.1 mg.
+
+| Spec | Value |
+|---|---|
+| Balance | Mettler Toledo **XPR226** (220 g capacity, 0.1 mg readability) |
+| Doser | Mettler **Quantos QB1** powder-dosing module with QH-series heads |
+| Head technology | RFID-tagged sealed cartridge; ionising bar inside; closed-loop on balance reading |
+| Target mass | 1 mg – 5 g (we use ~5 mg) |
+| Accuracy at 5 mg | ±0.1 mg |
+| Approx. price | ~$35,000 new |
+| What the arm has to do | Open the draft-shield door; place the flask; close the door; trigger the Quantos via a serial command; wait; open the door; remove the flask |
+
+### Dispenser competitor 1 (rejected) — Sartorius Cubis II + Q-App auto-dispensing
+
+Strong product line, competitive accuracy. We **rejected** it because
+its automation hooks (Q-App) are less openly documented than Quantos's
+RFID + RS232 protocol, and the ROS-friendly community examples almost
+all target Mettler. We do not lose accuracy by picking Mettler.
+
+### Dispenser competitor 2 (rejected) — Vibri vibrating-chute doser (manual + balance)
+
+A small vibrating chute that dispenses powder onto a manual balance.
+Used in some teaching labs because it is cheap (~$2,000). **Rejected**
+because it has no machine-readable protocol — the arm cannot tell it
+"dispense 5 mg now," and you would still need a person to read the
+balance. Fine for a benchtop demo, useless for a 50-vial run.
+
+## The whole shopping list (paracetamol cell)
+
+| Item | Pick | Approx. price |
+|---|---|---|
+| Arm | Universal Robots UR5e | ~$36,000 |
+| Gripper | Robotiq Hand-E | ~$5,000 |
+| Step 1 — dosing balance | Mettler XPR226 + Quantos QB1 | ~$35,000 |
+| Step 2 — sonicator | Branson 1800 ultrasonic bath | ~$1,500 |
+| Step 3 / 5 — pipette | Sartorius Picus 1000 µL + holster + tip rack | ~$1,500 |
+| Step 4 — syringe-filter clamp | Custom 3D-printed jig + 10 mL Luer syringes + 0.45 µm filters | ~$200 |
+| Step 6 — cap dispenser | Spring-loaded cap turret (custom) | ~$300 |
+| Step 7 — label printer + wrapper | Zebra ZD421 + tabletop wrapper | ~$2,500 |
+| Step 8 — autosampler tray | Agilent 100-position tray | ~$200 |
+| Wrist camera | Intel RealSense D405 | ~$400 |
+| Misc (mount, fiducials, cables) | — | ~$1,000 |
+| **Total** | | **~$83,600** |
+
+The Mettler Quantos is the single biggest line item. Drop it for v0
+(use the Vibri chute and accept manual mass logging) and the cell
+falls under $50k.
 
 ## Next
 
-[`03-simulation-workflow.md`](03-simulation-workflow.md) shows how we
-actually drive the UR3e through the weighing step inside Gazebo.
+[`03-simulation-workflow.md`](03-simulation-workflow.md) walks through
+**(a)** what the arm physically does at each step and **(b)** how we
+implement that in ROS 2 + Gazebo + MoveIt 2.

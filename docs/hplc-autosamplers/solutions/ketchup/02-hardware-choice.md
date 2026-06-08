@@ -1,167 +1,228 @@
 # 02 — Hardware choice for the ketchup case
 
-Unlike the paracetamol case, **the arm itself is the dispenser** here.
-That changes the shopping list. The previous file
-([`01-existing-solutions.md`](01-existing-solutions.md)) already
-narrowed the dispensing mechanism (peristaltic pump or positive-
-displacement piston, gated by a balance). This file picks the arm.
+Same rule as the paracetamol case: the arm and gripper must handle
+**all eight workflow steps**, not just the weighing one. If the choice
+breaks at Step 6, the cell is wrong.
 
-## The shopping list
+This file walks all eight steps from the *gripper's point of view*,
+then picks an arm, then picks the case-specific dispenser. The arm
+and gripper answers come out the same as for paracetamol; the
+dispenser does not.
 
-| Requirement | Number | Why |
-|---|---|---|
-| **Reach** | ≥ 60 cm | The arm has to span an inbound rack, the balance, and an outbound rack. Bigger workspace than paracetamol because the beaker + pump + tubing are bulkier. |
-| **Repeatability** | ≤ 0.5 mm | A 50 mL beaker has a 4 cm opening — millimetre-level is fine. |
-| **Payload** | ≥ 3 kg | A preeflow dispenser (~0.5 kg) + a glass beaker holder + safety pads. |
-| **Force / torque sensing** | **on every joint** | Non-negotiable. We need to detect the string-break the moment it happens, in any direction. A wrist-only sensor catches z-axis but is blind to drag. |
-| **Joint count** | ≥ 7 | A 7th joint lets the arm pull the nozzle straight up while keeping it vertical. With 6 joints, lifting straight up forces a wrist rotation. |
-| **Open-source ROS 2 + Gazebo + MoveIt 2 support** | first-party | Same as paracetamol — sim-first project. |
-| **Force-limited (safe near humans)** | yes | Same as paracetamol — bench-side technician. |
+## What every step asks the gripper to do (ketchup-flavoured)
 
-The "joint torque sensing on every joint" and the "≥ 7 joints" lines
-together rule out the entire UR family and the entire Doosan family.
-Both are 6-DOF with **wrist-only** force sensing.
-
-## The shortlist
-
-### Option A — Franka Research 3 (FR3) — the pick
-
-- **Reach:** 855 mm
-- **Joints:** 7
-- **Payload:** 3 kg
-- **Repeatability:** ±0.1 mm
-- **Sensing:** joint torque sensor on **every** joint (7 of them)
-- **Approx. price:** ~$15,000 at the research-academic price (commercial
-  closer to $25k)
-- **ROS 2 support:** first-party — [`franka_ros2`](https://github.com/frankarobotics/franka_ros2),
-  [`franka_description`](https://github.com/frankarobotics/franka_description),
-  Gazebo plugin maintained by Franka Robotics
-- **Vendor page:** <https://franka.de/franka-research-3>
-
-Why this is right:
-
-- **String-break detection.** The string of ketchup hanging from the
-  nozzle as the arm lifts away exerts a tiny downward drag — maybe
-  20–80 mN. A joint-torque sensor on the elbow + shoulder + wrist
-  picks that up cleanly. A wrist-only FT sensor (UR) detects only the
-  z-component; if the bead tugs sideways (which it does on partial
-  retractions), the wrist FT misses it.
-- **7 joints = straight-up retraction with a vertical nozzle.** Crucial
-  for not dragging extra paste out of the beaker on retract.
-- **First-party simulation maturity.** TARMAC (the closest research
-  paper) uses the FR3 in exactly this configuration. The sim path is
-  well trodden.
-- **Modest price for what it does.** $15k research price is comparable
-  to a UR3e and dramatically less than a Mettler Quantos rig.
-
-### Option B — Universal Robots UR5e (rejected)
-
-- **Reach:** 850 mm
-- **Joints:** 6
-- **Repeatability:** ±0.03 mm
-- **Sensing:** **wrist-only** 6-axis FT (built-in)
-- **ROS 2 support:** first-party (best in class)
-- **Approx. price:** ~$36,000
-
-The UR5e is the obvious cheaper alternative. We reject it for two
-reasons:
-
-1. **Wrist-only FT is the wrong sensor placement for string detection.**
-   The bead drags in arbitrary directions; wrist-only FT measures
-   force on a single rigid body (the wrist + tool). With 6 axes the
-   contribution of a sideways tug at the very tip is hard to separate
-   from gripping torque artefacts. With joint torque on every link,
-   the signature of a string tug is unmistakable.
-2. **6 joints + straight-up retract = wrist rotation.** A 6-axis arm
-   trying to lift the nozzle straight up while keeping it
-   vertically aligned uses an awkward shoulder + wrist combination
-   that often hits joint limits inside a draft-shield-style
-   enclosure. The 7th joint of the FR3 makes this trivial.
-
-If budget became a hard constraint at v2 and the bench is open (no
-enclosure), UR5e is a defensible fallback. It is **not** the right v1
-choice for a teaching project where we want the bead-break detection
-to actually work first time.
-
-### Option C — Kinova Gen3 (rejected)
-
-- **Reach:** 902 mm
-- **Joints:** 7
-- **Repeatability:** ±0.5 mm
-- **Sensing:** joint torque on all 7 joints
-- **ROS 2 support:** first-party (`ros2_kortex`)
-- **Approx. price:** ~$30,000
-
-Specs are close to the FR3 on paper — even better reach. We reject it
-on **simulation maturity** alone. The Kinova Gazebo plugin lags ROS 2
-releases by months; the description package has been through breaking
-changes recently. The TARMAC-style sim story is rougher. If Kinova's
-sim story matures we revisit, but for now FR3 is the safer pick.
-
-### Option D — Industrial 6-axis (Fanuc CRX-10iA, ABB GoFa, KUKA LBR iiwa)
-
-The KUKA **LBR iiwa 7 R800** is interesting: 7 joints, joint torque on
-every joint, ~800 mm reach. It is essentially the German industrial
-sibling of the FR3. We reject it on price (~$80,000) and ROS 2 support
-(community-maintained drivers only). For a future production v2 cell,
-LBR iiwa is the natural upgrade.
-
-## The decision
-
-We pick **Option A — Franka Research 3 (FR3)** with no fallback for
-v1. The decision rests on **joint torque sensing on every joint** plus
-**7 joints**, both of which the cheaper alternatives lack.
-
-## Dispenser sub-decision
-
-Two candidates from
-[`01-existing-solutions.md`](01-existing-solutions.md):
-
-| Candidate | Pros | Cons | Pick |
+| # | Step | What the gripper physically does | Specialized station the arm presents labware to |
 |---|---|---|---|
-| **Watson-Marlow 323Dud peristaltic** | Cheap (~$2,500), food-lab standard, no valves to clean | After-drip overshoot; struggles above ~10,000 cP | First pick — start here |
-| **preeflow eco-PEN piston** | Cleaner shut-off, handles 100,000+ cP | Costlier (~$3,000), needs cleaning cycle between samples | Fallback if Watson-Marlow can't hit 1 mg tolerance |
+| 1 | [Weighing](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/01-weighing.md) | Grip a 50 mL beaker (50 mm OD), slide the draft-shield door | Mettler XPR1203S balance + Watson-Marlow 323Dud peristaltic pump (fixed nozzle over pan) |
+| 2 | [Extraction](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/02-dissolution-and-extraction.md) | Grip the same beaker, drop it on a heated stirrer | Heated magnetic stirrer (50 °C, 600 rpm) |
+| **3a** | **Centrifuge** (extra step for food) | Grip a centrifuge tube (16 mm OD), load into rotor | Eppendorf 5424 microcentrifuge |
+| 3 | [Dilution](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/03-dilution.md) | Pick up an electronic pipette, dilute the clarified extract | Sartorius Picus 1000 µL + holster |
+| 4 | [Filtering](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/04-filtering.md) | Grip a 10 mL syringe with a **0.22 µm** filter on the tip, push the plunger with controlled force | Syringe-filter clamp |
+| 5 | [Transfer to vial](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/05-transfer-to-vial.md) | Hold pipette over the 2 mL vial, dispense | (uses the pipette holster) |
+| 6 | [Capping](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/06-capping.md) | Grip a 10 mm screw cap, set it on the vial, rotate wrist to torque limit | Cap dispenser |
+| 7 | [Labeling](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/07-labeling.md) | Hold the vial upright, present it to the wrapper | Zebra ZD421 printer + wrapper |
+| 8 | [Placement](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/08-placement-in-autosampler.md) | Grip the 12 mm vial, place in numbered slot | Agilent 100-position tray |
 
-We start with the Watson-Marlow because food-lab people will recognise
-it and it has a serial-control protocol that is well-documented for
-ROS 2. If the after-drip turns out to be larger than 5 mg in
-simulation, we swap to the preeflow.
+Two differences from the paracetamol table:
 
-## Other hardware in the cell
+- **Step 1** uses a peristaltic pump instead of a Quantos powder
+  doser. The arm's job (place beaker, walk away, pick up beaker) is
+  the same shape.
+- **Step 3a** is a new row: a centrifuge step before dilution. The
+  upstream Step 4 explains why — ketchup has pulp that would
+  instantly clog a 0.22 µm filter, so it is centrifuged first.
 
-| Item | Pick | Why |
+Everything else is identical to the paracetamol case from the
+gripper's point of view. A 50 mL beaker is wider than a 100 mL flask
+neck (50 mm vs 35 mm), but our gripper opens to 50 mm so it fits.
+
+## Can one gripper do all eight + 8a steps? Yes.
+
+Same answer as paracetamol. The gripper needs:
+
+- Range from **10 mm** (cap) to **50 mm** (beaker) wide.
+- **Glass-safe** soft pads or low force.
+- **Plunger pressing** for Step 4.
+- **Cap torquing** for Step 6.
+
+An adaptive parallel-jaw gripper with a 0–50 mm stroke, soft silicone
+fingertips, and a force-control mode covers all of them. No tool
+changer is needed. Nothing case-specific to ketchup forces a second
+gripper.
+
+## Arm pick — Universal Robots UR5e (same as paracetamol)
+
+The all-8-steps reasoning is the same as in the paracetamol case.
+Repeated here because most readers will only open one folder.
+
+**UR5e at a glance:**
+
+| Spec | Value | Why it matters here |
 |---|---|---|
-| **Arm** | Franka Research 3 | See above |
-| **Pump (primary)** | Watson-Marlow 323Dud + 4 mm Marprene tubing | Discussed above |
-| **Pump (fallback)** | preeflow eco-PEN piston dispenser | Higher viscosity headroom |
-| **End-effector** | Custom 3D-printed nozzle holder + Robotiq FT-300 wrist sensor | The FT-300 is redundant with joint torques but useful as a second source for direct Z-force when the nozzle approaches the surface |
-| **Balance** | Mettler Toledo XPR1203S (milligram readability) | Larger pan than the XPR226 used in paracetamol; 1 mg is fine for a 5 g target |
-| **Beaker** | 50 mL low-form Pyrex beaker | Right size for 5 g of ketchup, stable footprint on the pan |
-| **Cameras** | Intel RealSense D405 on wrist + a small overhead RGB looking into the beaker | Wrist camera reads ketchup-bottle barcode; overhead watches the bead form / break |
-| **Heat plate (v2)** | Small 30 °C plate under the source bottle | Thins ketchup viscosity; deferred to v2 to keep v1 simple |
+| Reach | **850 mm** | Spans an ~1.0 m bench cell from a central mount |
+| Payload | **5 kg** | Beaker + pipette + gripper ≈ 700 g — well within |
+| Joints | 6, including **continuous wrist rotation** | Wrist spin tightens the screw cap in step 6 |
+| Repeatability | ±0.03 mm | Plenty for our 1 mm autosampler tolerance |
+| Built-in sensor | **6-axis wrist force/torque sensor** | Drives plunger push (step 4) and cap torque (step 6) |
+| Approx. price | ~$36,000 new | Mid-range cobot |
+| Simulation | First-party [`Universal_Robots_ROS2_Driver`](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver), [`Universal_Robots_ROS2_GZ_Simulation`](https://github.com/UniversalRobots/Universal_Robots_ROS2_GZ_Simulation), MoveIt 2 config | Best-supported arm in open-source robotics |
+
+### Why not a different arm just for ketchup?
+
+The earlier draft of this file picked a **Franka Research 3** for
+ketchup, because joint-torque sensing on every joint would help
+detect the **bead-break** when the arm retracts after a paste
+dispense. But we have since moved the pump **off the arm** and onto
+a stationary mount. The arm now only places an empty beaker on the
+pan and picks it up filled — exactly like the paracetamol case. The
+bead-break happens between the fixed pump nozzle and the beaker; the
+arm is not in the loop at that moment.
+
+With the pump stationary, the joint-torque argument disappears. UR5e
++ wrist FT is just as good for ketchup as it is for paracetamol.
+
+### Competitor 1 (rejected) — Franka Research 3 (FR3)
+
+- 7 joints, joint torque on every joint, ±0.1 mm, 855 mm reach.
+- ~$15,000 at the research-academic price.
+
+Rejected for two reasons:
+
+1. **3 kg payload** is tight when carrying a syringe + filter + liquid.
+2. **Joint torques are wasted** here — pump is stationary, so the
+   force-sensing problem is the same one the UR5e wrist FT already
+   handles.
+
+### Competitor 2 (rejected) — Kinova Gen3 (7-DOF)
+
+- 7 joints, joint torques, 4 kg payload, 902 mm reach.
+- ~$30,000.
+
+Rejected on **simulation maturity**: the Kinova Gazebo plugin lags
+ROS 2 releases by months. Pick UR5e in v1; revisit Kinova at v2 if
+its sim story matures.
+
+## Gripper pick — Robotiq Hand-E (same as paracetamol)
+
+| Spec | Value | Why it matters here |
+|---|---|---|
+| Stroke | **0–50 mm** | Fits the 10 mm cap up to the 50 mm beaker |
+| Force | 20–185 N, force-controlled | Soft on glass, firm on syringe plunger |
+| Finger pads | Swappable silicone | Grips glass without slipping |
+| Mass | 0.9 kg | Within UR5e payload |
+| Driver | First-party Robotiq UR Toolio + [PickNik](https://github.com/PickNikRobotics/robotiq) ROS 2 driver | Drops in next to UR5e sim |
+| Approx. price | ~$5,000 | The smallest of Robotiq's lineup |
+
+### Why this single gripper covers all 8 (+1) steps
+
+| Step | Hand-E action |
+|---|---|
+| 1 | Grips the 50 mm beaker body. Slides the draft-shield door. |
+| 2 | Same beaker grip; places it on the heated stirrer. |
+| 3a | Grips a 16 mm centrifuge tube; loads into the rotor. |
+| 3 | Grips the 25 mm pipette handle; dilution dispenses are electronic. |
+| 4 | Grips a 16 mm syringe barrel; closes force-controlled on the plunger top. |
+| 5 | Pipette again. |
+| 6 | Grips a 10 mm cap; wrist rotates to torque limit. |
+| 7 | Holds the vial upright; wrapper applies the label. |
+| 8 | Grips the 12 mm vial body; drops into tray slot. |
+
+### Gripper competitor 1 (rejected) — Robotiq 2F-85
+
+- 85 mm stroke, same ecosystem.
+
+Rejected because **a larger stroke buys nothing** here, and 2F-85's
+fingertip pads grip 12 mm vials slightly less securely than Hand-E's.
+
+### Gripper competitor 2 (rejected) — OnRobot RG2-FT
+
+- Built-in 6-axis FT in each finger; ~$10k.
+
+Rejected because the UR5e wrist FT already does what we need, and
+RG2-FT doubles the gripper cost for no gain in our 8 (+1) steps.
+
+## Step 1 dispenser pick — Watson-Marlow 323Dud peristaltic pump + Mettler XPR1203S
+
+The arm and gripper are case-independent. The **Step 1 dispenser** is
+not — for ketchup it must extrude a thick paste with mass feedback.
+
+| Spec | Value |
+|---|---|
+| Balance | Mettler Toledo **XPR1203S** (1.2 kg capacity, 1 mg readability) — bigger pan than the XPR226 to fit a 50 mL beaker |
+| Pump | Watson-Marlow **323Dud** with 4 mm Marprene tubing |
+| Control | Pump speed set by RS232 / Modbus over serial; balance reads on serial too. Closed-loop in software. |
+| Target mass | ~5 g |
+| Accuracy at 5 g | ±1 mg with a slowdown ramp and after-drip correction |
+| Approx. price | ~$2,500 (pump) + ~$15,000 (balance) |
+| What the arm has to do | Place the empty beaker on the pan; close the draft-shield door; trigger the closed-loop dispense over serial; wait; open the door; remove the filled beaker |
+
+The pump sits on a small bench fixture next to the balance. Its
+nozzle hangs ~5 mm above the centre of the pan. The arm aligns the
+beaker so its centre is under the nozzle. Sub-millimetre precision is
+not needed — the nozzle is ~5 mm wide and the beaker is 50 mm wide.
+
+### Dispenser competitor 1 (rejected) — preeflow eco-PEN piston dispenser
+
+- Cleaner shut-off (no after-drip).
+- Handles 100,000+ cP — more headroom than Watson-Marlow on cold
+  ketchup.
+
+**Rejected for v1** because it needs a cleaning cycle between samples
+(disposable cartridge or a flush), and food labs already know
+Watson-Marlow pumps. If v2 needs to skip the warming step or push the
+mass accuracy below 1 mg, swap to a preeflow — the rest of the cell
+stays the same.
+
+### Dispenser competitor 2 (rejected) — Manual scoop + tare-and-add by hand
+
+The current industry default in most food QC labs. Cheap, but it
+needs a human standing at the bench for every sample. Not actually
+automation; listed only to make clear we are not competing with it on
+cost — we are competing on consistency and audit trail.
+
+## The whole shopping list (ketchup cell)
+
+| Item | Pick | Approx. price |
+|---|---|---|
+| Arm | Universal Robots UR5e | ~$36,000 |
+| Gripper | Robotiq Hand-E | ~$5,000 |
+| Step 1 — balance | Mettler XPR1203S | ~$15,000 |
+| Step 1 — pump | Watson-Marlow 323Dud + Marprene tubing | ~$2,500 |
+| Step 2 — heated stirrer | IKA C-MAG HS 7 hot plate | ~$700 |
+| Step 3a — centrifuge | Eppendorf 5424 (24 × 1.5 mL tubes) | ~$5,500 |
+| Step 3 / 5 — pipette | Sartorius Picus 1000 µL + holster + tips | ~$1,500 |
+| Step 4 — syringe-filter clamp + 0.22 µm filters | 3D-printed jig + PVDF filters | ~$300 |
+| Step 6 — cap dispenser | Spring-loaded cap turret (custom) | ~$300 |
+| Step 7 — label printer + wrapper | Zebra ZD421 + wrapper | ~$2,500 |
+| Step 8 — autosampler tray | Agilent 100-position tray | ~$200 |
+| Wrist camera | Intel RealSense D405 | ~$400 |
+| Misc | — | ~$1,000 |
+| **Total** | | **~$70,900** |
+
+About $13k less than the paracetamol cell — the Quantos is the
+expensive item; the Watson-Marlow + bigger balance combination is
+cheaper. The extra centrifuge is the only added line.
 
 ## Cross-case comparison
 
-How the two cases line up:
-
 | | Paracetamol | Ketchup |
 |---|---|---|
-| **Arm role** | Carry labware to / from a dosing balance | Hold the dispenser nozzle and drive the dispense |
-| **Arm** | UR3e (6-DOF, wrist FT) | Franka Research 3 (7-DOF, joint torque on every joint) |
-| **Dispenser** | Mettler Quantos QB1 (powder, ±0.1 mg) | Watson-Marlow 323Dud peristaltic (paste, ±1 mg) |
-| **Balance** | Mettler XPR226 (0.1 mg readability) | Mettler XPR1203S (1 mg readability) |
-| **Target mass** | ~5 mg | ~5 g (1000× more) |
-| **Hardest skill** | Sliding the draft-shield door without breaking glass | Detecting the string-break on retract |
-| **Approx. arm + dispenser hardware cost** | $28k (UR3e) + ~$35k (Mettler XPR + Quantos) | $15k (FR3) + ~$2.5k (Watson-Marlow) + ~$15k (Mettler XPR1203S) |
+| **Arm** | UR5e | **UR5e (same)** |
+| **Gripper** | Robotiq Hand-E | **Robotiq Hand-E (same)** |
+| **Step 1 dispenser** | Mettler Quantos QB1 (powder) | Watson-Marlow 323Dud (paste) |
+| **Balance** | Mettler XPR226 (0.1 mg) | Mettler XPR1203S (1 mg) |
+| **Mixing station** | Ultrasonic bath | Heated magnetic stirrer + microcentrifuge |
+| **Target mass** | ~5 mg | ~5 g |
+| **Arm cycle time per sample** | ~3 minutes (no centrifuge) | ~7 minutes (centrifuge adds 4 min) |
+| **Total cell cost** | ~$83.6k | ~$70.9k |
 
-The two cases need different hardware for honest engineering reasons —
-the **binding constraint differs**: precision-of-dispense for
-paracetamol, force-feedback-on-retract for ketchup. The two arms are
-*both* easy to simulate in ROS 2, so the project can build the two
-cells in parallel without compatibility headaches.
+The two cases share an arm and a gripper because the all-8-steps
+analysis converges. They diverge on **the dispenser** (Step 1) and
+on **mixing / clarification stations** (Steps 2 and 4) — exactly
+where the chemistry actually differs.
 
 ## Next
 
-[`03-simulation-workflow.md`](03-simulation-workflow.md) — the Gazebo
-world, the ROS 2 packages, the motion sequence, and the bead-break
-detector.
+[`03-simulation-workflow.md`](03-simulation-workflow.md) walks
+through **(a)** what the arm physically does at each step and
+**(b)** how we implement it in ROS 2 + Gazebo + MoveIt 2.

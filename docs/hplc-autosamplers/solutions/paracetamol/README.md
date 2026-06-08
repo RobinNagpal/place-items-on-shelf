@@ -1,82 +1,71 @@
-# Paracetamol — Step 1 (Weighing) solution
+# Paracetamol — full 8-step automated cell
 
-> **In one line:** for the easy case (a clean, dry powder), a small
-> SCARA-style robot arm carries vials and weighing boats in and out of a
-> commercial **dosing balance**. The dosing balance does the precise
-> powder dispensing; the arm just handles labware.
+> **In one line:** a single Universal Robots UR5e cobot with a
+> Robotiq Hand-E gripper carries labware between **stationary
+> stations** (analytical balance with Mettler Quantos doser,
+> sonicator, pipette, syringe-filter clamp, capper, labeler,
+> autosampler tray) and runs the entire eight-step HPLC sample-prep
+> workflow on a paracetamol tablet sample.
 
-This folder is the solution for the **paracetamol** case of
-**Step 1 — Weighing** in the eight-step workflow at
-[robotics-research / 03-hplc-workflow / 01-weighing.md](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/01-weighing.md).
-If you have not read that file, read it first — this folder assumes
-you know what the step is supposed to produce.
+This folder is the solution for the **paracetamol** case of the
+eight-step workflow at
+[robotics-research / 03-hplc-workflow](https://github.com/RobinNagpal/robotics-research/tree/main/03-hplc-autosampler/03-hplc-workflow).
+Read those eight files first — the simulation plan in this folder
+reproduces them one for one.
 
-## What we are automating, in one paragraph
+## Why this is the "easy" case
 
-A lab technician needs to weigh out about **5 milligrams** (5 mg) of
-ground paracetamol powder onto a weighing boat or directly into a
-small glass flask, with the answer accurate to **a tenth of a
-milligram**. The technician would do this by hand, scoop by scoop,
-inside an analytical balance's glass draft shield. Our solution lets a
-robot do it instead, so the same job can run for **five products in a
-row** (the tested brand plus four competitors) without a human
-standing over each weighing.
+Paracetamol is a clean tablet:
 
-## Why this case is the "easy" one
+- **Dry, free-flowing powder.** Gravity does the dispensing work.
+  A Mettler Quantos QB1 reaches ±0.1 mg at the 5 mg target on its own
+  — no special arm skill needed.
+- **Dissolves cleanly in methanol.** Step 2 produces a clear liquid
+  with nothing to filter out separately.
+- **No centrifuge needed.** Step 4 is a single push through a
+  0.45 µm syringe filter.
+- **Small vial count.** A typical paracetamol assay run is ~8 vials
+  (4 brands + reference + blank + 2 standards). Bookkeeping risk is
+  low.
 
-Compared to ketchup, paracetamol is the friendly sample:
-
-- **Dry, free-flowing powder.** Nothing sticks. Gravity does the work.
-- **Small target weight.** ~5 mg — well inside the range of every
-  commercial powder doser.
-- **The full off-the-shelf answer already exists.** A Mettler Toledo
-  **Quantos** module clipped onto an XPR analytical balance dispenses
-  powders down to 0.1 mg by itself. The robot arm has nothing fine to
-  do — it just carries empty containers in and the filled ones out.
-- **Static is the only annoyance.** The Quantos head solves this with a
-  built-in ionising bar (small high-voltage wires that neutralise the
-  static charge on the powder).
-
-That is why we do **not** need a $30k industrial 6-axis arm here. A
-small SCARA arm with millimetre-level repeatability is more than
-enough.
+That is what makes this the **first** case worth automating — the
+fewest things go wrong, so the cell can be brought up step by step.
 
 ## The three files in this folder
 
-Read them in order. Each one is short.
+1. **[`01-existing-solutions.md`](01-existing-solutions.md)** — a
+   one-screen summary of how commercial systems handle weighing
+   today, and which pattern we copy.
+2. **[`02-hardware-choice.md`](02-hardware-choice.md)** — the
+   **main reasoning** file. Walks all eight workflow steps from the
+   gripper's point of view, picks the arm (UR5e), picks the gripper
+   (Hand-E), picks the Step-1 dispenser (Mettler Quantos QB1), and
+   names two rejected competitors for each pick.
+3. **[`03-simulation-workflow.md`](03-simulation-workflow.md)** —
+   **(Part 1)** what the arm physically does at every step, in the
+   same plain English the upstream workflow uses. **(Part 2)** how
+   that maps to ROS 2 + Gazebo + MoveIt 2 calls.
 
-1. **[`01-existing-solutions.md`](01-existing-solutions.md)** — how
-   real labs (Mettler, Chemspeed, Hamilton, PAL) automate the weighing
-   step today, and which parts of those solutions we copy.
-2. **[`02-hardware-choice.md`](02-hardware-choice.md)** — which robot
-   arm we recommend, which dosing balance it talks to, why we picked
-   them, and what the alternatives are.
-3. **[`03-simulation-workflow.md`](03-simulation-workflow.md)** — the
-   exact ROS 2 / MoveIt 2 / Gazebo plan: which packages, which nodes,
-   which topics, and the step-by-step motion the arm performs in
-   simulation.
+## Headline picks
 
-## The headline picks (so you do not have to read further)
-
-| What | We picked | Why |
+| | Pick | Why |
 |---|---|---|
-| **Dosing instrument** | Mettler Toledo XPR226 analytical balance + **Quantos QB1** powder-dosing module with QH-series powder heads | Industry standard. ±0.1 mg accuracy at 5 mg. RFID-tagged dosing heads. Closed-loop on balance reading. |
-| **Robot arm (production)** | **Epson G6-553S SCARA** (550 mm reach, ±0.015 mm repeatability) | Right geometry for a flat 40 cm bench cell. Repeatability beats any cobot. Fast and cheap (~$15k). |
-| **Robot arm (simulation + project)** | **Universal Robots UR3e** (500 mm reach, ±0.03 mm) | Same job, slightly worse precision, but its ROS 2 driver, MoveIt 2 config, and Gazebo SDF are first-party and beginner-friendly. The Quantos sets the mass, so the arm precision loss does not matter. |
-| **Gripper** | UR's **2F-85** Robotiq parallel jaw, soft silicone pads | Holds a 100 mL volumetric flask and a 2 mL HPLC vial. Soft pads protect glass. |
-| **Sensors** | Wrist-mounted RGB-D camera + draft-shield door switch | Camera reads the vial barcode and confirms the flask is on the pan. Door switch confirms the draft shield is open before the arm enters. |
+| **Arm** | Universal Robots UR5e | 5 kg payload, wrist FT, 850 mm reach, first-party ROS 2 / Gazebo / MoveIt 2. See [`02-hardware-choice.md`](02-hardware-choice.md) for the FR3 and Kinova Gen3 rejections. |
+| **Gripper** | Robotiq Hand-E | 50 mm stroke spans 10 mm cap → 50 mm flask. Force-controlled. ROS 2 driver. Soft pads for glass. |
+| **Step 1 dispenser** | Mettler XPR226 + Quantos QB1 powder doser | Industry standard. ±0.1 mg at 5 mg. RFID-tagged dosing heads. |
+| **Stations** | Sonicator, pipette holster, syringe-filter clamp, cap dispenser, label printer + wrapper, autosampler tray | All stationary — the arm shuttles labware between them. |
 
-Full reasoning — including what we considered and rejected — is in
-[`02-hardware-choice.md`](02-hardware-choice.md).
+The arm and gripper picks are **the same** in the ketchup case (see
+[`../ketchup/`](../ketchup/)) — the all-8-steps analysis converges on
+the same answer. The two cases differ only in the **Step 1 dispenser**
+(Quantos QB1 powder for paracetamol; Watson-Marlow 323Dud peristaltic
+for ketchup) and in a few intermediate stations (a centrifuge replaces
+the sonicator for ketchup's Step 4 clarification).
 
 ## What this does **not** cover (and why)
 
-- **Sample homogenisation** — grinding 20 tablets into a fine powder.
-  That is a kitchen-blender-style pre-step the tech still does by
-  hand. Out of scope for v1.
-- **The next seven workflow steps** (dissolution onward). Each gets its
-  own folder when we implement it.
-- **Real hardware bring-up.** This folder is sim-only for now. Layer 4
-  (integration on real hardware) follows the same workflow but adds
-  real-world calibration, safety, and LIMS hooks — see
-  [`../../../04-integration-and-bring-up/`](../../../04-integration-and-bring-up/).
+- **Sample homogenisation.** Grinding 20 tablets into a fine powder
+  is still a manual pre-step. Out of scope for v1.
+- **Real hardware bring-up.** This folder is sim-only for now.
+- **Other workflow variations.** v1 is the standard tablet assay.
+  Crimp caps, amber vials, and partial racks are deferred to v2.

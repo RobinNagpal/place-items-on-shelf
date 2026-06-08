@@ -50,10 +50,15 @@ upstream [HPLC workflow primer](https://github.com/RobinNagpal/robotics-research
 each with three short markdown files:
 
 - **[`solutions/paracetamol/`](solutions/paracetamol/)** — the **easy**
-  case (dry powder, ~5 mg target). UR3e + Mettler Quantos.
+  case (dry powder, ~5 mg target). UR5e + Robotiq Hand-E + Mettler
+  Quantos QB1 powder doser.
 - **[`solutions/ketchup/`](solutions/ketchup/)** — the **hard** case
-  (sticky paste, ~5 g target). Franka Research 3 + Watson-Marlow
-  peristaltic pump.
+  (sticky paste, ~5 g target). **Same UR5e + Hand-E**, plus a
+  Watson-Marlow peristaltic pump and an Eppendorf centrifuge.
+
+The all-eight-steps gripper analysis in each case folder converges on
+the **same arm and the same gripper** for both cases — only the
+Step 1 dispenser and the Step 4 clarification (centrifuge) differ.
 
 Each folder follows the same three-file layout:
 
