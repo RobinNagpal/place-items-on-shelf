@@ -8,15 +8,24 @@
     02-dissolution-and-extraction.md
 
   WHAT IS THE SCENE?
-    A small lab bench with everything an arm would need to extract
-    5-HMF from ~5 g of ketchup into a beaker: a glass beaker (the
-    extraction vessel), a solvent bottle (water / mild acid), a
-    magnetic hot-plate stirrer, a stir bar inside the beaker, and
-    a weigh boat carrying the pre-weighed ~5 g ketchup sample from
-    Step 1. The original Heinz ketchup source bottle is NOT in the
-    scene - that bottle is only used in Step 1 (weighing), which
-    this project skips, so the bench starts with the weighed
-    sample already in the boat.
+    A small lab bench laid out for a "pick beaker -> pour solvent
+    -> place beaker back" routine that uses ONLY the actions a
+    simple arm + gripper can do reliably. On the right side of
+    the bench, three Pyrex 100 mL beakers each already hold ~5 g
+    of ketchup paste at the bottom (the pre-weighed sample from
+    Step 1 - which the project skips - is already in the beaker).
+    On the left side stands a 500 mL water / mild-acid solvent
+    bottle. The centre of the bench is the empty "pour station"
+    where the arm temporarily places each beaker while pouring.
+
+    The hot plate, stir bar, and weigh boat that earlier versions
+    of this world had are GONE. A hot plate's knobs are too small
+    for the arm to operate, the stir bar cannot actually spin in
+    Gazebo's physics, and the weigh boat belongs to the skipped
+    Step 1. Mixing is done by the arm physically picking up the
+    beaker and swirling it by hand - the doc's Step 2 routine
+    explicitly lists "swirl by hand" as one of the four valid
+    mixing methods.
 
   NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the
   bench marks the spot where a future arm base will be bolted
@@ -34,7 +43,7 @@
 
   Bench top is at z = 0.900 m (standard lab bench height).
 
-  Layout (top-down view):
+  Layout (top-down view; +Y is left, -Y is right):
 
           back of bench (X = -0.30)
           +=======================================+
@@ -42,13 +51,15 @@
           |            [arm marker]               |  arm base
           |          (-0.22, 0.00)                |  goes here
           |                                       |  in the
-          |  [weigh boat]   [hot plate]           |  future
-          |   (-0.05,         (0.05, 0.00)        |
-          |    +0.18)        + beaker on top      |
-          |                                       |
-          |                              [solvent]|
-          |                              (0.10,   |
-          |                               -0.25)  |
+          |   [solvent]    [pour station]         |  future
+          |   (0.10,        (centre,              |
+          |    +0.25)        no marker)           |
+          |                          [beaker_3]   |
+          |                          (0.05, -0.06)|
+          |                          [beaker_2]   |
+          |                          (0.05, -0.18)|
+          |                          [beaker_1]   |
+          |                          (0.05, -0.30)|
           |                                       |
           +=======================================+
           front of bench (X = +0.30)
@@ -56,23 +67,15 @@
   All quantities below come from off-the-shelf real lab parts:
 
     Bench           - 1000 x 600 x 50 mm laminated lab bench top.
-    Beaker          - Pyrex 100 mL low-form beaker: 50 mm OD,
-                      70 mm tall, modelled as a thin-walled translucent
-                      cylinder.
+    Beaker (x3)     - Pyrex 100 mL low-form beaker: 50 mm OD,
+                      70 mm tall, modelled as a thin-walled
+                      translucent cylinder, each with a small
+                      red ketchup blob (Ø30 x 8 mm) at the
+                      bottom representing the ~5 g pre-weighed
+                      sample.
     Solvent bottle  - 500 mL wide-mouth glass reagent bottle:
                       85 mm OD body, 150 mm tall, 50 mm OD cap.
                       Pale-blue label = water / mild acid.
-    Hot plate       - DAE mesh (hot_plate.dae) of a benchtop
-                      magnetic stirrer hot plate, exported from
-                      the SketchUp 3D Warehouse "Magnetic Stirrer
-                      with Hot Plate" model via Blender. Has
-                      visible heat / stir knobs on the front face.
-    Stir bar        - 25 x 8 mm PTFE-coated octagonal magnet,
-                      simplified to a small white cylinder sitting
-                      at the bottom of the beaker.
-    Weigh boat      - 60 x 60 x 15 mm white PS antistatic weigh
-                      boat with a small ketchup blob on top to
-                      represent the 5 g pre-weighed sample.
     Arm marker      - 100 mm OD x 2 mm yellow disc, purely visual,
                       flagging the future arm base location.
 
@@ -227,124 +230,117 @@
     </model>
 
     <!-- ============================================================
-         Hot plate magnetic stirrer - DAE mesh from the SketchUp 3D
-         Warehouse "Magnetic Stirrer with Hot Plate"
-         (https://3dwarehouse.sketchup.com/model/ace3cf0f-7327-4bbe-
-         b0c3-f193798013b8/Magnetic-Stirrer-with-Hot-Plate). The user
-         downloaded the .skp, opened it in Blender, and exported as
-         hot_plate.dae sitting next to this SDF.
+         Three Pyrex 100 mL low-form beakers (Corning P/N 1000-100),
+         each Ø50 x 70 mm. Each beaker already carries a small ~5 g
+         ketchup blob (Ø30 x 8 mm red disc) at the bottom, standing
+         in for the pre-weighed sample from Step 1. The blobs are
+         the same geometry / material the weigh boat used to carry -
+         we just relocated them straight into the destination beaker
+         to remove the extra "tip the boat" sub-step.
 
-         The DAE replaces the previous primitive (base box + ceramic
-         top + tiny knobs) so the bench has a realistic-looking hot
-         plate with visible heat / stir knobs the arm can be aimed
-         at. The knobs in the mesh are static polygons - they do not
-         physically rotate in Gazebo, but the visual + the workflow
-         text in the README make the intended arm action clear.
+         All three sit in a row at X = 0.05 on the RIGHT side of
+         the bench (operator-view right = world -Y):
+           beaker_1 : (0.05, -0.30)  furthest from arm
+           beaker_2 : (0.05, -0.18)
+           beaker_3 : (0.05, -0.06)  closest to arm
+         12 cm centre-to-centre spacing leaves ~70 mm clearance
+         between glass rims - room for the gripper to slip in.
 
-         POSE / SCALE TUNING NOTES (likely needed on first load):
-
-           - If the mesh looks huge or tiny, SketchUp probably
-             exported in inches. Add inches->metres conversion by
-             setting <scale>0.0254 0.0254 0.0254</scale> below.
-           - If the mesh half-buries into the bench top, its origin
-             is at the geometry centre rather than the base. Raise
-             this model's pose z by half the mesh height
-             (~0.060 m for a ~120 mm tall hot plate).
-           - If the beaker (sitting at z=1.055 in this world)
-             floats above or sinks into the ceramic top of the
-             imported mesh, adjust the beaker_100ml model's pose
-             z to match the actual mesh top height.
-
-         Collision is kept as a primitive 220 x 220 x 120 mm box so
-         physics is fast and predictable - only the visual uses the
-         mesh.
-
-         The actual hot_plate.dae binary file must live next to this
-         SDF. If it is missing, Gazebo will show a placeholder cube
-         (or fall back to the collision box).
+         Beaker centre z = 0.900 (bench top) + 0.035 (half height)
+                        = 0.935.
+         Blob centre in beaker-local frame: z = -0.031
+           (puts blob centre at world z = 0.904, blob spans
+            0.900-0.908 - a thin red layer at the very bottom).
          ============================================================ -->
-    <model name="hot_plate">
-      <static>true</static>
-      <pose>0.05 0.00 0.900 0 0 0</pose>
-      <link name="link">
-        <visual name="v">
-          <geometry>
-            <mesh>
-              <uri>hot_plate.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <!-- Fallback material in case the DAE lost its texture /
-               material info during the SketchUp -> Blender -> DAE
-               round-trip. The mesh's own materials take precedence
-               when present. -->
-          <material>
-            <ambient>0.25 0.25 0.28 1</ambient>
-            <diffuse>0.35 0.35 0.38 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <pose>0 0 0.060 0 0 0</pose>
-          <geometry><box><size>0.22 0.22 0.12</size></box></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         Beaker: Pyrex 100 mL low-form.
-           OD 50 mm, height 70 mm.
-         Sits on the hot plate ceramic top (z = 1.020), so:
-           beaker centre z = 1.020 + 0.070 / 2 = 1.055
-         Translucent pale-blue glass.
-         ============================================================ -->
-    <model name="beaker_100ml">
-      <pose>0.05 0.00 1.055 0 0 0</pose>
+    <model name="beaker_1">
+      <pose>0.05 -0.30 0.935 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.075</mass>
+          <mass>0.080</mass>
           <inertia>
-            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
+            <ixx>4.5e-5</ixx><iyy>4.5e-5</iyy><izz>2.5e-5</izz>
             <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
           </inertia>
         </inertial>
-        <visual name="v">
+        <visual name="glass">
           <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
           <material>
             <ambient>0.85 0.90 0.92 0.55</ambient>
             <diffuse>0.85 0.90 0.92 0.55</diffuse>
           </material>
         </visual>
+        <visual name="ketchup_sample">
+          <pose>0 0 -0.031 0 0 0</pose>
+          <geometry><cylinder><radius>0.015</radius><length>0.008</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.08 0.08 1</diffuse>
+          </material>
+        </visual>
         <collision name="c">
           <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
         </collision>
       </link>
     </model>
 
-    <!-- ============================================================
-         Stir bar: 25 x 8 mm PTFE-coated octagonal magnet.
-         Modelled as a flat white cylinder at the bottom of the beaker.
-         Beaker bottom is at z = 1.020, so:
-           stir bar centre z = 1.020 + 0.008 / 2 = 1.024
-         ============================================================ -->
-    <model name="stir_bar">
-      <pose>0.05 0.00 1.024 0 0 0</pose>
+    <model name="beaker_2">
+      <pose>0.05 -0.18 0.935 0 0 0</pose>
       <link name="link">
         <inertial>
-          <mass>0.005</mass>
+          <mass>0.080</mass>
           <inertia>
-            <ixx>0.3e-6</ixx><iyy>0.3e-6</iyy><izz>0.5e-6</izz>
+            <ixx>4.5e-5</ixx><iyy>4.5e-5</iyy><izz>2.5e-5</izz>
             <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
           </inertia>
         </inertial>
-        <visual name="v">
-          <geometry><cylinder><radius>0.0125</radius><length>0.008</length></cylinder></geometry>
+        <visual name="glass">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
           <material>
-            <ambient>0.95 0.95 0.95 1</ambient>
-            <diffuse>0.95 0.95 0.95 1</diffuse>
+            <ambient>0.85 0.90 0.92 0.55</ambient>
+            <diffuse>0.85 0.90 0.92 0.55</diffuse>
+          </material>
+        </visual>
+        <visual name="ketchup_sample">
+          <pose>0 0 -0.031 0 0 0</pose>
+          <geometry><cylinder><radius>0.015</radius><length>0.008</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.08 0.08 1</diffuse>
           </material>
         </visual>
         <collision name="c">
-          <geometry><cylinder><radius>0.0125</radius><length>0.008</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="beaker_3">
+      <pose>0.05 -0.06 0.935 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.080</mass>
+          <inertia>
+            <ixx>4.5e-5</ixx><iyy>4.5e-5</iyy><izz>2.5e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="glass">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.90 0.92 0.55</ambient>
+            <diffuse>0.85 0.90 0.92 0.55</diffuse>
+          </material>
+        </visual>
+        <visual name="ketchup_sample">
+          <pose>0 0 -0.031 0 0 0</pose>
+          <geometry><cylinder><radius>0.015</radius><length>0.008</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.05 0.05 1</ambient>
+            <diffuse>0.70 0.08 0.08 1</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
         </collision>
       </link>
     </model>
@@ -353,14 +349,14 @@
          Solvent bottle: 500 mL wide-mouth glass reagent bottle.
            Body : 85 mm OD glass, 150 mm tall.
            Cap  : 50 mm OD blue PP cap, 25 mm tall.
-         Sits on the bench at (0.10, -0.25):
+         Sits on the LEFT side of the bench at (0.10, +0.25):
            body centre z = 0.900 + 0.150 / 2 = 0.975
            cap  centre z = 0.900 + 0.150 + 0.025 / 2 = 1.0625
          Label is a pale blue band that says "WATER" / "MILD ACID"
          in the real workflow; the colour stands in for the text.
          ============================================================ -->
     <model name="solvent_bottle">
-      <pose>0.10 -0.25 0.975 0 0 0</pose>
+      <pose>0.10 0.25 0.975 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.700</mass>
@@ -394,46 +390,6 @@
         </visual>
         <collision name="c">
           <geometry><cylinder><radius>0.0425</radius><length>0.175</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         Weigh boat carrying the pre-weighed ~5 g ketchup sample
-         from Step 1. The boat is a shallow white plastic tray;
-         the sample is a small red blob on top of it.
-         Boat: 60 x 60 x 15 mm.
-         Sits on the bench at (-0.05, +0.18):
-           boat centre z = 0.900 + 0.015 / 2 = 0.9075
-         Sample blob: 25 mm OD x 6 mm tall flattened red cylinder.
-         ============================================================ -->
-    <model name="weigh_boat">
-      <pose>-0.05 0.18 0.9075 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.010</mass>
-          <inertia>
-            <ixx>4.1e-6</ixx><iyy>4.1e-6</iyy><izz>7.5e-6</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="boat">
-          <geometry><box><size>0.060 0.060 0.015</size></box></geometry>
-          <material>
-            <ambient>0.95 0.95 0.95 1</ambient>
-            <diffuse>0.98 0.98 0.98 1</diffuse>
-          </material>
-        </visual>
-        <visual name="sample">
-          <pose>0 0 0.0105 0 0 0</pose>
-          <geometry><cylinder><radius>0.0125</radius><length>0.006</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.08 0.08 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><box><size>0.060 0.060 0.021</size></box></geometry>
         </collision>
       </link>
     </model>
