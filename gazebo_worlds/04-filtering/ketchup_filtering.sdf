@@ -468,12 +468,19 @@
     </model>
 
     <!-- ============================================================
-         Receiving beaker: Pyrex 100 mL low-form, clean and empty.
-         Collects the filtered liquid coming out of the syringe.
+         Receiving beaker - PRIMITIVE version (Gazebo-native
+         cylinder). Pyrex 100 mL low-form, clean and empty.
          Same dimensions as the Step 2 source beaker.
+
+         Parked at (0.20, +0.45), the front-LEFT corner of the
+         bench, so the three beakers (primitive cylinder vs broken
+         Blender .obj vs clean Thingiverse .stl) are visible
+         side-by-side as a "primitive vs mesh" comparison. The
+         Thingiverse STL one below takes the active workflow
+         position at (0.10, -0.20).
          ============================================================ -->
     <model name="receiving_beaker">
-      <pose>0.10 -0.20 0.935 0 0 0</pose>
+      <pose>0.20 0.45 0.935 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.075</mass>
@@ -487,6 +494,52 @@
           <material>
             <ambient>0.85 0.90 0.92 0.50</ambient>
             <diffuse>0.85 0.90 0.92 0.50</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Receiving beaker - STL MESH version (Thingiverse).
+         Source: greengiant1298 "100ml Beaker", thing:2267
+         (https://www.thingiverse.com/thing:2267). Direct .stl,
+         3D-print convention (base at z=0, Z-up), 25 mm OD, 51 mm
+         tall, 2 mm wall. The file is saved as Beaker.stl right
+         next to this SDF.
+
+         Sits at (0.10, -0.20) - the position the primitive
+         receiving_beaker used to occupy, i.e. the active workflow
+         spot between the syringe filter and the bench edge. The
+         arm fills this beaker with filtrate.
+
+         The STL is in millimetres (3D-print default), so
+         <scale>0.001 0.001 0.001</scale> converts to Gazebo's
+         metres. Collision is a primitive cylinder for fast physics.
+         ============================================================ -->
+    <model name="beaker_100ml_stl">
+      <pose>0.10 -0.20 0.900 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.075</mass>
+          <inertia>
+            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="v">
+          <geometry>
+            <mesh>
+              <uri>Beaker.stl</uri>
+              <scale>0.001 0.001 0.001</scale>
+            </mesh>
+          </geometry>
+          <!-- STL carries no colour; force translucent glass here. -->
+          <material>
+            <ambient>0.85 0.90 0.92 0.55</ambient>
+            <diffuse>0.85 0.90 0.92 0.55</diffuse>
           </material>
         </visual>
         <collision name="c">
