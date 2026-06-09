@@ -1,0 +1,105 @@
+# 05 — Transfer to the vial (ketchup case)
+
+Run: `gz sim gazebo_worlds/05-transfer-to-vial/ketchup_transfer_to_vial.sdf`
+
+Gazebo world for HPLC workflow [**Step 5 — Transfer to the vial**](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/05-transfer-to-vial.md),
+ketchup case only. The doc says the ketchup case is *not* physically
+harder than paracetamol at this step — the liquid is now thin and
+clear after filtering. The ketchup difficulty is **bookkeeping**:
+*several supplier batches × two-or-three repeat preparations* means
+**more vials to track**. So this world is laid out as **3 batches ×
+2 replicates = 6 empty vials in a rack**, plus the clean filtered
+ketchup from Step 4 and a transfer pipette.
+
+No arm is included. Yellow Ø100 mm disc at the back of the bench
+marks where the arm base will go. Capping (Step 6) happens in a
+separate world — the loose caps are present here only so the workflow
+context is visible.
+
+## What is on the bench
+
+Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at
+**z = 0.900 m**.
+
+| # | Object | Real product reference | Size (mm) | Pose (X, Y) | Purpose |
+|---|---|---|---|---|---|
+| 1 | **Bench** | Laminated lab bench, 4-leg | Top 1000 × 600 × 50, 4× Ø50 × 850 steel legs | centred at (0, 0) | Work surface. Same as Steps 2 / 3 / 4. |
+| 2 | **Arm marker** | n/a — visual flag | Ø100 × 2 yellow disc | (-0.22, 0.00) | Future arm base location. |
+| 3 | **Source beaker** (filtered ketchup) | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 with light-reddish translucent contents | (0.00, +0.28) | Carries the clean filtered ketchup from Step 4. The arm aspirates from here. |
+| 4 | **Vial rack (6-position)** | 6-position 2 mL HPLC vial rack, acrylic | 60 × 40 × 25 white block, 18 mm pitch | (0.05, 0.00) | Holds the empty vials upright while the arm fills them. |
+| 5 | **Vial × 6** (empty) | Agilent 5182-0716 11 mm crimp / screw-top clear glass autosampler vial, 2 mL | Ø12 × 32 borosilicate glass | (0.041 / 0.059, -0.018 / 0.000 / +0.018) | Destination vessels. Named **`vial_bX_rY`** (batch X, replicate Y) — 3 batches × 2 replicates = 6 vials. The arm hits each opening reliably; the doc identifies this exact task as the ideal **first proof-of-concept**. |
+| 6 | **Cap tray** (6 loose caps) | 11 mm white PP screw caps with PTFE / silicone septum | 60 × 40 × 8 tray + 6× Ø10 × 5 caps | (-0.05, -0.28) | Caps are needed in **Step 6 (Capping)**, not this step. Shown here only so the workflow context is visible — do not cap during transfer. |
+| 7 | **Pasteur transfer pipette** | Samco 222-1S 3 mL polyethylene transfer pipette | Bulb Ø14 × 25, stem Ø6 × 110, tip Ø2 × 10; total 145 | (0.15, +0.15) lying along Y | Moves liquid from the source beaker into each vial. Disposable — a fresh one per batch in a stricter SOP, but 1 covers all 6 vials here. |
+
+### Why these objects in particular
+
+The Step 5 doc routine is: have a clean empty vial → take the filtered
+liquid → aim over the narrow opening → fill to about 1.5 mL. Mapping:
+
+| Doc sub-step | Object responsible |
+|---|---|
+| "have a clean, empty vial ready, often in a small rack" | vial rack + 6 empty vials |
+| "take the filtered liquid" | source beaker (with the Step 4 output) |
+| "aim carefully over the narrow opening and let liquid flow in" | Pasteur pipette (the arm holds it, dips into the source, dispenses over each vial in turn) |
+| "fill to roughly the right level, even under 2 mL" | reading the vial graduation by eye (no extra tool needed) |
+| "move on to the next vial, keeping each sample strictly separate" | the 6 vials in a 2×3 grid with predictable, distinct `vial_bX_rY` positions for tracking |
+
+### What was deliberately left out
+
+- **Vial caps applied during transfer.** Capping is a separate
+  workflow step ([Step 6](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/README.md))
+  and gets its own world. The loose caps in the tray are visible here
+  only as context.
+- **Crimping tool / capper.** Same reason — Step 6.
+- **Label printer / pre-printed vial labels.** The doc warns about the
+  *wrong vial* mistake but the labelling action itself is a one-time
+  pre-step in most SOPs, not part of the pour. Tracking is done by
+  rack position in this world.
+- **Multiple source beakers.** A stricter SOP would have one source
+  vessel per batch. We single-source here for clarity — the bench
+  would otherwise read as a different kind of cell (parallel
+  preparation rather than transfer).
+- **Backup blank vials.** A real run also fills a *solvent blank*
+  vial. Not required by the doc's Step 5 paragraph.
+
+## Arm placeholder
+
+Yellow Ø100 mm disc at **(-0.22, 0.00)**. Same position as Steps
+2 / 3 / 4. Install an arm with:
+
+```xml
+<include>
+  <name>arm</name>
+  <uri>model://mycobot_280</uri>
+  <pose>-0.22 0.00 0.900 0 0 0</pose>
+</include>
+```
+
+Reach check: every vial in the rack is within (≤ 290 mm) of the
+marker — well inside any benchtop arm's reach envelope. The doc
+specifically names this step as the **ideal first proof-of-concept**
+because reaching a fixed, ~9 mm opening reliably is the right
+difficulty for any small benchtop arm including the myCobot 280.
+
+## Coordinate sanity check
+
+Bench top at **z = 0.900 m**. Vial tops at z = 0.932 (32 mm vials).
+Source beaker top at z = 0.970. Pipette is ~7 mm thick at the bulb,
+so its centre sits at z = 0.907.
+
+## Is one Gazebo world enough for Step 5?
+
+**Yes**, for the ketchup case. The bookkeeping difficulty of "more
+vials" is already captured by the 3-batch × 2-replicate naming.
+
+A **paracetamol** sibling would look very similar (5 brands + 1
+standard + 1 blank = 7 vials) but with a different naming scheme. A
+**capping-aware** version belongs in Step 6, not here.
+
+## File list
+
+```
+05-transfer-to-vial/
+├── README.md                          (this file)
+└── ketchup_transfer_to_vial.sdf       (the Gazebo world)
+```

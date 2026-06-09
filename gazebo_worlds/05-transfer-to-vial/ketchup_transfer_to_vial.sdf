@@ -1,0 +1,411 @@
+<?xml version="1.0" ?>
+<!--
+  ketchup_transfer_to_vial.sdf
+
+  Gazebo world for HPLC workflow Step 5 (transfer to the vial),
+  ketchup case only. Mirrors the routine at:
+    robotics-research/03-hplc-autosampler/03-hplc-workflow/
+    05-transfer-to-vial.md
+
+  The doc explicitly says the ketchup case is *not* physically
+  harder than paracetamol at this step - the liquid is now thin
+  and clear. What makes ketchup the "hard case" here is **tracking
+  more vials**: several supplier batches x two-or-three repeats.
+  This world reflects that: a 6-position vial rack populated with
+  6 empty HPLC vials standing in for "3 batches x 2 replicates."
+
+  WHAT IS THE SCENE?
+    A small lab bench laid out for the pour: a 100 mL Pyrex
+    receiving beaker holding the clean filtered ketchup from
+    Step 4 (light reddish, thin); a 6-position acrylic rack
+    holding 6 empty 2 mL HPLC autosampler vials; a small open
+    tray with 6 loose white screw caps (used later in Step 6 -
+    Capping); and a 3 mL plastic Pasteur transfer pipette laid
+    flat on the bench for moving liquid from the beaker into
+    each vial.
+
+  NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the bench
+  marks where the arm base will be bolted down.
+
+  Units: SI. Metres, kilograms, radians. Bench top at z = 0.900 m.
+-->
+<sdf version="1.7">
+  <world name="ketchup_transfer_to_vial_cell">
+
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="c">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="v">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.60 0.60 0.60 1</ambient>
+            <diffuse>0.70 0.70 0.70 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Bench (top + 4 legs). Same as the other worlds. -->
+    <model name="bench">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="top">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+          <material><ambient>0.85 0.82 0.75 1</ambient><diffuse>0.85 0.82 0.75 1</diffuse></material>
+        </visual>
+        <collision name="top_c">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+        </collision>
+        <visual name="leg_fr">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fr_c">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_fl">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fl_c">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_br">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_br_c">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_bl">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_bl_c">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Arm base marker - same position as the other worlds. -->
+    <model name="arm_base_marker">
+      <static>true</static>
+      <pose>-0.22 0.00 0.901 0 0 0</pose>
+      <link name="disc">
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>0.002</length></cylinder></geometry>
+          <material><ambient>0.95 0.80 0.10 1</ambient><diffuse>0.95 0.80 0.10 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Source beaker: Pyrex 100 mL low-form, holding the clean
+         filtered ketchup from Step 4. Same Ø50 x 70 mm beaker as
+         the other worlds, but now the contents are a thin
+         light-reddish-clear liquid (not the cloudy pulp from
+         Step 2).
+         Position: (0.00, +0.28).
+         ============================================================ -->
+    <model name="source_beaker">
+      <pose>0.00 0.28 0.935 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.120</mass>
+          <inertia>
+            <ixx>1.0e-4</ixx><iyy>1.0e-4</iyy><izz>5.0e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="glass">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.90 0.92 0.50</ambient>
+            <diffuse>0.85 0.90 0.92 0.50</diffuse>
+          </material>
+        </visual>
+        <visual name="filtrate">
+          <pose>0 0 -0.015 0 0 0</pose>
+          <geometry><cylinder><radius>0.023</radius><length>0.040</length></cylinder></geometry>
+          <material>
+            <ambient>0.75 0.55 0.45 0.70</ambient>
+            <diffuse>0.88 0.65 0.50 0.70</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Vial rack: 60 x 40 x 25 mm white acrylic block, 6 positions
+         in a 2 (row) x 3 (col) grid spaced 18 mm apart. Sized so
+         each 12 mm OD vial sits in a slightly tapered hole; the
+         rack covers the bottom ~22 mm of each vial and exposes the
+         top ~10 mm + neck.
+         Position centre: (0.05, 0.00).
+         Hole positions in rack-local coords:
+           row1 (X = -0.009) col1..3 (Y = -0.018, 0.000, +0.018)
+           row2 (X = +0.009) col1..3 same Ys
+         ============================================================ -->
+    <model name="vial_rack">
+      <static>true</static>
+      <pose>0.05 0.00 0.9125 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><box><size>0.06 0.04 0.025</size></box></geometry>
+          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.06 0.04 0.025</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         HPLC autosampler vials: 6x Agilent 5182-0716 style.
+           Glass body : Ø12 x 32 mm clear borosilicate
+           No cap     : the vials are empty and uncapped here.
+                        Capping is Step 6 (separate world).
+         All 6 vials are identical empty-glass models, only their
+         (X, Y) poses differ. Each vial bottom rests on the bench
+         top inside its rack hole, so vial centre z = 0.900 + 0.016
+         = 0.916.
+
+         Vial naming = batch_replicate so the operator (and a
+         future arm) can track which is which:
+           vial_b1_r1, vial_b1_r2 (batch 1, replicates 1 & 2)
+           vial_b2_r1, vial_b2_r2
+           vial_b3_r1, vial_b3_r2
+         This matches the doc's "more vials to track" theme.
+         ============================================================ -->
+    <model name="vial_b1_r1">
+      <pose>0.041 -0.018 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_b1_r2">
+      <pose>0.059 -0.018 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_b2_r1">
+      <pose>0.041 0.000 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_b2_r2">
+      <pose>0.059 0.000 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_b3_r1">
+      <pose>0.041 0.018 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="vial_b3_r2">
+      <pose>0.059 0.018 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.005</mass>
+          <inertia><ixx>5.0e-7</ixx><iyy>5.0e-7</iyy><izz>2.0e-7</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+          <material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Cap tray: small open white plastic tray holding 6 loose
+         white screw caps for the 6 vials. Caps are needed for
+         Step 6 (Capping); we show them on the bench now so the
+         workflow context is clear.
+           Tray  : 60 x 40 x 8 mm
+           Caps  : 6x Ø10 x 5 mm white PP screw caps in a 2x3 grid
+         Position: (-0.05, -0.28).
+         ============================================================ -->
+    <model name="cap_tray">
+      <static>true</static>
+      <pose>-0.05 -0.28 0.904 0 0 0</pose>
+      <link name="link">
+        <visual name="tray">
+          <geometry><box><size>0.060 0.040 0.008</size></box></geometry>
+          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.060 0.040 0.008</size></box></geometry>
+        </collision>
+        <visual name="cap_1">
+          <pose>-0.012 -0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="cap_2">
+          <pose>0.000 -0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="cap_3">
+          <pose>0.012 -0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="cap_4">
+          <pose>-0.012 0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="cap_5">
+          <pose>0.000 0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <visual name="cap_6">
+          <pose>0.012 0.012 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Pasteur transfer pipette: 3 mL polyethylene plastic
+         transfer pipette (e.g. Samco 222-1S).
+           Bulb : Ø14 x 25 mm
+           Stem : Ø6 x 110 mm
+           Tip  : Ø2 x 10 mm tapered
+         Total length ~145 mm. Lies flat on the bench at
+         (0.15, +0.15), length along Y.
+
+         Local +Z is bulb-to-tip axis; roll = pi/2 rotates the
+         local +Z to world -Y, so bulb ends up at +Y and tip at -Y.
+         ============================================================ -->
+    <model name="pasteur_pipette">
+      <pose>0.15 0.15 0.907 1.5708 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.004</mass>
+          <inertia>
+            <ixx>2.0e-7</ixx><iyy>5.0e-6</iyy><izz>5.0e-6</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="bulb">
+          <pose>0 0 0.060 0 0 0</pose>
+          <geometry><sphere><radius>0.007</radius></sphere></geometry>
+          <material><ambient>0.92 0.92 0.92 0.85</ambient><diffuse>0.97 0.97 0.97 0.85</diffuse></material>
+        </visual>
+        <visual name="stem">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry><cylinder><radius>0.003</radius><length>0.110</length></cylinder></geometry>
+          <material><ambient>0.92 0.92 0.92 0.55</ambient><diffuse>0.97 0.97 0.97 0.55</diffuse></material>
+        </visual>
+        <visual name="tip">
+          <pose>0 0 -0.060 0 0 0</pose>
+          <geometry><cylinder><radius>0.001</radius><length>0.010</length></cylinder></geometry>
+          <material><ambient>0.92 0.92 0.92 0.55</ambient><diffuse>0.97 0.97 0.97 0.55</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.007</radius><length>0.145</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+  </world>
+</sdf>
