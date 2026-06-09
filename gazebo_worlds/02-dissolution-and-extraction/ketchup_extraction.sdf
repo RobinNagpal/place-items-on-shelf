@@ -62,9 +62,11 @@
     Solvent bottle  - 500 mL wide-mouth glass reagent bottle:
                       85 mm OD body, 150 mm tall, 50 mm OD cap.
                       Pale-blue label = water / mild acid.
-    Hot plate       - IKA C-MAG HS 7-style magnetic stirrer with
-                      heat: 220 x 220 x 120 mm metal base, 180 mm
-                      ceramic top inset 20 mm into the base.
+    Hot plate       - DAE mesh (hot_plate.dae) of a benchtop
+                      magnetic stirrer hot plate, exported from
+                      the SketchUp 3D Warehouse "Magnetic Stirrer
+                      with Hot Plate" model via Blender. Has
+                      visible heat / stir knobs on the front face.
     Stir bar        - 25 x 8 mm PTFE-coated octagonal magnet,
                       simplified to a small white cylinder sitting
                       at the bottom of the beaker.
@@ -225,76 +227,66 @@
     </model>
 
     <!-- ============================================================
-         Hot plate magnetic stirrer (IKA C-MAG HS 7-style).
-         Two stacked boxes: 220 x 220 x 100 mm steel base, then a
-         180 x 180 x 20 mm white ceramic top on it.
-         Bench top z = 0.900, so:
-           base centre  z = 0.900 + 0.100 / 2 = 0.950
-           top  centre  z = 0.900 + 0.100 + 0.020 / 2 = 1.010
+         Hot plate magnetic stirrer - DAE mesh from the SketchUp 3D
+         Warehouse "Magnetic Stirrer with Hot Plate"
+         (https://3dwarehouse.sketchup.com/model/ace3cf0f-7327-4bbe-
+         b0c3-f193798013b8/Magnetic-Stirrer-with-Hot-Plate). The user
+         downloaded the .skp, opened it in Blender, and exported as
+         hot_plate.dae sitting next to this SDF.
+
+         The DAE replaces the previous primitive (base box + ceramic
+         top + tiny knobs) so the bench has a realistic-looking hot
+         plate with visible heat / stir knobs the arm can be aimed
+         at. The knobs in the mesh are static polygons - they do not
+         physically rotate in Gazebo, but the visual + the workflow
+         text in the README make the intended arm action clear.
+
+         POSE / SCALE TUNING NOTES (likely needed on first load):
+
+           - If the mesh looks huge or tiny, SketchUp probably
+             exported in inches. Add inches->metres conversion by
+             setting <scale>0.0254 0.0254 0.0254</scale> below.
+           - If the mesh half-buries into the bench top, its origin
+             is at the geometry centre rather than the base. Raise
+             this model's pose z by half the mesh height
+             (~0.060 m for a ~120 mm tall hot plate).
+           - If the beaker (sitting at z=1.055 in this world)
+             floats above or sinks into the ceramic top of the
+             imported mesh, adjust the beaker_100ml model's pose
+             z to match the actual mesh top height.
+
+         Collision is kept as a primitive 220 x 220 x 120 mm box so
+         physics is fast and predictable - only the visual uses the
+         mesh.
+
+         The actual hot_plate.dae binary file must live next to this
+         SDF. If it is missing, Gazebo will show a placeholder cube
+         (or fall back to the collision box).
          ============================================================ -->
     <model name="hot_plate">
       <static>true</static>
-      <pose>0.05 0.00 0.950 0 0 0</pose>
-      <link name="base">
+      <pose>0.05 0.00 0.900 0 0 0</pose>
+      <link name="link">
         <visual name="v">
-          <geometry><box><size>0.22 0.22 0.10</size></box></geometry>
+          <geometry>
+            <mesh>
+              <uri>hot_plate.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <!-- Fallback material in case the DAE lost its texture /
+               material info during the SketchUp -> Blender -> DAE
+               round-trip. The mesh's own materials take precedence
+               when present. -->
           <material>
-            <ambient>0.20 0.20 0.22 1</ambient>
-            <diffuse>0.30 0.30 0.32 1</diffuse>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.35 0.35 0.38 1</diffuse>
           </material>
         </visual>
         <collision name="c">
-          <geometry><box><size>0.22 0.22 0.10</size></box></geometry>
+          <pose>0 0 0.060 0 0 0</pose>
+          <geometry><box><size>0.22 0.22 0.12</size></box></geometry>
         </collision>
-      </link>
-      <link name="ceramic_top">
-        <pose>0 0 0.060 0 0 0</pose>
-        <visual name="v">
-          <geometry><box><size>0.18 0.18 0.02</size></box></geometry>
-          <material>
-            <ambient>0.95 0.95 0.93 1</ambient>
-            <diffuse>0.95 0.95 0.93 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><box><size>0.18 0.18 0.02</size></box></geometry>
-        </collision>
-      </link>
-      <!-- Small red power LED on the front face so the operator can
-           see at a glance whether heat is on. -->
-      <link name="power_led">
-        <pose>0.111 0.080 0.020 0 1.5708 0</pose>
-        <visual name="v">
-          <geometry><cylinder><radius>0.003</radius><length>0.003</length></cylinder></geometry>
-          <material>
-            <ambient>0.90 0.10 0.10 1</ambient>
-            <diffuse>0.90 0.10 0.10 1</diffuse>
-            <emissive>0.50 0.00 0.00 1</emissive>
-          </material>
-        </visual>
-      </link>
-      <!-- Two control knobs: heat (left) and stir (right).
-           Each is a 30 mm OD black knob protruding from the front
-           face of the base. -->
-      <link name="heat_knob">
-        <pose>0.111 0.050 -0.020 0 1.5708 0</pose>
-        <visual name="v">
-          <geometry><cylinder><radius>0.015</radius><length>0.015</length></cylinder></geometry>
-          <material>
-            <ambient>0.05 0.05 0.05 1</ambient>
-            <diffuse>0.10 0.10 0.10 1</diffuse>
-          </material>
-        </visual>
-      </link>
-      <link name="stir_knob">
-        <pose>0.111 -0.050 -0.020 0 1.5708 0</pose>
-        <visual name="v">
-          <geometry><cylinder><radius>0.015</radius><length>0.015</length></cylinder></geometry>
-          <material>
-            <ambient>0.05 0.05 0.05 1</ambient>
-            <diffuse>0.10 0.10 0.10 1</diffuse>
-          </material>
-        </visual>
       </link>
     </model>
 

@@ -38,7 +38,7 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top is at
 |---|---|---|---|---|---|---|
 | 1 | **Bench** | Laminated lab bench section, 4-leg | Top 1000 × 600 × 50, 4× Ø50 × 850 steel legs | centred at (0, 0) | static | Work surface. Legs go down to the floor so the bench is not floating. |
 | 2 | **Arm marker** | n/a — visual flag only | Ø100 × 2 yellow disc | (-0.22, 0.00) | static | Future arm base location. |
-| 3 | **Hot plate** | IKA C-MAG HS 7 magnetic stirrer + hot plate | 220 × 220 × 120, 180 × 180 ceramic top | (0.05, 0.00) | static | Provides the *warm gently* and the magnetic spin field for the stir bar. |
+| 3 | **Hot plate** (DAE mesh) | [SketchUp 3D Warehouse — "Magnetic Stirrer with Hot Plate"](https://3dwarehouse.sketchup.com/model/ace3cf0f-7327-4bbe-b0c3-f193798013b8/Magnetic-Stirrer-with-Hot-Plate), `.skp` → Blender → `hot_plate.dae` | ~220 × 220 × 120 (depends on the mesh) | (0.05, 0.00) | static | Provides the *warm gently* and the magnetic spin field for the stir bar. Replaces the previous primitive (base box + tiny knobs) with a realistic mesh that has visible heat / stir knobs on the front face. |
 | 4 | **Beaker (100 mL)** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 | on the ceramic top | 75 g | The extraction vessel. |
 | 5 | **Stir bar** | PTFE-coated octagonal magnet | Ø25 × 8 white | inside the beaker | 5 g | The thing the hot-plate magnet drags in a spin. **In sim it does not actually rotate** — see *Stir-bar limitation* below. |
 | 6 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, -0.25) | 700 g | The diluent the doc names for ketchup. |
@@ -87,9 +87,9 @@ an arm:
 </include>
 ```
 
-Reach check: the farthest object (ketchup bottle at (0.10, +0.25)) is
+Reach check: the farthest object (solvent bottle at (0.10, -0.25)) is
 ~407 mm from the marker — outside the myCobot 280's ~280 mm envelope.
-For a myCobot, move the ketchup and solvent bottles to (0.05, ±0.15).
+For a myCobot, move the solvent bottle to (0.05, -0.15).
 The bench is sized generously so a longer-reach arm (UR3 / Franka FR3)
 does not have to relayout the cell.
 
@@ -97,11 +97,15 @@ does not have to relayout the cell.
 
 Bench top at **z = 0.900 m**. For objects sitting flat on the bench,
 the SDF pose's z = 0.900 + height/2 (boxes / cylinders are centred on
-their geometry). The beaker is the only exception — it sits on the
-hot plate's ceramic top at z = 1.020, so its centre is at z = 1.055.
-The ketchup bottle, which has multiple stacked sections, uses a model
-pose at z = 0.900 and per-section local z offsets measured from the
-bench top.
+their geometry).
+
+The beaker is the exception — it sits on the hot plate's ceramic top.
+The previous primitive hot plate was 120 mm tall, so the beaker centre
+was placed at z = 1.055 (35 mm above the assumed top at z = 1.020). The
+imported `hot_plate.dae` may not be exactly that tall, in which case the
+beaker will float or sink relative to the mesh's ceramic top — adjust
+the `beaker_100ml` model's pose z in the SDF to match the actual mesh
+top height. The stir bar centre at z = 1.024 needs the same adjustment.
 
 ## Is one world enough for Step 2?
 
@@ -115,5 +119,19 @@ dissolution case later; other steps get their own subfolders under
 ```
 02-dissolution-and-extraction/
 ├── README.md                  (this file)
-└── ketchup_extraction.sdf     (the Gazebo world)
+├── ketchup_extraction.sdf     (the Gazebo world)
+└── hot_plate.dae              (hot plate mesh — SketchUp 3D Warehouse,
+                                exported via Blender)
 ```
+
+### About `hot_plate.dae`
+
+Source: [SketchUp 3D Warehouse — "Magnetic Stirrer with Hot Plate"](https://3dwarehouse.sketchup.com/model/ace3cf0f-7327-4bbe-b0c3-f193798013b8/Magnetic-Stirrer-with-Hot-Plate).
+Workflow used: download the `.skp` → open in Blender → `File → Export → Collada (.dae)`. The file lives next to the SDF; Gazebo Sim resolves relative `<uri>hot_plate.dae</uri>` against the SDF's own directory.
+
+If on first load the mesh is huge, tiny, half-buried, or floating, see
+the **POSE / SCALE TUNING NOTES** comment block above the `hot_plate`
+model in `ketchup_extraction.sdf` for the standard one-line fixes
+(scale 0.0254 for inches→metres, pose-z offset if origin is at the
+geometry centre, beaker-z offset if the mesh top is at a different
+height than 1.020 m).
