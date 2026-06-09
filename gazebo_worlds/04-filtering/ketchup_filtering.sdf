@@ -526,7 +526,14 @@
          physics is fast - the mesh is only the visual.
          ============================================================ -->
     <model name="beaker_100ml_cad">
-      <pose>0.10 -0.30 0.900 0 0 0</pose>
+      <!-- Parked at the far front-right corner of the bench. The
+           3dLabWare collection's 100 mL piece comes in with its
+           own scene origin offset AND a Y-up convention, so it
+           floats and tips sideways without a Blender re-origin
+           pass. Until someone re-exports it cleanly, it sits out
+           of the way of the actual workflow items so screenshots
+           and demos still read normally. -->
+      <pose>0.25 -0.45 0.900 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.075</mass>
