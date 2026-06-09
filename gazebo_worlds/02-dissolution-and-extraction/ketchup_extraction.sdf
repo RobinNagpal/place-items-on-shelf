@@ -372,6 +372,22 @@
             <diffuse>0.85 0.92 0.95 0.55</diffuse>
           </material>
         </visual>
+        <!-- Static "water level" visual: a pale-blue translucent
+             cylinder filling the bottom ~80 % of the bottle. This is
+             a visual prop, NOT a fluid - Gazebo's physics is rigid-
+             body only. The cylinder is a child of the same link as
+             the glass body, so when the arm tilts the bottle the
+             water-level visual tilts with it. To fake a "pouring out"
+             effect later, a small plugin can shrink this cylinder
+             when the bottle's tilt angle crosses a threshold. -->
+        <visual name="water">
+          <pose>0 0 -0.015 0 0 0</pose>
+          <geometry><cylinder><radius>0.040</radius><length>0.120</length></cylinder></geometry>
+          <material>
+            <ambient>0.55 0.75 0.92 0.70</ambient>
+            <diffuse>0.65 0.85 0.97 0.70</diffuse>
+          </material>
+        </visual>
         <visual name="cap">
           <pose>0 0 0.0875 0 0 0</pose>
           <geometry><cylinder><radius>0.025</radius><length>0.025</length></cylinder></geometry>

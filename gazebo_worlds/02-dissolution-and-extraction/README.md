@@ -56,7 +56,7 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top is at
 | 3 | **Beaker 1 + sample** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) + ~5 g ketchup blob (Ø30 × 8 mm red disc at the bottom) | Ø50 × 70 glass | (0.05, -0.30) | 80 g | First extraction vessel. Furthest from the arm. |
 | 4 | **Beaker 2 + sample** | Same as Beaker 1 | Ø50 × 70 glass | (0.05, -0.18) | 80 g | Second extraction vessel. |
 | 5 | **Beaker 3 + sample** | Same as Beaker 1 | Ø50 × 70 glass | (0.05, -0.06) | 80 g | Third extraction vessel. Closest to the arm. |
-| 6 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, +0.25) | 700 g | The diluent the doc names for ketchup. Sits on the left side so the arm can pick it up after placing a beaker at the centre. |
+| 6 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150 (with a pale-blue translucent Ø80 × 120 mm water level filling ~80 % of the body), cap Ø50 × 25 blue | (0.10, +0.25) | 700 g | The diluent the doc names for ketchup. Sits on the left side so the arm can pick it up after placing a beaker at the centre. The water cylinder is a **static visual prop** — Gazebo's physics is rigid-body only, so the bottle does not actually pour fluid when tilted. A small plugin could shrink the water visual on tilt later to fake a pour. |
 
 ### What was deliberately left out
 
