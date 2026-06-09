@@ -18,11 +18,10 @@
     A small lab bench laid out for the pour: a 100 mL Pyrex
     receiving beaker holding the clean filtered ketchup from
     Step 4 (light reddish, thin); a 6-position acrylic rack
-    holding 6 empty 2 mL HPLC autosampler vials; a small open
-    tray with 6 loose white screw caps (used later in Step 6 -
-    Capping); and a 3 mL plastic Pasteur transfer pipette laid
-    flat on the bench for moving liquid from the beaker into
-    each vial.
+    holding 6 empty 2 mL HPLC autosampler vials; and a 3 mL
+    plastic Pasteur transfer pipette laid flat on the bench for
+    moving liquid from the beaker into each vial. The cap tray
+    is NOT in the scene - the project skips Step 6 (Capping).
 
   NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the bench
   marks where the arm base will be bolted down.
@@ -311,58 +310,9 @@
       </link>
     </model>
 
-    <!-- ============================================================
-         Cap tray: small open white plastic tray holding 6 loose
-         white screw caps for the 6 vials. Caps are needed for
-         Step 6 (Capping); we show them on the bench now so the
-         workflow context is clear.
-           Tray  : 60 x 40 x 8 mm
-           Caps  : 6x Ø10 x 5 mm white PP screw caps in a 2x3 grid
-         Position: (-0.05, -0.28).
-         ============================================================ -->
-    <model name="cap_tray">
-      <static>true</static>
-      <pose>-0.05 -0.28 0.904 0 0 0</pose>
-      <link name="link">
-        <visual name="tray">
-          <geometry><box><size>0.060 0.040 0.008</size></box></geometry>
-          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
-        </visual>
-        <collision name="c">
-          <geometry><box><size>0.060 0.040 0.008</size></box></geometry>
-        </collision>
-        <visual name="cap_1">
-          <pose>-0.012 -0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-        <visual name="cap_2">
-          <pose>0.000 -0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-        <visual name="cap_3">
-          <pose>0.012 -0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-        <visual name="cap_4">
-          <pose>-0.012 0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-        <visual name="cap_5">
-          <pose>0.000 0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-        <visual name="cap_6">
-          <pose>0.012 0.012 0.006 0 0 0</pose>
-          <geometry><cylinder><radius>0.005</radius><length>0.005</length></cylinder></geometry>
-          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
-        </visual>
-      </link>
-    </model>
+    <!-- The cap tray that used to sit at (-0.05, -0.28) was removed:
+         the project skips Step 6 (Capping), so loose caps do not
+         belong on this bench. -->
 
     <!-- ============================================================
          Pasteur transfer pipette: 3 mL polyethylene plastic

@@ -17,6 +17,22 @@ they are the **same reference parts the spec names**.
 No arm is included. Yellow Ø100 mm disc at the back of the bench marks
 where the arm base will be bolted down (same convention as Steps 2/3/4/5).
 
+## Workflow — what the arm does
+
+Short, in order. Look up → pick → scan → place, then repeat per
+worklist row.
+
+1. Read the next worklist row (start at position 1).
+2. Pick up the matching vial from the source rack (use the cap colour to confirm).
+3. Move the vial under the barcode reader's red window — wait for the scan to confirm the label matches the worklist row.
+4. Move the vial over the matching slot on the destination tray (use the ArUco fiducial on the alignment plate to re-zero first if needed).
+5. Lower it gently into the slot until the cap rests on the tray surface.
+6. Release the vial and lift the gripper clear.
+7. Repeat steps 1-6 for positions 2 through 12 in worklist order.
+
+After all 12 vials are placed, the technician (not the arm) carries
+the loaded tray over to the HPLC instrument and slides it in.
+
 ## What is on the bench
 
 Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at

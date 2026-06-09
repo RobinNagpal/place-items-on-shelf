@@ -12,6 +12,24 @@ floats on top, draw the supernatant into a syringe, push it through a
 No arm is included. Yellow Ø100 mm disc at the back of the bench
 marks where the arm base will go.
 
+## Workflow — what the arm does
+
+Short, in order. Pick → tilt → place → spin → draw → screw → push.
+
+1. Pick up the source flask.
+2. Tilt it over the pre-spin Falcon tube to pour the diluted ketchup in.
+3. Put the flask back on the bench.
+4. Pick up the pre-spin Falcon tube from the rack.
+5. Place it into the centrifuge rotor well.
+6. Close the centrifuge lid and start the spin. Wait for it to finish.
+7. Open the lid and take the (now post-spin) tube out.
+8. Pick up the syringe.
+9. Dip its Luer tip into the top of the post-spin tube and pull the plunger back to draw up the clear supernatant.
+10. Screw the 0.45 µm syringe filter onto the syringe's Luer tip.
+11. Hold the filter outlet over the receiving beaker.
+12. Push the plunger down with steady force — clean filtrate drips into the beaker.
+13. Put the syringe + filter down on the bench.
+
 ## What is on the bench
 
 Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at
@@ -25,13 +43,12 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at
 | 4 | **Tube rack** | 4-position 50 mL acrylic tube rack | 80 × 80 × 30 white | (0.00, +0.15) | Holds the Falcon tubes upright before and after the spin. |
 | 5 | **Falcon tube — pre-spin** | Corning Falcon 50 mL polypropylene conical tube (P/N 352070) | Ø30 × 115 + Ø32 × 10 orange cap | (-0.020, +0.130) | Carries the dilution about to be spun. Body colour = cloudy reddish (pulp suspended throughout). |
 | 6 | **Falcon tube — post-spin** | Same as above | Ø30 × 115 + Ø32 × 10 orange cap | (+0.020, +0.130) | Already spun: a dark Ø29 × 15 mm pellet at the bottom, light reddish-clear supernatant above. This is the visual reference for what the arm pours off. |
-| 7 | **Falcon tubes — empty (×2)** | Same as above | Ø30 × 115 + cap | (±0.020, +0.170) | Clean spares so the workflow can re-spin or balance the rotor. |
-| 8 | **Source flask (100 mL)** | Corning Pyrex 5640 Class A 100 mL volumetric flask (P/N 5640-100) | Foot Ø50 × 5, bulb Ø60 sphere with light-reddish liquid inside, neck Ø12 × 140 | (-0.05, -0.30) | The Step 3 dilution that gets decanted into the Falcon tube. Same flask model as `gazebo_worlds/03-dilution/`. |
-| 9 | **Syringe (10 mL)** | BD Plastipak Luer-Lok 10 mL (P/N 309604) | Barrel Ø16 × 90 + plunger Ø11 × 70 + Ø22 thumb pad + Ø6 × 8 Luer tip; total ~140 | (0.10, +0.05) lying along Y | Draws the supernatant out of the post-spin tube and pushes it through the filter. |
-| 10 | **Syringe filter** | Millex-HV 0.45 µm PVDF, 25 mm OD Luer-Lok (P/N SLHVR25NB) | Disc Ø25 × 7 + inlet Ø6 × 8 + outlet Ø3 × 8 | (0.10, -0.05) lying along Y | The actual filtration membrane. 0.45 µm pore traps particles before they reach the HPLC column. The doc names 0.45 / 0.22 µm. |
-| 11 | **Receiving beaker — STL MESH** (active workflow position) | [Thingiverse — greengiant1298 100ml Beaker, thing:2267](https://www.thingiverse.com/thing:2267), `.stl` (mm), 3D-print convention | Ø50 × 51 STL mesh | (0.10, -0.20) | The actual receiving vessel for the filtrate. Sits where the primitive used to sit. STL is in mm, SDF scales by 0.001 to metres. |
-| 12 | **Receiving beaker — PRIMITIVE** (Gazebo-native cylinder) | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 clean glass cylinder | (0.20, +0.45) | Parked at the front-LEFT corner of the bench as a side-by-side reference: the "what a Gazebo primitive looks like" version of the same nominal beaker. |
-| 13 | **Receiving beaker — Blender / OBJ MESH** (broken) | [3dLabWare Beaker Collection on Sketchfab](https://sketchfab.com/3d-models/beaker-collection-0ec8afce877345f1acd95ceb24b7c6f3), CC BY 4.0 — Blender .blend re-exported as OBJ | mesh `beaker_collection.obj` next to the SDF | (0.25, -0.45) | Parked at the front-RIGHT corner. Floats / tips sideways because the 3dLabWare `.blend` had its scene origin offset and a Y-up axis convention — kept around as the "this is why STL was the right choice" reference for the manager demo. |
+| 7 | **Source flask (100 mL)** | Corning Pyrex 5640 Class A 100 mL volumetric flask (P/N 5640-100) | Foot Ø50 × 5, bulb Ø60 sphere with light-reddish liquid inside, neck Ø12 × 140 | (-0.05, -0.30) | The Step 3 dilution that gets decanted into the Falcon tube. Same flask model as `gazebo_worlds/03-dilution/`. |
+| 8 | **Syringe (10 mL)** | BD Plastipak Luer-Lok 10 mL (P/N 309604) | Barrel Ø16 × 90 + plunger Ø11 × 70 + Ø22 thumb pad + Ø6 × 8 Luer tip; total ~140 | (0.10, +0.05) lying along Y | Draws the supernatant out of the post-spin tube and pushes it through the filter. |
+| 9 | **Syringe filter** | Millex-HV 0.45 µm PVDF, 25 mm OD Luer-Lok (P/N SLHVR25NB) | Disc Ø25 × 7 + inlet Ø6 × 8 + outlet Ø3 × 8 | (0.10, -0.05) lying along Y | The actual filtration membrane. 0.45 µm pore traps particles before they reach the HPLC column. The doc names 0.45 / 0.22 µm. |
+| 10 | **Receiving beaker — STL MESH** (active workflow position) | [Thingiverse — greengiant1298 100ml Beaker, thing:2267](https://www.thingiverse.com/thing:2267), `.stl` (mm), 3D-print convention | Ø50 × 51 STL mesh | (0.10, -0.20) | The actual receiving vessel for the filtrate. Sits where the primitive used to sit. STL is in mm, SDF scales by 0.001 to metres. |
+| 11 | **Receiving beaker — PRIMITIVE** (Gazebo-native cylinder) | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 clean glass cylinder | (0.20, +0.45) | Parked at the front-LEFT corner of the bench as a side-by-side reference: the "what a Gazebo primitive looks like" version of the same nominal beaker. Kept on the bench at the user's request. |
+| 12 | **Receiving beaker — Blender / OBJ MESH** (broken) | [3dLabWare Beaker Collection on Sketchfab](https://sketchfab.com/3d-models/beaker-collection-0ec8afce877345f1acd95ceb24b7c6f3), CC BY 4.0 — Blender .blend re-exported as OBJ | mesh `beaker_collection.obj` next to the SDF | (0.25, -0.45) | Parked at the front-RIGHT corner. Floats / tips sideways because the 3dLabWare `.blend` had its scene origin offset and a Y-up axis convention — kept around as the "this is why STL was the right choice" reference for the manager demo. |
 
 ### Why these objects in particular
 

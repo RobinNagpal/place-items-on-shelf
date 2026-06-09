@@ -16,9 +16,9 @@
   WHAT IS THE SCENE?
     A small lab bench laid out for the spin-pour-filter routine:
     a benchtop swing-bucket centrifuge at the back of the bench;
-    a 4-tube rack holding 50 mL Falcon tubes (one with the
-    cloudy dilution about to be spun, one already spun with a
-    visible pellet + supernatant layer, two empty); the 100 mL
+    a 4-position rack holding two 50 mL Falcon tubes (one with
+    the cloudy dilution about to be spun, one already spun with
+    a visible pellet + supernatant layer); the 100 mL
     volumetric flask that came out of Step 3 (still carrying some
     of the dilution); a 10 mL plastic syringe; a 25 mm Luer-lock
     syringe filter; and a clean Pyrex 100 mL beaker to receive
@@ -201,11 +201,12 @@
                      Body painted cloudy-reddish.
          tube_post : already spun. Lower 15 mm = dark pellet, upper
                      85 mm = clear-ish supernatant.
-         tube_empty_a / _empty_b : just empty glass.
 
-         All four sit in the 2x2 rack at (0.00, 0.15). Hole spacing
-         in the rack = 40 mm. Each tube body bottom is at the bench
-         top (z=0.900), so tube centre z = 0.900 + 0.115 / 2 = 0.9575.
+         Both sit in the front row of the 2x2 rack at (0.00, 0.15).
+         Hole spacing in the rack = 40 mm. Each tube body bottom is
+         at the bench top (z=0.900), so tube centre z = 0.900 + 0.115
+         / 2 = 0.9575. The two back-row wells (+/-0.020, +0.170) are
+         left empty - the project does not need extra balance tubes.
          ============================================================ -->
     <model name="falcon_tube_pre">
       <pose>-0.020 0.130 0.9575 0 0 0</pose>
@@ -277,50 +278,10 @@
         </collision>
       </link>
     </model>
-    <model name="falcon_tube_empty_a">
-      <pose>-0.020 0.170 0.9575 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.015</mass>
-          <inertia>
-            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="glass">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-          <material>
-            <ambient>0.88 0.92 0.95 0.45</ambient>
-            <diffuse>0.88 0.92 0.95 0.45</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-    <model name="falcon_tube_empty_b">
-      <pose>0.020 0.170 0.9575 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.015</mass>
-          <inertia>
-            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="glass">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-          <material>
-            <ambient>0.88 0.92 0.95 0.45</ambient>
-            <diffuse>0.88 0.92 0.95 0.45</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
+    <!-- The two extra empty Falcon tubes that used to sit at
+         (+/-0.020, +0.170) were removed: balance tubes are an
+         operator-safety convenience for a real centrifuge, not
+         something the arm workflow needs. -->
 
     <!-- ============================================================
          Source flask: 100 mL volumetric flask carried over from

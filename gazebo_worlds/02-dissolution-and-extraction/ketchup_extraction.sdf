@@ -9,11 +9,14 @@
 
   WHAT IS THE SCENE?
     A small lab bench with everything an arm would need to extract
-    5-HMF from ~5 g of ketchup into a beaker: a ketchup source
-    bottle, a glass beaker (the extraction vessel), a solvent
-    bottle (water / mild acid), a magnetic hot-plate stirrer, a
-    stir bar inside the beaker, and a weigh boat carrying the
-    pre-weighed ~5 g ketchup sample from Step 1.
+    5-HMF from ~5 g of ketchup into a beaker: a glass beaker (the
+    extraction vessel), a solvent bottle (water / mild acid), a
+    magnetic hot-plate stirrer, a stir bar inside the beaker, and
+    a weigh boat carrying the pre-weighed ~5 g ketchup sample from
+    Step 1. The original Heinz ketchup source bottle is NOT in the
+    scene - that bottle is only used in Step 1 (weighing), which
+    this project skips, so the bench starts with the weighed
+    sample already in the boat.
 
   NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the
   bench marks the spot where a future arm base will be bolted
@@ -43,10 +46,9 @@
           |   (-0.05,         (0.05, 0.00)        |
           |    +0.18)        + beaker on top      |
           |                                       |
-          |  [ketchup]      [hotplate cont.]      |
-          |  (0.10,                     [solvent] |
-          |   +0.25)                    (0.10,    |
-          |                              -0.25)   |
+          |                              [solvent]|
+          |                              (0.10,   |
+          |                               -0.25)  |
           |                                       |
           +=======================================+
           front of bench (X = +0.30)
@@ -54,9 +56,6 @@
   All quantities below come from off-the-shelf real lab parts:
 
     Bench           - 1000 x 600 x 50 mm laminated lab bench top.
-    Ketchup bottle  - 14 oz Heinz glass bottle: 55 mm OD glass body,
-                      180 mm tall, 30 mm OD red PP cap, 25 mm tall.
-                      Modelled red-through-glass at the body level.
     Beaker          - Pyrex 100 mL low-form beaker: 50 mm OD,
                       70 mm tall, modelled as a thin-walled translucent
                       cylinder.
@@ -354,104 +353,6 @@
         </visual>
         <collision name="c">
           <geometry><cylinder><radius>0.0125</radius><length>0.008</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         Ketchup source bottle: Mitchell's / Heinz 14 oz glass
-         bottle. Has the classic tapered shoulder, not a straight
-         cylinder. Built from 6 stacked primitives (one link, six
-         visuals):
-
-           Body          Ø55 mm x 130 mm   (red glass)
-           Shoulder low  Ø48 mm x 10 mm    (taper start)
-           Shoulder mid  Ø38 mm x 10 mm    (taper middle)
-           Shoulder hi   Ø28 mm x 10 mm    (taper end)
-           Neck          Ø22 mm x 30 mm    (narrow column)
-           Cap           Ø28 mm x 18 mm    (white screw cap)
-
-         Total height: 130 + 10 + 10 + 10 + 30 + 18 = 208 mm.
-         SDF has no <cone> primitive in 1.7, so the curved
-         shoulder is faked with three short cylinders of
-         decreasing radius. The eye reads this as a smooth taper
-         from a few metres away.
-
-         Cream-coloured label band wraps the lower middle of the
-         body. Model pose puts the bottle base on the bench top
-         (z = 0.900), so every link-local z is measured from
-         there.
-         ============================================================ -->
-    <model name="ketchup_bottle">
-      <pose>0.10 0.25 0.900 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <pose>0 0 0.085 0 0 0</pose>
-          <mass>0.500</mass>
-          <inertia>
-            <ixx>1.4e-3</ixx><iyy>1.4e-3</iyy><izz>1.9e-4</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="body">
-          <pose>0 0 0.065 0 0 0</pose>
-          <geometry><cylinder><radius>0.0275</radius><length>0.130</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.05 0.05 1</diffuse>
-          </material>
-        </visual>
-        <visual name="shoulder_low">
-          <pose>0 0 0.135 0 0 0</pose>
-          <geometry><cylinder><radius>0.024</radius><length>0.010</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.05 0.05 1</diffuse>
-          </material>
-        </visual>
-        <visual name="shoulder_mid">
-          <pose>0 0 0.145 0 0 0</pose>
-          <geometry><cylinder><radius>0.019</radius><length>0.010</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.05 0.05 1</diffuse>
-          </material>
-        </visual>
-        <visual name="shoulder_high">
-          <pose>0 0 0.155 0 0 0</pose>
-          <geometry><cylinder><radius>0.014</radius><length>0.010</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.05 0.05 1</diffuse>
-          </material>
-        </visual>
-        <visual name="neck">
-          <pose>0 0 0.175 0 0 0</pose>
-          <geometry><cylinder><radius>0.011</radius><length>0.030</length></cylinder></geometry>
-          <material>
-            <ambient>0.55 0.05 0.05 1</ambient>
-            <diffuse>0.70 0.05 0.05 1</diffuse>
-          </material>
-        </visual>
-        <visual name="cap">
-          <pose>0 0 0.199 0 0 0</pose>
-          <geometry><cylinder><radius>0.014</radius><length>0.018</length></cylinder></geometry>
-          <material>
-            <ambient>0.90 0.90 0.90 1</ambient>
-            <diffuse>0.97 0.97 0.97 1</diffuse>
-          </material>
-        </visual>
-        <visual name="label">
-          <pose>0 0 0.060 0 0 0</pose>
-          <geometry><cylinder><radius>0.0276</radius><length>0.060</length></cylinder></geometry>
-          <material>
-            <ambient>0.95 0.95 0.90 1</ambient>
-            <diffuse>0.98 0.98 0.92 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <pose>0 0 0.104 0 0 0</pose>
-          <geometry><cylinder><radius>0.0275</radius><length>0.208</length></cylinder></geometry>
         </collision>
       </link>
     </model>

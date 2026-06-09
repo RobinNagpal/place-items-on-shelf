@@ -7,8 +7,27 @@ Gazebo world for HPLC workflow [**Step 2 — Dissolution / extraction**](https:/
 pre-weighed ~5 g sample from Step 1 → tip it into a beaker → add
 water / mild acid solvent → stir, optionally warm gently.
 
+The original ketchup bottle is **not** in this scene. That bottle
+only exists in Step 1 (weighing), which this project skips, so the
+bench starts with the sample already weighed into the boat.
+
 No arm is included. A yellow Ø100 mm disc at the back of the bench
 marks where the arm base will be bolted down later.
+
+## Workflow — what the arm does
+
+Short, in order. Picks → tilts → presses, then waits.
+
+1. Pick up the weigh boat.
+2. Tilt it over the beaker so the ~5 g ketchup blob slides in.
+3. Put the weigh boat back on the bench.
+4. Pick up the solvent bottle.
+5. Tilt it over the beaker to pour ~50 mL solvent in.
+6. Put the solvent bottle back.
+7. Press the hot plate's stir knob on — the stir bar already in the beaker starts spinning.
+8. Press the hot plate's heat knob on for a gentle warm-up.
+9. Wait until the mixture looks even.
+10. Turn both knobs off.
 
 ## What is on the bench
 
@@ -22,9 +41,8 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top is at
 | 3 | **Hot plate** | IKA C-MAG HS 7 magnetic stirrer + hot plate | 220 × 220 × 120, 180 × 180 ceramic top | (0.05, 0.00) | static | Provides the *warm gently* and the magnetic spin field for the stir bar. |
 | 4 | **Beaker (100 mL)** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 | on the ceramic top | 75 g | The extraction vessel. |
 | 5 | **Stir bar** | PTFE-coated octagonal magnet | Ø25 × 8 white | inside the beaker | 5 g | The thing the hot-plate magnet drags in a spin. **In sim it does not actually rotate** — see *Stir-bar limitation* below. |
-| 6 | **Ketchup bottle** | Heinz / Mitchell's 14 oz glass bottle | Body Ø55 × 130 + tapered shoulder (3 stacked discs) + neck Ø22 × 30 + cap Ø28 × 18 white; total 208 | (0.10, +0.25) | 500 g | The source jar of ketchup. Tapered shoulder mimics the real bottle silhouette. |
-| 7 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, -0.25) | 700 g | The diluent the doc names for ketchup. |
-| 8 | **Weigh boat + sample** | 60 mm white PS antistatic weigh boat | 60 × 60 × 15 + Ø25 × 6 red blob | (-0.05, +0.18) | 10 g | Carries the pre-weighed ~5 g ketchup from Step 1. The arm scoops directly out of the weigh boat with the beaker rim (or the gripper) — no separate spatula. |
+| 6 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, -0.25) | 700 g | The diluent the doc names for ketchup. |
+| 7 | **Weigh boat + sample** | 60 mm white PS antistatic weigh boat | 60 × 60 × 15 + Ø25 × 6 red blob | (-0.05, +0.18) | 10 g | Carries the pre-weighed ~5 g ketchup from Step 1. The arm tips the boat into the beaker. |
 
 ### Stir-bar limitation
 
