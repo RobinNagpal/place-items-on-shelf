@@ -495,5 +495,60 @@
       </link>
     </model>
 
+    <!-- ============================================================
+         CAD-based 100 mL beaker - mesh version.
+         Sits BESIDE the primitive receiving_beaker so the two can
+         be compared in the GUI: same nominal beaker, one built
+         from <cylinder> primitives, one from the mesh.
+
+         Source mesh: 3dLabWare "Beaker Collection" Sketchfab model
+         (CC BY 4.0, https://sketchfab.com/3d-models/beaker-collection-
+         0ec8afce877345f1acd95ceb24b7c6f3). Author opened the .blend
+         in Blender, deleted the four other beakers, exported only
+         the 100 mL piece as beaker_collection.obj alongside this
+         SDF.
+
+         The <uri> is relative to this SDF's own directory, so
+         Gazebo expects the .obj at
+           gazebo_worlds/04-filtering/beaker_collection.obj
+
+         If the beaker sinks half-way into the bench when the world
+         loads, the .obj's origin is at the geometry centre (not
+         the base); raise the pose z by ~0.035 m. If it appears
+         huge or tiny, the .obj was exported in millimetres rather
+         than metres - set <scale>0.001 0.001 0.001</scale> here.
+
+         Collision stays as a primitive cylinder (Ø50 x 70 mm) so
+         physics is fast - the mesh is only the visual.
+         ============================================================ -->
+    <model name="beaker_100ml_cad">
+      <pose>0.10 -0.30 0.900 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.075</mass>
+          <inertia>
+            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="v">
+          <geometry>
+            <mesh>
+              <uri>file://beaker_collection.obj</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <!-- Fallback material if the companion .mtl is missing. -->
+          <material>
+            <ambient>0.85 0.90 0.92 0.55</ambient>
+            <diffuse>0.85 0.90 0.92 0.55</diffuse>
+          </material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
   </world>
 </sdf>

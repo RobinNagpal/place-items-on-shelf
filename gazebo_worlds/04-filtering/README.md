@@ -30,6 +30,7 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at
 | 9 | **Syringe (10 mL)** | BD Plastipak Luer-Lok 10 mL (P/N 309604) | Barrel Ø16 × 90 + plunger Ø11 × 70 + Ø22 thumb pad + Ø6 × 8 Luer tip; total ~140 | (0.10, +0.05) lying along Y | Draws the supernatant out of the post-spin tube and pushes it through the filter. |
 | 10 | **Syringe filter** | Millex-HV 0.45 µm PVDF, 25 mm OD Luer-Lok (P/N SLHVR25NB) | Disc Ø25 × 7 + inlet Ø6 × 8 + outlet Ø3 × 8 | (0.10, -0.05) lying along Y | The actual filtration membrane. 0.45 µm pore traps particles before they reach the HPLC column. The doc names 0.45 / 0.22 µm. |
 | 11 | **Receiving beaker (100 mL)** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 clean glass | (0.10, -0.20) | Collects the filtrate. Empty in this world (it gets filled during the workflow run). |
+| 12 | **CAD-based 100 mL beaker** (mesh demo) | [3dLabWare Beaker Collection on Sketchfab](https://sketchfab.com/3d-models/beaker-collection-0ec8afce877345f1acd95ceb24b7c6f3), CC BY 4.0 — Blender + OBJ export | mesh `beaker_collection.obj` next to the SDF | (0.10, -0.30) | A mesh-from-CAD beaker placed **beside** item 11 so the two can be visually compared. Same nominal size as item 11. Collision is still a primitive cylinder for fast physics. |
 
 ### Why these objects in particular
 
