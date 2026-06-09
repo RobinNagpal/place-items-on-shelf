@@ -11,14 +11,15 @@
   harder than paracetamol at this step - the liquid is now thin
   and clear. What makes ketchup the "hard case" here is **tracking
   more vials**: several supplier batches x two-or-three repeats.
-  This world reflects that: a 6-position vial rack populated with
+  This world reflects that: a 6-position vial tray populated with
   6 empty HPLC vials standing in for "3 batches x 2 replicates."
 
   WHAT IS THE SCENE?
     A small lab bench laid out for the pour: a 100 mL Pyrex
     receiving beaker holding the clean filtered ketchup from
-    Step 4 (light reddish, thin); a 6-position acrylic rack
-    holding 6 empty 2 mL HPLC autosampler vials; and a 3 mL
+    Step 4 (light reddish, thin); a 6-position dark polymer vial
+    tray (styled to match the Step 8 autosampler destination
+    tray) holding 6 empty 2 mL HPLC autosampler vials; and a 3 mL
     plastic Pasteur transfer pipette laid flat on the bench for
     moving liquid from the beaker into each vial. The cap tray
     is NOT in the scene - the project skips Step 6 (Capping).
@@ -166,27 +167,49 @@
     </model>
 
     <!-- ============================================================
-         Vial rack: 60 x 40 x 25 mm white acrylic block, 6 positions
-         in a 2 (row) x 3 (col) grid spaced 18 mm apart. Sized so
-         each 12 mm OD vial sits in a slightly tapered hole; the
-         rack covers the bottom ~22 mm of each vial and exposes the
-         top ~10 mm + neck.
+         Vial tray: 60 x 40 x 25 mm dark polymer block, 6 positions
+         in a 2 (row) x 3 (col) grid spaced 18 mm apart. Same visual
+         style as the destination tray in Step 8 (the Agilent G2255A
+         100-position autosampler tray): dark grey body, a small
+         white position-1 corner marker, and 6 dark Ø14 mm slot-
+         mouth discs flush with the tray top to show the operator
+         where each vial sits.
          Position centre: (0.05, 0.00).
-         Hole positions in rack-local coords:
+         Slot positions in tray-local coords:
            row1 (X = -0.009) col1..3 (Y = -0.018, 0.000, +0.018)
            row2 (X = +0.009) col1..3 same Ys
          ============================================================ -->
-    <model name="vial_rack">
+    <model name="vial_tray">
       <static>true</static>
       <pose>0.05 0.00 0.9125 0 0 0</pose>
       <link name="link">
-        <visual name="v">
+        <!-- Solid dark polymer body. Slot wells are NOT subtracted
+             (Gazebo primitive limitation); the dark slot-mouth
+             discs below are the operator's visual reference. -->
+        <visual name="body">
           <geometry><box><size>0.06 0.04 0.025</size></box></geometry>
-          <material><ambient>0.92 0.92 0.92 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
+          <material><ambient>0.20 0.20 0.22 1</ambient><diffuse>0.28 0.28 0.30 1</diffuse></material>
         </visual>
         <collision name="c">
           <geometry><box><size>0.06 0.04 0.025</size></box></geometry>
         </collision>
+        <!-- Position-1 corner marker: small white square at the
+             tray's back-right corner, same convention as the
+             Step 8 destination tray. -->
+        <visual name="corner_marker">
+          <pose>-0.022 -0.014 0.013 0 0 0</pose>
+          <geometry><box><size>0.008 0.008 0.001</size></box></geometry>
+          <material><ambient>0.98 0.98 0.98 1</ambient><diffuse>0.99 0.99 0.99 1</diffuse></material>
+        </visual>
+        <!-- 6 visible slot-mouth rings: dark Ø14 mm flat discs
+             sitting flush with the tray top (z = +0.013 in tray-
+             local). Same style as Step 8's 10x10 grid. -->
+        <visual name="slot_r1_c1"><pose>-0.009 -0.018 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_r1_c2"><pose>-0.009  0.000 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_r1_c3"><pose>-0.009  0.018 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_r2_c1"><pose> 0.009 -0.018 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_r2_c2"><pose> 0.009  0.000 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_r2_c3"><pose> 0.009  0.018 0.013 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
       </link>
     </model>
 

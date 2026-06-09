@@ -19,16 +19,21 @@ where the arm base will be bolted down (same convention as Steps 2/3/4/5).
 
 ## Workflow — what the arm does
 
-Short, in order. Look up → pick → scan → place, then repeat per
-worklist row.
+Short, in order. Pick → scan → place, then repeat per vial.
 
-1. Read the next worklist row (start at position 1).
-2. Pick up the matching vial from the source rack (use the cap colour to confirm).
-3. Move the vial under the barcode reader's red window — wait for the scan to confirm the label matches the worklist row.
-4. Move the vial over the matching slot on the destination tray (use the ArUco fiducial on the alignment plate to re-zero first if needed).
-5. Lower it gently into the slot until the cap rests on the tray surface.
-6. Release the vial and lift the gripper clear.
-7. Repeat steps 1-6 for positions 2 through 12 in worklist order.
+The arm does **not** physically read the worklist printout. The
+worklist is stored as software state on the controller — the
+controller already knows *which* vial to pick next from the source
+rack and *which* destination-tray slot it goes into. The arm just
+executes that pick-and-place sequence. The paper printout on the
+bench is a human-readable audit copy, not the arm's input.
+
+1. Pick up the next vial from the source rack (the controller dictates the order; the cap colour is the camera's visual cross-check).
+2. Move the vial under the barcode reader's red window — wait for the scan to confirm the label matches the controller's expected value for this step.
+3. Move the vial over the target slot on the destination tray (use the ArUco fiducial on the alignment plate to re-zero first if needed).
+4. Lower it gently into the slot until the cap rests on the tray surface.
+5. Release the vial and lift the gripper clear.
+6. Repeat steps 1-5 for the remaining vials, in the order the controller specifies, until all 12 slots are filled.
 
 After all 12 vials are placed, the technician (not the arm) carries
 the loaded tray over to the HPLC instrument and slides it in.
@@ -46,7 +51,7 @@ Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top at
 | 4 | **Alignment plate** | Custom 240 × 240 × 6 mm anodized aluminium plate with two Ø3 mm corner locator pins + ArUco-style fiducial | 240 × 240 × 6 plate, top at z = 0.906 | (0.05, 0.00) | The mechanism that recovers the spec's ±1 mm slot precision. Locates the tray to a calibrated bench position; ArUco patch lets the arm camera re-zero per shift. |
 | 5 | **Destination tray** | Agilent **G2255A 100-position "classic"** autosampler tray, 10 × 10 grid, 18 mm pitch, Ø14 mm slot ID | 195 × 195 × 50 dark polymer block with 100 visible Ø14 slot mouths and a white "position 1" corner marker | (0.05, 0.00), bottom at z = 0.906 | **The target.** Shown EMPTY here — Step 8 is the act of moving the 12 ketchup vials *into* this grid in worklist order. |
 | 6 | **Source rack** | MicroSolv **MV9502R-02B** polypropylene 50-position rack | 150 × 80 × 25 white PP block, 10 × 5 wells, 15 mm pitch, accepts 12 mm OD vials | (0.10, 0.32) | The **starting** vessel. Holds the 12 capped+labelled ketchup vials waiting to be moved. 38 wells are empty (the run uses 12 of 50). |
-| 7 | **Worklist printout** | Standard 100 × 70 mm thermal-printed worklist slip | 100 × 70 × 0.2 white paper with 5 thin printed rows | (0.20, 0.32) | The **ground truth** for what goes where. Without this, the run is meaningless. |
+| 7 | **Worklist printout** | Standard 100 × 70 mm thermal-printed worklist slip | 100 × 70 × 0.2 white paper with 5 thin printed rows | (0.20, 0.32) | A **paper audit copy** of the worklist for the technician. The arm does **not** read this — the pick / place order lives as software state on the controller. The printout is on the bench so a human can spot-check what the run is doing. |
 | 8 | **Barcode reader** | USB handheld scanner on vertical stand (e.g. Honeywell Voyager / Zebra DS2208 style) | 60 × 60 × 10 base + Ø12 × 100 stem + 80 × 50 × 40 angled head + red emissive window | (0.20, -0.30) | Per v1 spec the arm **scans every vial barcode before placement** to verify label-to-position match. Reads via USB-HID into the local controller. |
 
 ## The 12 ketchup vials and their worklist order
@@ -91,7 +96,7 @@ Mapping:
 
 | Doc sub-step | Object responsible |
 |---|---|
-| "look at the worklist" | worklist printout |
+| "look at the worklist" | done in **software** by the controller (the arm does not read the worklist); the paper printout is only a technician-side audit copy |
 | "take each labelled vial" (starting location) | source rack with the 12 capped+labelled vials |
 | "verify label matches the position" | barcode reader + the coloured caps as a quick visual cross-check |
 | "set it gently into the matching numbered slot" | destination tray (the 10 × 10 grid) on the alignment plate |
