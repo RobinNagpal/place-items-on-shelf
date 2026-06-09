@@ -17,13 +17,34 @@ on purpose — the operator picks one based on how strong the Step 2
 extract turned out. The action is: aspirate a measured volume of the
 cloudy extract with the P1000 micropipette, dispense it into the
 chosen flask, top up to the graduation ring with deionised water from
-the solvent bottle, cap the flask, invert to mix, write the dilution
-factor on the label with the Sharpie.
+the solvent bottle, cap the flask, invert to mix.
+
+The dilution factor itself is recorded as run metadata, not written
+on the flask. The project skips the labelling step (Step 7) because
+it is hard to automate, so there is **no Sharpie** on the bench.
 
 This world contains **only the bench and the objects**. There is no
 arm. A yellow disc at the back of the bench marks where the arm base
 will go later (same position as the Step 2 world, so the cell layout
 stays consistent across steps).
+
+## Workflow — what the arm does
+
+Short, in order. Pick → push → aspirate → dispense → eject → pour →
+invert.
+
+1. Pick up the pipette from its stand.
+2. Push the pipette tip down into a fresh tip in the tip box.
+3. Move over the source beaker, dip the tip in, pull the thumb wheel up to aspirate 1 mL of cloudy extract.
+4. Move over the 10 mL flask neck.
+5. Push the thumb wheel down to dispense the 1 mL into the flask.
+6. Move over the waste beaker and eject the used tip.
+7. Pick up the solvent bottle.
+8. Tilt it over the flask to top up to the graduation ring with water.
+9. Put the solvent bottle back.
+10. Pick up the 10 mL flask and gently invert it a few times to mix.
+11. Put it back upright.
+12. If the result is still too strong, repeat steps 1-11 using the 100 mL flask for a 1:100 dilution instead.
 
 ## What is on the bench
 
@@ -43,7 +64,6 @@ at **z = 0.900 m**.
 | 8 | **Eppendorf Research Plus P1000 micropipette** | The "precise volume" tool — the workflow doc explicitly identifies this as the make-or-break instrument for dilution accuracy | Eppendorf Research Plus single-channel, 100 - 1000 µL (P/N 3123000063) | Total length 240 (thumb wheel Ø12.5 × 80 + body Ø7.5 × 100 + tip shaft Ø4 × 60) | hangs on the stand at (-0.055, -0.15) | 100 g |
 | 9 | **Pipette tip rack (96 tips)** | Source of fresh, sterile tips. One tip per dilution step — no cross-contamination | Eppendorf epT.I.P.S. Box 2.0 for 100 - 1000 µL (P/N 0030073460) | 130 × 85 × 60 box, 96 tips Ø6 × 60 in 8 × 12 grid | (0.00, -0.15) | static |
 | 10 | **Waste beaker (used tips)** | Tip-disposal pot — the operator ejects each used tip into here so the bench stays clean | Corning Pyrex 1000 low-form, 250 mL (P/N 1000-250) | Ø70 × 100 | (0.05, -0.30) | 300 g |
-| 11 | **Sharpie permanent marker** | Records the dilution factor on the flask label area — the doc warns "forgetting to record the dilution factor → result is useless" | Sharpie Fine Point permanent marker, black (P/N 30001) | Body Ø12 × 110, cap Ø13 × 30, total 140 | (-0.10, +0.20) lying flat along Y | 12 g |
 
 ### Why these objects in particular
 
@@ -58,7 +78,7 @@ object on the bench maps to exactly one of those sub-steps:
 | "put it into a clean, larger container" | 10 mL / 100 mL volumetric flask |
 | "add solvent up to a known total volume" | 500 mL water bottle + the etched ring on the flask neck |
 | "mix well" | flask cap + manual inversion (the operator does this) |
-| "write down the dilution factor" | Sharpie marker |
+| "write down the dilution factor" | recorded as run metadata in software, not on the flask (no Sharpie in the scene) |
 | "dilute the dilution" | second volumetric flask (use the 100 mL after the 10 mL) |
 | (tip hygiene between aspirations) | waste beaker (eject + replace tip every transfer) |
 
@@ -113,7 +133,6 @@ Bench top is at **z = 0.900 m**. Tall items and their tops:
 | Pipette (hanging) tip | 0.890 | 1.130 |
 | Waste beaker | 0.900 | 1.000 |
 | Tip box | 0.900 | 0.960 |
-| Sharpie | 0.900 | 0.912 |
 
 The tallest item (the 100 mL flask) is 205 mm above the bench. Leave
 arm pre-grasp standoff ≥ 250 mm if you mount a vertically-approaching

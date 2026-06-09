@@ -17,9 +17,10 @@
     the diluent; an Eppendorf Research Plus P1000 single-channel
     micropipette in a vertical charging stand does the precise
     volume transfer; an epT.I.P.S. 96-tip rack feeds fresh tips;
-    a 250 mL waste beaker collects ejected tips; and a Sharpie
-    permanent marker is on the bench so the operator can record
-    the dilution factor on the flask label area.
+    and a 250 mL waste beaker collects ejected tips. The dilution
+    factor itself is recorded as run metadata, not written on the
+    flask, so the project's "labelling" step is skipped and there
+    is no Sharpie on the bench.
 
   NO ARM IS INCLUDED. A 2 mm yellow disc at the back of the bench
   marks the spot where a future arm base will be bolted down.
@@ -44,9 +45,9 @@
           |            [arm marker]               |  arm base
           |          (-0.22, 0.00)                |  goes here
           |                                       |
-          | [marker]   [pipette stand + pipette]  |
-          | (-0.10,    (-0.10, -0.15)             |
-          |  +0.20)                               |
+          |            [pipette stand + pipette]  |
+          |            (-0.10, -0.15)             |
+          |                                       |
           |                                       |
           | [source beaker]   [tip box]           |
           | (0.00, +0.20)     (0.00, -0.15)       |
@@ -629,52 +630,12 @@
       </link>
     </model>
 
-    <!-- ============================================================
-         Sharpie permanent marker (Fine Point). Used to write the
-         dilution factor on the flask label area. Real marker:
-           Body : 110 mm long x Ø12 mm
-           Cap  : 30 mm long x Ø13 mm
-         Total length 140 mm. Lies flat on the bench along Y.
-
-         Pose orientation: pitch = pi/2 rotates the local Z axis
-         to world -X. Since the marker geometry is along local Z,
-         this orientation makes the marker lie horizontally with
-         its body pointing along the world Y axis... see note in
-         README. Cap is at the +Y end of the marker, body at the
-         -Y end. The arm-side cap (which you twist off first) is
-         the part closest to (-0.10, +0.25).
-         ============================================================ -->
-    <model name="sharpie_marker">
-      <pose>-0.10 0.20 0.906 1.5708 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.012</mass>
-          <inertia>
-            <ixx>2.0e-6</ixx><iyy>2.0e-5</iyy><izz>2.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="body">
-          <pose>0 0 -0.015 0 0 0</pose>
-          <geometry><cylinder><radius>0.006</radius><length>0.110</length></cylinder></geometry>
-          <material>
-            <ambient>0.05 0.05 0.05 1</ambient>
-            <diffuse>0.12 0.12 0.12 1</diffuse>
-          </material>
-        </visual>
-        <visual name="cap">
-          <pose>0 0 0.055 0 0 0</pose>
-          <geometry><cylinder><radius>0.0065</radius><length>0.030</length></cylinder></geometry>
-          <material>
-            <ambient>0.05 0.05 0.05 1</ambient>
-            <diffuse>0.12 0.12 0.12 1</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.0065</radius><length>0.140</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
+    <!-- NOTE: the Sharpie marker used to live here, for writing the
+         dilution factor on the flask label area. The project skips
+         the labelling step (Step 7) because it is hard to automate,
+         and writing the factor on the flask is a software / metadata
+         concern rather than a physical arm action, so the Sharpie
+         was removed from the scene. -->
 
   </world>
 </sdf>

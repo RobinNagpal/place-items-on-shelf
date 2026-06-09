@@ -1,0 +1,719 @@
+<?xml version="1.0" ?>
+<!--
+  ketchup_placement_in_autosampler.sdf
+
+  Gazebo world for HPLC workflow Step 8 (placement in the
+  autosampler), ketchup case only. Mirrors the routine at:
+    robotics-research/03-hplc-autosampler/03-hplc-workflow/
+    08-placement-in-autosampler.md
+
+  STEP 8 IN ONE SENTENCE
+    Pick each finished, capped, labelled vial from the source
+    rack and set it gently into its exact numbered slot in the
+    autosampler tray, in the order the worklist demands.
+
+  WHY THIS WORLD LOOKS THE WAY IT DOES
+    - The tray sits ON THE BENCH, in an alignment plate, NOT
+      inside the HPLC. This is exactly what the v1 spec calls
+      for (see docs/hplc-autosamplers/requirements/00-spec-
+      summary.md). The HPLC body is shown next to the bench
+      for context but is DELIBERATELY outside the arm's reach
+      envelope - we do not plan in-instrument reaches in v1.
+    - The destination tray is the Agilent G2255A 100-position
+      "classic" 10 x 10 grid. The source rack is the MicroSolv
+      MV9502R-02B 50-well polypropylene rack. Both are pinned
+      to specific reference products in the v1 spec.
+    - Ketchup case = "hard case for tracking" - more vials than
+      paracetamol. The worklist drives the placement order:
+        Pos 1  = Blank        (solvent only, white cap)
+        Pos 2  = Standard     (pure ref, blue cap)
+        Pos 3  = Batch A r1   (red cap)
+        Pos 4  = Batch A r2
+        Pos 5  = Batch A r3
+        Pos 6  = Batch B r1   (green cap)
+        Pos 7  = Batch B r2
+        Pos 8  = Batch B r3
+        Pos 9  = Batch C r1   (orange cap)
+        Pos 10 = Batch C r2
+        Pos 11 = Batch C r3
+        Pos 12 = Standard     (drift check, blue cap)
+      = 12 capped+labelled vials sitting in the source rack
+      waiting to be moved.
+
+  NO ARM IS INCLUDED. A 2 mm yellow disc marks where the arm
+  base will be bolted down (same convention as Steps 2/3/4/5).
+
+  Units: SI. Metres, kilograms, radians. Bench top at z = 0.900 m.
+-->
+<sdf version="1.7">
+  <world name="ketchup_placement_in_autosampler_cell">
+
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="c">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="v">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.60 0.60 0.60 1</ambient>
+            <diffuse>0.70 0.70 0.70 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Bench (top + 4 legs). Same shape and pose as Steps 2/3/4/5. -->
+    <model name="bench">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="top">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+          <material><ambient>0.85 0.82 0.75 1</ambient><diffuse>0.85 0.82 0.75 1</diffuse></material>
+        </visual>
+        <collision name="top_c">
+          <pose>0 0 0.875 0 0 0</pose>
+          <geometry><box><size>0.60 1.00 0.05</size></box></geometry>
+        </collision>
+        <visual name="leg_fr">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fr_c">
+          <pose>0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_fl">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_fl_c">
+          <pose>0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_br">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_br_c">
+          <pose>-0.27 -0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+        <visual name="leg_bl">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+          <material><ambient>0.45 0.45 0.48 1</ambient><diffuse>0.60 0.60 0.63 1</diffuse></material>
+        </visual>
+        <collision name="leg_bl_c">
+          <pose>-0.27 0.47 0.425 0 0 0</pose>
+          <geometry><cylinder><radius>0.025</radius><length>0.850</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Arm base marker - same position as Steps 2/3/4/5. -->
+    <model name="arm_base_marker">
+      <static>true</static>
+      <pose>-0.22 0.00 0.901 0 0 0</pose>
+      <link name="disc">
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>0.002</length></cylinder></geometry>
+          <material><ambient>0.95 0.80 0.10 1</ambient><diffuse>0.95 0.80 0.10 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         HPLC instrument body: Agilent 1290 Infinity II Vialsampler
+         (G7129B / G7129C), the v1 pinned reference instrument.
+           Outer  : 324 (W, Y) x 396 (D, X) x 468 (H, Z) mm
+           Mass   : 19 kg (static here)
+         Sits behind the bench, on the lab floor, with its front
+         face (the autosampler drawer) toward the technician (+X).
+         Body center at world (-0.50, 0.00, 0.234). Front face is
+         at X = -0.302, well behind the bench edge at X = -0.30.
+         The body is OUTSIDE the arm's ~280 mm reach envelope by
+         design: distance from arm marker (-0.22, 0, 0.901) to the
+         nearest face of the HPLC = ~80 mm horizontal but 670 mm
+         vertical below the bench top - and the drawer is closed
+         during loading, so the arm physically cannot reach in.
+         The autosampler drawer is shown closed (recessed band on
+         the front face); the dark band marks where the loaded
+         tray will slide in once the operator carries it over.
+         ============================================================ -->
+    <model name="hplc_instrument">
+      <static>true</static>
+      <pose>-0.50 0.00 0.234 0 0 0</pose>
+      <link name="link">
+        <!-- Main chassis (cream/grey enclosure) -->
+        <visual name="chassis">
+          <geometry><box><size>0.396 0.324 0.468</size></box></geometry>
+          <material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material>
+        </visual>
+        <collision name="chassis_c">
+          <geometry><box><size>0.396 0.324 0.468</size></box></geometry>
+        </collision>
+        <!-- Front face decoration: dark autosampler drawer band -->
+        <visual name="drawer_band">
+          <pose>0.199 0.00 0.000 0 0 0</pose>
+          <geometry><box><size>0.002 0.280 0.110</size></box></geometry>
+          <material><ambient>0.20 0.20 0.22 1</ambient><diffuse>0.25 0.25 0.27 1</diffuse></material>
+        </visual>
+        <!-- Front face decoration: small green status LED -->
+        <visual name="led">
+          <pose>0.199 -0.130 0.180 0 0 0</pose>
+          <geometry><box><size>0.002 0.010 0.005</size></box></geometry>
+          <material>
+            <ambient>0.10 0.80 0.20 1</ambient>
+            <diffuse>0.15 0.95 0.25 1</diffuse>
+            <emissive>0.05 0.40 0.10 1</emissive>
+          </material>
+        </visual>
+        <!-- Front face decoration: model label strip -->
+        <visual name="label_strip">
+          <pose>0.199 0.000 0.210 0 0 0</pose>
+          <geometry><box><size>0.002 0.180 0.020</size></box></geometry>
+          <material><ambient>0.30 0.30 0.34 1</ambient><diffuse>0.35 0.35 0.40 1</diffuse></material>
+        </visual>
+        <!-- Top vent strip -->
+        <visual name="top_vent">
+          <pose>0.000 0.000 0.235 0 0 0</pose>
+          <geometry><box><size>0.300 0.220 0.002</size></box></geometry>
+          <material><ambient>0.55 0.55 0.58 1</ambient><diffuse>0.65 0.65 0.68 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Alignment plate: a thin metal plate fixed to the bench
+         that locates the autosampler tray to a known, calibrated
+         position. The v1 spec demands +/-1 mm placement precision
+         at the tray slot - the plate is how we recover that
+         tolerance after the tray is slid in or out.
+           Dimensions: 240 x 240 x 6 mm anodized aluminum
+         Position centre on bench: (0.05, 0.00). Top of plate at
+         z = 0.900 + 0.006 = 0.906 m.
+         ============================================================ -->
+    <model name="alignment_plate">
+      <static>true</static>
+      <pose>0.05 0.00 0.903 0 0 0</pose>
+      <link name="link">
+        <visual name="plate">
+          <geometry><box><size>0.240 0.240 0.006</size></box></geometry>
+          <material><ambient>0.55 0.57 0.60 1</ambient><diffuse>0.70 0.72 0.75 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.240 0.240 0.006</size></box></geometry>
+        </collision>
+        <!-- Two raised locator pins (anti-rotation + corner registration) -->
+        <visual name="pin_a">
+          <pose>0.105 0.105 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.003</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.30 0.30 0.32 1</ambient><diffuse>0.40 0.40 0.42 1</diffuse></material>
+        </visual>
+        <visual name="pin_b">
+          <pose>-0.105 -0.105 0.006 0 0 0</pose>
+          <geometry><cylinder><radius>0.003</radius><length>0.008</length></cylinder></geometry>
+          <material><ambient>0.30 0.30 0.32 1</ambient><diffuse>0.40 0.40 0.42 1</diffuse></material>
+        </visual>
+        <!-- ArUco-style fiducial marker (white square + dark band) for
+             visual servoing on the +/-1 mm slot tolerance. Per v1
+             spec: "Rigid bench plate, levelled to +/-0.5 mm, ArUco
+             fiducial near base". -->
+        <visual name="fiducial_bg">
+          <pose>-0.105 0.105 0.006 0 0 0</pose>
+          <geometry><box><size>0.030 0.030 0.001</size></box></geometry>
+          <material><ambient>0.98 0.98 0.98 1</ambient><diffuse>0.99 0.99 0.99 1</diffuse></material>
+        </visual>
+        <visual name="fiducial_fg">
+          <pose>-0.105 0.105 0.0065 0 0 0</pose>
+          <geometry><box><size>0.018 0.018 0.001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Destination tray: Agilent G2255A 100-position "classic"
+         autosampler tray.
+           Outer  : 195 x 195 x 50 mm dark polymer block
+           Layout : 10 x 10 grid, 18 mm pitch
+           Slot   : Ø14 mm ID, ~1 mm radial clearance for a 12 mm
+                    vial. ~32 mm deep, but we render only the visible
+                    rim/sleeve here.
+         Centre on alignment plate at (0.05, 0.00). Tray bottom at
+         z = 0.906 (plate top), centre at z = 0.906 + 0.025 = 0.931.
+         The tray is shown EMPTY because Step 8 is about placing
+         vials INTO it - the vials start in the source rack and
+         end here.
+         ============================================================ -->
+    <model name="destination_tray">
+      <static>true</static>
+      <pose>0.05 0.00 0.931 0 0 0</pose>
+      <link name="link">
+        <!-- Solid main block. Slot wells are not subtracted (Gazebo
+             primitive limitation); the visible 10x10 of dark rim
+             rings below are the operator's visual reference. -->
+        <visual name="body">
+          <geometry><box><size>0.195 0.195 0.050</size></box></geometry>
+          <material><ambient>0.20 0.20 0.22 1</ambient><diffuse>0.28 0.28 0.30 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.195 0.195 0.050</size></box></geometry>
+        </collision>
+        <!-- Numbered-corner stripe (white) so the operator can tell
+             which corner is "position 1". Real trays paint or laser-
+             etch a "1" near a corner; we use a short white stripe. -->
+        <visual name="corner_marker">
+          <pose>-0.087 -0.087 0.026 0 0 0</pose>
+          <geometry><box><size>0.020 0.020 0.001</size></box></geometry>
+          <material><ambient>0.98 0.98 0.98 1</ambient><diffuse>0.99 0.99 0.99 1</diffuse></material>
+        </visual>
+        <!-- 10 x 10 visual slot grid: each cell is a thin dark
+             cylinder showing the slot mouth. Pitch 18 mm; grid
+             centred on the tray. Slot ID Ø14 mm; ring rendered as
+             a flat disc Ø14 mm to show the operator's target. The
+             100 slot-mouth visuals are listed compactly below. -->
+        <!-- Row Y = -0.081 (j = 1) -->
+        <visual name="slot_1_1"><pose>-0.081 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_1"><pose>-0.063 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_1"><pose>-0.045 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_1"><pose>-0.027 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_1"><pose>-0.009 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_1"><pose>0.009 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_1"><pose>0.027 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_1"><pose>0.045 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_1"><pose>0.063 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_1"><pose>0.081 -0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = -0.063 (j = 2) -->
+        <visual name="slot_1_2"><pose>-0.081 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_2"><pose>-0.063 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_2"><pose>-0.045 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_2"><pose>-0.027 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_2"><pose>-0.009 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_2"><pose>0.009 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_2"><pose>0.027 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_2"><pose>0.045 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_2"><pose>0.063 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_2"><pose>0.081 -0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = -0.045 (j = 3) -->
+        <visual name="slot_1_3"><pose>-0.081 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_3"><pose>-0.063 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_3"><pose>-0.045 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_3"><pose>-0.027 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_3"><pose>-0.009 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_3"><pose>0.009 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_3"><pose>0.027 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_3"><pose>0.045 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_3"><pose>0.063 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_3"><pose>0.081 -0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = -0.027 (j = 4) -->
+        <visual name="slot_1_4"><pose>-0.081 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_4"><pose>-0.063 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_4"><pose>-0.045 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_4"><pose>-0.027 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_4"><pose>-0.009 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_4"><pose>0.009 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_4"><pose>0.027 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_4"><pose>0.045 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_4"><pose>0.063 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_4"><pose>0.081 -0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = -0.009 (j = 5) -->
+        <visual name="slot_1_5"><pose>-0.081 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_5"><pose>-0.063 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_5"><pose>-0.045 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_5"><pose>-0.027 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_5"><pose>-0.009 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_5"><pose>0.009 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_5"><pose>0.027 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_5"><pose>0.045 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_5"><pose>0.063 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_5"><pose>0.081 -0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = 0.009 (j = 6) -->
+        <visual name="slot_1_6"><pose>-0.081 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_6"><pose>-0.063 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_6"><pose>-0.045 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_6"><pose>-0.027 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_6"><pose>-0.009 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_6"><pose>0.009 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_6"><pose>0.027 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_6"><pose>0.045 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_6"><pose>0.063 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_6"><pose>0.081 0.009 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = 0.027 (j = 7) -->
+        <visual name="slot_1_7"><pose>-0.081 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_7"><pose>-0.063 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_7"><pose>-0.045 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_7"><pose>-0.027 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_7"><pose>-0.009 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_7"><pose>0.009 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_7"><pose>0.027 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_7"><pose>0.045 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_7"><pose>0.063 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_7"><pose>0.081 0.027 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = 0.045 (j = 8) -->
+        <visual name="slot_1_8"><pose>-0.081 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_8"><pose>-0.063 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_8"><pose>-0.045 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_8"><pose>-0.027 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_8"><pose>-0.009 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_8"><pose>0.009 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_8"><pose>0.027 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_8"><pose>0.045 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_8"><pose>0.063 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_8"><pose>0.081 0.045 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = 0.063 (j = 9) -->
+        <visual name="slot_1_9"><pose>-0.081 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_9"><pose>-0.063 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_9"><pose>-0.045 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_9"><pose>-0.027 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_9"><pose>-0.009 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_9"><pose>0.009 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_9"><pose>0.027 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_9"><pose>0.045 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_9"><pose>0.063 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_9"><pose>0.081 0.063 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <!-- Row Y = 0.081 (j = 10) -->
+        <visual name="slot_1_10"><pose>-0.081 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_2_10"><pose>-0.063 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_3_10"><pose>-0.045 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_4_10"><pose>-0.027 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_5_10"><pose>-0.009 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_6_10"><pose>0.009 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_7_10"><pose>0.027 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_8_10"><pose>0.045 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_9_10"><pose>0.063 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+        <visual name="slot_10_10"><pose>0.081 0.081 0.026 0 0 0</pose><geometry><cylinder><radius>0.007</radius><length>0.001</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Source rack: MicroSolv MV9502R-02B 50-position polypropylene
+         vial rack (the v1 pinned source rack).
+           Outer  : 150 x 80 x 25 mm white PP block
+           Layout : 10 (Y) x 5 (X) grid, 15 mm pitch
+           Wells  : Ø14 mm ID, accept 12 x 32 mm vials with ~22 mm of
+                    vial sleeved by the rack and the top ~10 mm + the
+                    cap exposed above.
+         Centre on bench: (0.10, 0.32). Rack bottom on the bench top,
+         centre at z = 0.900 + 0.0125 = 0.9125.
+
+         Twelve of the 50 wells are occupied by the capped, labelled
+         ketchup vials that Step 8 will move. The remaining 38 wells
+         are empty (just rack body shown; not modelled separately).
+         ============================================================ -->
+    <model name="source_rack">
+      <static>true</static>
+      <pose>0.10 0.32 0.9125 0 0 0</pose>
+      <link name="link">
+        <visual name="body">
+          <geometry><box><size>0.080 0.150 0.025</size></box></geometry>
+          <material><ambient>0.94 0.94 0.94 1</ambient><diffuse>0.98 0.98 0.98 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><box><size>0.080 0.150 0.025</size></box></geometry>
+        </collision>
+        <!-- White "MV9502R" label strip on the long side. -->
+        <visual name="label">
+          <pose>0.0405 0.000 0.000 0 0 0</pose>
+          <geometry><box><size>0.001 0.040 0.006</size></box></geometry>
+          <material><ambient>0.20 0.20 0.22 1</ambient><diffuse>0.25 0.25 0.27 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Worklist printout: a simple flat sheet of paper lying on the
+         bench. Real workflows print or display the worklist next to
+         the rack so the technician can map labels to positions one-
+         to-one. Just a thin white rectangle here.
+           Sheet : 100 x 70 x 0.2 mm white paper
+         Position: (0.20, 0.32).
+         ============================================================ -->
+    <model name="worklist_printout">
+      <static>true</static>
+      <pose>0.20 0.32 0.9005 0 0 0</pose>
+      <link name="link">
+        <visual name="paper">
+          <geometry><box><size>0.100 0.070 0.0002</size></box></geometry>
+          <material><ambient>0.97 0.97 0.95 1</ambient><diffuse>0.99 0.99 0.97 1</diffuse></material>
+        </visual>
+        <!-- A few thin black bars to suggest printed rows. -->
+        <visual name="row1">
+          <pose>0 0.020 0.0002 0 0 0</pose>
+          <geometry><box><size>0.060 0.002 0.0001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.10 0.10 0.10 1</diffuse></material>
+        </visual>
+        <visual name="row2">
+          <pose>0 0.010 0.0002 0 0 0</pose>
+          <geometry><box><size>0.060 0.002 0.0001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.10 0.10 0.10 1</diffuse></material>
+        </visual>
+        <visual name="row3">
+          <pose>0 0.000 0.0002 0 0 0</pose>
+          <geometry><box><size>0.060 0.002 0.0001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.10 0.10 0.10 1</diffuse></material>
+        </visual>
+        <visual name="row4">
+          <pose>0 -0.010 0.0002 0 0 0</pose>
+          <geometry><box><size>0.060 0.002 0.0001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.10 0.10 0.10 1</diffuse></material>
+        </visual>
+        <visual name="row5">
+          <pose>0 -0.020 0.0002 0 0 0</pose>
+          <geometry><box><size>0.060 0.002 0.0001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.10 0.10 0.10 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         Barcode reader: small USB handheld scanner mounted on a
+         vertical stand. Per the v1 spec, every vial barcode is read
+         by the arm BEFORE placement to confirm the label matches
+         the worklist's expected position.
+           Stand base : 60 x 60 x 10 mm
+           Stand neck : Ø12 x 100 mm
+           Reader head: 80 x 50 x 40 mm angled scanner head, dark
+                        plastic with a small red emissive window.
+         Position: (0.20, -0.30).
+         ============================================================ -->
+    <model name="barcode_reader">
+      <static>true</static>
+      <pose>0.20 -0.30 0.900 0 0 0</pose>
+      <link name="link">
+        <visual name="base">
+          <pose>0 0 0.005 0 0 0</pose>
+          <geometry><box><size>0.060 0.060 0.010</size></box></geometry>
+          <material><ambient>0.20 0.20 0.22 1</ambient><diffuse>0.25 0.25 0.27 1</diffuse></material>
+        </visual>
+        <collision name="base_c">
+          <pose>0 0 0.005 0 0 0</pose>
+          <geometry><box><size>0.060 0.060 0.010</size></box></geometry>
+        </collision>
+        <visual name="neck">
+          <pose>0 0 0.060 0 0 0</pose>
+          <geometry><cylinder><radius>0.006</radius><length>0.100</length></cylinder></geometry>
+          <material><ambient>0.30 0.30 0.32 1</ambient><diffuse>0.40 0.40 0.42 1</diffuse></material>
+        </visual>
+        <visual name="head">
+          <pose>0.020 0 0.130 0 0.35 0</pose>
+          <geometry><box><size>0.080 0.050 0.040</size></box></geometry>
+          <material><ambient>0.18 0.18 0.20 1</ambient><diffuse>0.22 0.22 0.24 1</diffuse></material>
+        </visual>
+        <visual name="head_window">
+          <pose>0.058 0 0.118 0 0.35 0</pose>
+          <geometry><box><size>0.002 0.030 0.015</size></box></geometry>
+          <material>
+            <ambient>0.80 0.10 0.10 1</ambient>
+            <diffuse>0.95 0.15 0.15 1</diffuse>
+            <emissive>0.45 0.05 0.05 1</emissive>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         The twelve capped, labelled ketchup vials in the source rack.
+
+         Each vial = 12 x 32 mm clear borosilicate body + Ø13 x 8 mm
+         coloured screw cap + 12 x 4 mm coloured label band on the
+         body. The body sleeves into the rack well; the cap and band
+         show above the rack surface.
+
+         Cap colour codes:
+           white   = blank
+           blue    = standard
+           red     = batch A (3 replicates)
+           green   = batch B (3 replicates)
+           orange  = batch C (3 replicates)
+
+         Rack-local well coordinates (rack centre at world
+         (0.10, 0.32, 0.9125), rack X axis = bench X, Y axis = bench Y,
+         well spacing 15 mm):
+           Wells laid out as 5 (X) x 10 (Y).
+           Used wells (well_X, well_Y) -> world position:
+             1  (-2,  -4)  blank        world (0.070, 0.260)
+             2  (-2,  -3)  standard     world (0.070, 0.275)
+             3  (-2,  -2)  A_r1         world (0.070, 0.290)
+             4  (-2,  -1)  A_r2         world (0.070, 0.305)
+             5  (-2,   0)  A_r3         world (0.070, 0.320)
+             6  (-2,  +1)  B_r1         world (0.070, 0.335)
+             7  (-2,  +2)  B_r2         world (0.070, 0.350)
+             8  (-2,  +3)  B_r3         world (0.070, 0.365)
+             9  (-2,  +4)  C_r1         world (0.070, 0.380)
+            10  (-1,  -4)  C_r2         world (0.085, 0.260)
+            11  (-1,  -3)  C_r3         world (0.085, 0.275)
+            12  (-1,  -2)  std drift    world (0.085, 0.290)
+
+         All vials share the same height: bottom at z = 0.900,
+         centre at z = 0.916, cap at z = 0.940 (32 + 8 mm above
+         bench top, plus rack body just sleeves the bottom).
+         ============================================================ -->
+
+    <!-- vial_pos1 = Blank (white cap) -->
+    <model name="vial_pos1_blank">
+      <pose>0.070 0.260 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.98 0.98 0.98 1</ambient><diffuse>0.99 0.99 0.99 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.97 0.97 0.95 1</ambient><diffuse>0.99 0.99 0.97 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos2 = Standard (blue cap) -->
+    <model name="vial_pos2_standard">
+      <pose>0.070 0.275 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.15 0.35 0.85 1</ambient><diffuse>0.20 0.45 0.95 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.20 0.40 0.85 1</ambient><diffuse>0.25 0.50 0.95 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos3 = Batch A rep 1 (red cap) -->
+    <model name="vial_pos3_A_r1">
+      <pose>0.070 0.290 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.85 0.15 0.15 1</ambient><diffuse>0.95 0.20 0.20 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.85 0.20 0.20 1</ambient><diffuse>0.95 0.25 0.25 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos4 = Batch A rep 2 (red cap) -->
+    <model name="vial_pos4_A_r2">
+      <pose>0.070 0.305 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.85 0.15 0.15 1</ambient><diffuse>0.95 0.20 0.20 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.85 0.20 0.20 1</ambient><diffuse>0.95 0.25 0.25 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos5 = Batch A rep 3 (red cap) -->
+    <model name="vial_pos5_A_r3">
+      <pose>0.070 0.320 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.85 0.15 0.15 1</ambient><diffuse>0.95 0.20 0.20 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.85 0.20 0.20 1</ambient><diffuse>0.95 0.25 0.25 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos6 = Batch B rep 1 (green cap) -->
+    <model name="vial_pos6_B_r1">
+      <pose>0.070 0.335 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.10 0.60 0.20 1</ambient><diffuse>0.15 0.75 0.25 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.15 0.65 0.25 1</ambient><diffuse>0.20 0.78 0.30 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos7 = Batch B rep 2 (green cap) -->
+    <model name="vial_pos7_B_r2">
+      <pose>0.070 0.350 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.10 0.60 0.20 1</ambient><diffuse>0.15 0.75 0.25 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.15 0.65 0.25 1</ambient><diffuse>0.20 0.78 0.30 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos8 = Batch B rep 3 (green cap) -->
+    <model name="vial_pos8_B_r3">
+      <pose>0.070 0.365 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.10 0.60 0.20 1</ambient><diffuse>0.15 0.75 0.25 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.15 0.65 0.25 1</ambient><diffuse>0.20 0.78 0.30 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos9 = Batch C rep 1 (orange cap) -->
+    <model name="vial_pos9_C_r1">
+      <pose>0.070 0.380 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos10 = Batch C rep 2 (orange cap) -->
+    <model name="vial_pos10_C_r2">
+      <pose>0.085 0.260 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos11 = Batch C rep 3 (orange cap) -->
+    <model name="vial_pos11_C_r3">
+      <pose>0.085 0.275 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.78 0.55 0.45 0.60</ambient><diffuse>0.88 0.65 0.50 0.60</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.95 0.55 0.10 1</ambient><diffuse>0.99 0.65 0.15 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- vial_pos12 = Standard, drift check (blue cap) -->
+    <model name="vial_pos12_standard_drift">
+      <pose>0.085 0.290 0.916 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.008</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>4e-7</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="body"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry><material><ambient>0.85 0.90 0.92 0.55</ambient><diffuse>0.85 0.90 0.92 0.55</diffuse></material></visual>
+        <visual name="cap"><pose>0 0 0.020 0 0 0</pose><geometry><cylinder><radius>0.0065</radius><length>0.008</length></cylinder></geometry><material><ambient>0.15 0.35 0.85 1</ambient><diffuse>0.20 0.45 0.95 1</diffuse></material></visual>
+        <visual name="label_band"><pose>0 0 -0.008 0 0 0</pose><geometry><cylinder><radius>0.00605</radius><length>0.004</length></cylinder></geometry><material><ambient>0.20 0.40 0.85 1</ambient><diffuse>0.25 0.50 0.95 1</diffuse></material></visual>
+        <collision name="c"><geometry><cylinder><radius>0.006</radius><length>0.032</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+  </world>
+</sdf>

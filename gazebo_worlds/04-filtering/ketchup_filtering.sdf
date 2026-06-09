@@ -16,9 +16,9 @@
   WHAT IS THE SCENE?
     A small lab bench laid out for the spin-pour-filter routine:
     a benchtop swing-bucket centrifuge at the back of the bench;
-    a 4-tube rack holding 50 mL Falcon tubes (one with the
-    cloudy dilution about to be spun, one already spun with a
-    visible pellet + supernatant layer, two empty); the 100 mL
+    a 4-position rack holding two 50 mL Falcon tubes (one with
+    the cloudy dilution about to be spun, one already spun with
+    a visible pellet + supernatant layer); the 100 mL
     volumetric flask that came out of Step 3 (still carrying some
     of the dilution); a 10 mL plastic syringe; a 25 mm Luer-lock
     syringe filter; and a clean Pyrex 100 mL beaker to receive
@@ -201,11 +201,12 @@
                      Body painted cloudy-reddish.
          tube_post : already spun. Lower 15 mm = dark pellet, upper
                      85 mm = clear-ish supernatant.
-         tube_empty_a / _empty_b : just empty glass.
 
-         All four sit in the 2x2 rack at (0.00, 0.15). Hole spacing
-         in the rack = 40 mm. Each tube body bottom is at the bench
-         top (z=0.900), so tube centre z = 0.900 + 0.115 / 2 = 0.9575.
+         Both sit in the front row of the 2x2 rack at (0.00, 0.15).
+         Hole spacing in the rack = 40 mm. Each tube body bottom is
+         at the bench top (z=0.900), so tube centre z = 0.900 + 0.115
+         / 2 = 0.9575. The two back-row wells (+/-0.020, +0.170) are
+         left empty - the project does not need extra balance tubes.
          ============================================================ -->
     <model name="falcon_tube_pre">
       <pose>-0.020 0.130 0.9575 0 0 0</pose>
@@ -277,50 +278,10 @@
         </collision>
       </link>
     </model>
-    <model name="falcon_tube_empty_a">
-      <pose>-0.020 0.170 0.9575 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.015</mass>
-          <inertia>
-            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="glass">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-          <material>
-            <ambient>0.88 0.92 0.95 0.45</ambient>
-            <diffuse>0.88 0.92 0.95 0.45</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-    <model name="falcon_tube_empty_b">
-      <pose>0.020 0.170 0.9575 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.015</mass>
-          <inertia>
-            <ixx>3.0e-5</ixx><iyy>3.0e-5</iyy><izz>1.0e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="glass">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-          <material>
-            <ambient>0.88 0.92 0.95 0.45</ambient>
-            <diffuse>0.88 0.92 0.95 0.45</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.015</radius><length>0.115</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
+    <!-- The two extra empty Falcon tubes that used to sit at
+         (+/-0.020, +0.170) were removed: balance tubes are an
+         operator-safety convenience for a real centrifuge, not
+         something the arm workflow needs. -->
 
     <!-- ============================================================
          Source flask: 100 mL volumetric flask carried over from
@@ -435,10 +396,16 @@
            Disc body : Ø25 x 7 mm white
            Inlet     : Ø6 x 8 mm Luer-Lok female on one face
            Outlet    : Ø3 x 8 mm tapered male on the opposite face
-         Lies flat on the bench at (0.10, -0.05), faces along Y.
+         Sits at (0.22, -0.10) lying along world X, i.e. PERPENDICULAR
+         to the syringe (which lies along world Y at 0.10, +0.05).
+         The 90-degree offset + the ~150 mm gap make it visually
+         obvious that the filter is a SEPARATE part: the arm must
+         first draw supernatant into the syringe, then pick up the
+         filter and screw it onto the syringe's Luer tip. The filter
+         is NOT pre-attached.
          ============================================================ -->
     <model name="syringe_filter">
-      <pose>0.10 -0.05 0.9035 1.5708 0 0</pose>
+      <pose>0.22 -0.10 0.9035 0 1.5708 0</pose>
       <link name="link">
         <inertial>
           <mass>0.005</mass>
@@ -468,59 +435,32 @@
     </model>
 
     <!-- ============================================================
-         Receiving beaker - PRIMITIVE version (Gazebo-native
-         cylinder). Pyrex 100 mL low-form, clean and empty.
-         Same dimensions as the Step 2 source beaker.
-
-         Parked at (0.20, +0.45), the front-LEFT corner of the
-         bench, so the three beakers (primitive cylinder vs broken
-         Blender .obj vs clean Thingiverse .stl) are visible
-         side-by-side as a "primitive vs mesh" comparison. The
-         Thingiverse STL one below takes the active workflow
-         position at (0.10, -0.20).
-         ============================================================ -->
-    <model name="receiving_beaker">
-      <pose>0.20 0.45 0.935 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.075</mass>
-          <inertia>
-            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="v">
-          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
-          <material>
-            <ambient>0.85 0.90 0.92 0.50</ambient>
-            <diffuse>0.85 0.90 0.92 0.50</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         Receiving beaker - STL MESH version (Thingiverse).
+         Receiving beaker - STL MESH (Thingiverse).
          Source: greengiant1298 "100ml Beaker", thing:2267
          (https://www.thingiverse.com/thing:2267). Direct .stl,
          3D-print convention (base at z=0, Z-up), 25 mm OD, 51 mm
          tall, 2 mm wall. The file is saved as Beaker.stl right
          next to this SDF.
 
-         Sits at (0.10, -0.20) - the position the primitive
-         receiving_beaker used to occupy, i.e. the active workflow
-         spot between the syringe filter and the bench edge. The
-         arm fills this beaker with filtrate.
+         This is the ONLY receiving beaker on the bench. The two
+         extra "comparison" beakers that used to sit at the front
+         corners (a Gazebo-native cylinder primitive and a broken
+         Blender/OBJ mesh from the 3dLabWare Sketchfab collection)
+         were removed at the user's request so the workflow scene
+         shows exactly what the arm uses, nothing more.
+
+         Sits at (0.05, -0.15) - chosen so the arm marker at
+         (-0.22, 0.00) can reach it (~309 mm, inside UR3 / FR3
+         envelopes; tight for myCobot 280). This puts the beaker
+         directly in front of the arm and clear of the syringe
+         (0.10, +0.05) and the filter (0.22, -0.10).
 
          The STL is in millimetres (3D-print default), so
          <scale>0.001 0.001 0.001</scale> converts to Gazebo's
          metres. Collision is a primitive cylinder for fast physics.
          ============================================================ -->
     <model name="beaker_100ml_stl">
-      <pose>0.10 -0.20 0.900 0 0 0</pose>
+      <pose>0.05 -0.15 0.900 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.075</mass>
@@ -537,72 +477,6 @@
             </mesh>
           </geometry>
           <!-- STL carries no colour; force translucent glass here. -->
-          <material>
-            <ambient>0.85 0.90 0.92 0.55</ambient>
-            <diffuse>0.85 0.90 0.92 0.55</diffuse>
-          </material>
-        </visual>
-        <collision name="c">
-          <geometry><cylinder><radius>0.025</radius><length>0.070</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-
-    <!-- ============================================================
-         CAD-based 100 mL beaker - mesh version.
-         Sits BESIDE the primitive receiving_beaker so the two can
-         be compared in the GUI: same nominal beaker, one built
-         from <cylinder> primitives, one from the mesh.
-
-         Source mesh: 3dLabWare "Beaker Collection" Sketchfab model
-         (CC BY 4.0, https://sketchfab.com/3d-models/beaker-collection-
-         0ec8afce877345f1acd95ceb24b7c6f3). Author opened the .blend
-         in Blender, deleted the four other beakers, exported only
-         the 100 mL piece as beaker_collection.obj alongside this
-         SDF.
-
-         The <uri> is a bare relative path (no file:// scheme)
-         so Gazebo Sim resolves it against the SDF's own directory
-         - gz sim does NOT resolve file://<relative> against the
-         SDF directory, only against absolute paths or the
-         GZ_SIM_RESOURCE_PATH. Gazebo Classic accepts both.
-         The .obj must therefore live at:
-           gazebo_worlds/04-filtering/beaker_collection.obj
-
-         If the beaker sinks half-way into the bench when the world
-         loads, the .obj's origin is at the geometry centre (not
-         the base); raise the pose z by ~0.035 m. If it appears
-         huge or tiny, the .obj was exported in millimetres rather
-         than metres - set <scale>0.001 0.001 0.001</scale> here.
-
-         Collision stays as a primitive cylinder (Ø50 x 70 mm) so
-         physics is fast - the mesh is only the visual.
-         ============================================================ -->
-    <model name="beaker_100ml_cad">
-      <!-- Parked at the far front-right corner of the bench. The
-           3dLabWare collection's 100 mL piece comes in with its
-           own scene origin offset AND a Y-up convention, so it
-           floats and tips sideways without a Blender re-origin
-           pass. Until someone re-exports it cleanly, it sits out
-           of the way of the actual workflow items so screenshots
-           and demos still read normally. -->
-      <pose>0.25 -0.45 0.900 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>0.075</mass>
-          <inertia>
-            <ixx>4.4e-5</ixx><iyy>4.4e-5</iyy><izz>2.3e-5</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
-        <visual name="v">
-          <geometry>
-            <mesh>
-              <uri>beaker_collection.obj</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <!-- Fallback material if the companion .mtl is missing. -->
           <material>
             <ambient>0.85 0.90 0.92 0.55</ambient>
             <diffuse>0.85 0.90 0.92 0.55</diffuse>

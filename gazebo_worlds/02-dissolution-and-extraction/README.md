@@ -3,58 +3,77 @@
 Run: `gz sim gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf`
 
 Gazebo world for HPLC workflow [**Step 2 — Dissolution / extraction**](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/02-dissolution-and-extraction.md),
-**ketchup case only**. The doc routine modelled here is: take the
-pre-weighed ~5 g sample from Step 1 → tip it into a beaker → add
-water / mild acid solvent → stir, optionally warm gently.
+**ketchup case only**. The doc routine for ketchup is: take the
+pre-weighed ~5 g sample → add solvent → mix until the 5-HMF has been
+pulled out of the pulp.
+
+This world strips the routine down to **only what a benchtop arm can
+reliably do**:
+
+- The three beakers on the bench **already contain the ~5 g ketchup
+  sample** at the bottom. Step 1 (weighing) is skipped, so we put the
+  weighed paste straight into the destination vessel instead of
+  carrying it in a weigh boat.
+- The arm physically **swirls** each beaker after pouring solvent in,
+  to mix. The Step 2 doc lists "swirl by hand" as one of the four
+  valid mixing methods, so this matches the original routine.
+- There is **no hot plate** and **no stir bar**. A hot plate's knobs
+  are too small for the arm to grip and operate, and Gazebo cannot
+  simulate the magnetic coupling that makes a stir bar spin anyway,
+  so both were removed.
 
 No arm is included. A yellow Ø100 mm disc at the back of the bench
 marks where the arm base will be bolted down later.
 
+## Workflow — what the arm does
+
+Pick → place → pour → place back, repeated three times. One beaker
+at a time:
+
+1. Pick up **beaker_1** from the right side of the bench.
+2. Place it at the centre of the bench (pour station).
+3. Pick up the solvent bottle.
+4. Tilt it over beaker_1 to pour ~50 mL solvent in.
+5. Put the solvent bottle back on the left side.
+6. Pick up beaker_1 from the centre.
+7. (Optional) Swirl it gently in a small circular motion for ~10
+   seconds so the sample mixes into the solvent.
+8. Place beaker_1 back at its original spot on the right side.
+9. Repeat steps 1-8 for **beaker_2**, then for **beaker_3**.
+
+End state: each of the three beakers now holds the cloudy reddish
+extract, ready for Step 3 (dilution).
+
 ## What is on the bench
 
 Frame: **+X = forward**, **+Y = left**, **+Z = up**. Bench top is at
-**z = 0.900 m**.
+**z = 0.900 m**. Operator-view right = world **-Y**.
 
 | # | Object | Real product reference | Size (mm) | Pose (X, Y) | Mass | Purpose |
 |---|---|---|---|---|---|---|
 | 1 | **Bench** | Laminated lab bench section, 4-leg | Top 1000 × 600 × 50, 4× Ø50 × 850 steel legs | centred at (0, 0) | static | Work surface. Legs go down to the floor so the bench is not floating. |
 | 2 | **Arm marker** | n/a — visual flag only | Ø100 × 2 yellow disc | (-0.22, 0.00) | static | Future arm base location. |
-| 3 | **Hot plate** | IKA C-MAG HS 7 magnetic stirrer + hot plate | 220 × 220 × 120, 180 × 180 ceramic top | (0.05, 0.00) | static | Provides the *warm gently* and the magnetic spin field for the stir bar. |
-| 4 | **Beaker (100 mL)** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) | Ø50 × 70 | on the ceramic top | 75 g | The extraction vessel. |
-| 5 | **Stir bar** | PTFE-coated octagonal magnet | Ø25 × 8 white | inside the beaker | 5 g | The thing the hot-plate magnet drags in a spin. **In sim it does not actually rotate** — see *Stir-bar limitation* below. |
-| 6 | **Ketchup bottle** | Heinz / Mitchell's 14 oz glass bottle | Body Ø55 × 130 + tapered shoulder (3 stacked discs) + neck Ø22 × 30 + cap Ø28 × 18 white; total 208 | (0.10, +0.25) | 500 g | The source jar of ketchup. Tapered shoulder mimics the real bottle silhouette. |
-| 7 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150, cap Ø50 × 25 blue | (0.10, -0.25) | 700 g | The diluent the doc names for ketchup. |
-| 8 | **Weigh boat + sample** | 60 mm white PS antistatic weigh boat | 60 × 60 × 15 + Ø25 × 6 red blob | (-0.05, +0.18) | 10 g | Carries the pre-weighed ~5 g ketchup from Step 1. The arm scoops directly out of the weigh boat with the beaker rim (or the gripper) — no separate spatula. |
+| 3 | **Beaker 1 + sample** | Corning Pyrex 1000 low-form, 100 mL (P/N 1000-100) + ~5 g ketchup blob (Ø30 × 8 mm red disc at the bottom) | Ø50 × 70 glass | (0.05, -0.30) | 80 g | First extraction vessel. Furthest from the arm. |
+| 4 | **Beaker 2 + sample** | Same as Beaker 1 | Ø50 × 70 glass | (0.05, -0.18) | 80 g | Second extraction vessel. |
+| 5 | **Beaker 3 + sample** | Same as Beaker 1 | Ø50 × 70 glass | (0.05, -0.06) | 80 g | Third extraction vessel. Closest to the arm. |
+| 6 | **Solvent bottle (water / mild acid)** | Schott Duran 500 mL wide-mouth reagent bottle GL45 (P/N 218017552) | Body Ø85 × 150 (with a pale-blue translucent Ø80 × 120 mm water level filling ~80 % of the body), cap Ø50 × 25 blue | (0.10, +0.25) | 700 g | The diluent the doc names for ketchup. Sits on the left side so the arm can pick it up after placing a beaker at the centre. The water cylinder is a **static visual prop** — Gazebo's physics is rigid-body only, so the bottle does not actually pour fluid when tilted. A small plugin could shrink the water visual on tilt later to fake a pour. |
 
-### Stir-bar limitation
+### What was deliberately left out
 
-The stir bar's geometry is correct but Gazebo cannot simulate the
-magnetic coupling that makes a real stir bar spin. In the real cell, a
-motor inside the hot-plate base rotates a hidden magnet under the
-ceramic top; that field drags the PTFE-coated iron bar in the beaker
-in a circle. We have no equivalent in Gazebo's physics engine.
-
-So this stir bar is a **static visual prop**. To make it actually
-rotate during a simulation, you would either (a) attach a hidden
-revolute joint between the stir bar and the beaker bottom and command
-a joint velocity with a small ROS 2 node, or (b) use the
-`gz-sim-velocity-control-system` plugin to spin the link directly.
-For a first-pass world that is just object placement, the static prop
-is fine.
-
-### Why these are the only items
-
-The ketchup paragraph of the workflow doc requires exactly four
-actions: **transfer the pre-weighed sample → add solvent → stir →
-optionally warm**. The list above is the smallest set that supports
-all four. Deliberately left out:
-
-- **Ultrasonic bath.** The general routine mentions it; the ketchup
-  paragraph specifically does not.
+- **Hot plate / magnetic stirrer.** A real benchtop hot plate has
+  small knobs and a button panel. A simple cobot gripper cannot
+  reliably grip and turn those — modelling the device would mean
+  modelling an action the arm cannot do.
+- **Stir bar.** Depends on the hot plate, and Gazebo cannot simulate
+  the magnetic coupling that makes a real stir bar spin anyway.
+- **Weigh boat with sample.** Belongs to Step 1 (weighing), which
+  this project skips. The pre-weighed paste is shown directly inside
+  each beaker.
+- **Ultrasonic bath.** Mentioned by the general Step 2 routine but
+  not by the ketchup paragraph.
 - **Analytical balance.** Lives in [Step 1](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/01-weighing.md).
-- **Volumetric flask, pipette, vials.** Live in [Step 3](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/03-dilution.md)
-  and later. See `gazebo_worlds/03-dilution/` for those.
-- **Filter / centrifuge tube.** Pulp removal happens in [Step 4](https://github.com/RobinNagpal/robotics-research/blob/main/03-hplc-autosampler/03-hplc-workflow/04-filtering.md).
+- **Volumetric flask, pipette, vials, filter, centrifuge.** Live in
+  Steps 3 / 4 / 5 — see the other `gazebo_worlds/` subfolders.
 
 ## Arm placeholder
 
@@ -69,21 +88,31 @@ an arm:
 </include>
 ```
 
-Reach check: the farthest object (ketchup bottle at (0.10, +0.25)) is
-~407 mm from the marker — outside the myCobot 280's ~280 mm envelope.
-For a myCobot, move the ketchup and solvent bottles to (0.05, ±0.15).
-The bench is sized generously so a longer-reach arm (UR3 / Franka FR3)
-does not have to relayout the cell.
+Reach check from the marker at (-0.22, 0, 0.901):
+
+| Target | Distance | Inside myCobot 280 (~280 mm)? |
+|---|---|---|
+| Beaker 3 (closest) at (0.05, -0.06) | ~277 mm | Borderline |
+| Beaker 2 at (0.05, -0.18) | ~325 mm | **No** |
+| Beaker 1 (farthest) at (0.05, -0.30) | ~404 mm | **No** |
+| Solvent bottle at (0.10, +0.25) | ~406 mm | **No** |
+
+The bench is sized generously so a longer-reach arm (UR3 / Franka FR3
+at ≥ 500 mm) does not have to relayout the cell. For a myCobot 280,
+tighten the beaker spacing and move the solvent bottle inward.
 
 ## Coordinate sanity check
 
-Bench top at **z = 0.900 m**. For objects sitting flat on the bench,
-the SDF pose's z = 0.900 + height/2 (boxes / cylinders are centred on
-their geometry). The beaker is the only exception — it sits on the
-hot plate's ceramic top at z = 1.020, so its centre is at z = 1.055.
-The ketchup bottle, which has multiple stacked sections, uses a model
-pose at z = 0.900 and per-section local z offsets measured from the
-bench top.
+Bench top at **z = 0.900 m**. Every object sits directly on the bench
+top — the previous "beaker on the hot plate" stack is gone, so all
+heights are straightforward:
+
+| Object | Bottom z | Top z |
+|---|---|---|
+| Beaker (each) | 0.900 | 0.970 |
+| Ketchup blob inside each beaker | 0.900 | 0.908 |
+| Solvent bottle body | 0.900 | 1.050 |
+| Solvent bottle cap | 1.050 | 1.075 |
 
 ## Is one world enough for Step 2?
 
