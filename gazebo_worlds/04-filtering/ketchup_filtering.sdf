@@ -508,8 +508,12 @@
          the 100 mL piece as beaker_collection.obj alongside this
          SDF.
 
-         The <uri> is relative to this SDF's own directory, so
-         Gazebo expects the .obj at
+         The <uri> is a bare relative path (no file:// scheme)
+         so Gazebo Sim resolves it against the SDF's own directory
+         - gz sim does NOT resolve file://<relative> against the
+         SDF directory, only against absolute paths or the
+         GZ_SIM_RESOURCE_PATH. Gazebo Classic accepts both.
+         The .obj must therefore live at:
            gazebo_worlds/04-filtering/beaker_collection.obj
 
          If the beaker sinks half-way into the bench when the world
@@ -534,7 +538,7 @@
         <visual name="v">
           <geometry>
             <mesh>
-              <uri>file://beaker_collection.obj</uri>
+              <uri>beaker_collection.obj</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
