@@ -53,37 +53,11 @@ Almost every CAD program has at least **STL export** built in (it's
 the 3D-print default), so in practice you can always get something
 Gazebo can use, even if it costs one extra FreeCAD hop.
 
-## Referencing a mesh from an SDF
+## If you start from a `.blend` file
 
-The SDF block to replace a primitive `<cylinder>` / `<box>` with a
-mesh:
-
-```xml
-<visual name="v">
-  <geometry>
-    <mesh>
-      <uri>file://meshes/beaker_100ml.dae</uri>
-      <scale>1 1 1</scale>
-    </mesh>
-  </geometry>
-</visual>
-<collision name="c">
-  <!-- Keep collision as a primitive: physics is much faster. -->
-  <geometry>
-    <cylinder><radius>0.025</radius><length>0.070</length></cylinder>
-  </geometry>
-</collision>
-```
-
-The `file://` URI is relative to the **SDF file's own directory**, so
-put mesh files in a `meshes/` subfolder next to the `.sdf`.
-
-## Common gotchas
-
-| Problem | Fix |
-|---|---|
-| Beaker shows up 1000× too big | The STL was in millimetres; Gazebo wants metres. Scale by 0.001 in Blender or set `<scale>0.001 0.001 0.001</scale>` in the SDF. |
-| Beaker sinks half-way through the bench | The mesh origin is at its geometry centre, not at the base. Re-origin in Blender (Object → Set Origin → Origin to 3D Cursor) or shift `<pose>` z by +half-height. |
-| Real-time factor drops once a mesh is loaded | Polygon count too high. Use Blender's *Decimate* modifier or MeshLab's *Quadric Edge Collapse* to target ≤ 20 k triangles for any single visible-but-secondary object. |
-| `[Err] Mesh URI not found` | The `file://` path is wrong. Path is relative to the SDF, not the working directory. `ls` from the SDF folder to verify the mesh exists where the SDF says it does. |
-| Mesh loads but has no colour in Gazebo | STL has no colour. Either switch to `.dae` (carries materials), `.obj` (carries colour), or set a `<material>` block inside the SDF `<visual>`. |
+Sketchfab and other model sites often ship the original `.blend`
+(Blender) file. Blender is not Gazebo, but it is a free one-stop
+shop: open the `.blend`, delete what you do not need, then
+**File → Export → Collada (.dae)** to get the Gazebo-ready mesh.
+Install once with `sudo apt install blender`, open with
+`blender path/to/file.blend`.
