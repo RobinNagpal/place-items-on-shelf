@@ -229,18 +229,59 @@ ros2 topic hz /overhead_camera/image_raw
 ros2 run rqt_image_view rqt_image_view /overhead_camera/image_raw
 ```
 
-## Troubleshooting
+## Debugging the "waiting for first image / poses..." loop
 
-- **Script prints "waiting for first image / poses..." forever,
-  but `ros2 topic list` shows both topics.** This is a QoS
-  mismatch. The bridge publishes the camera frames with
-  `BEST_EFFORT` reliability; a subscriber with the default
-  `RELIABLE` QoS never matches it. Confirm with
-  `ros2 topic hz /overhead_camera/image_raw` — if you see
-  "topic does not appear to be published yet" first, then a rate,
-  it is QoS. The current script subscribes with
-  `qos_profile_sensor_data` (BEST_EFFORT) so this is fixed; pull
-  the latest if you wrote an older copy.
+If you see this even though `ros2 topic list` shows both topics,
+work the list below top-to-bottom. Stop as soon as one step
+recovers messages.
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+
+# 1. Make sure you actually have the QoS fix.
+git log --oneline -3
+# The top commit should be the QoS fix. If it is older, pull:
+git pull origin synthetic-data-ketchup-task
+
+# 2. Confirm the file has the BEST_EFFORT QoS line.
+grep qos_profile_sensor_data \
+    gazebo_worlds/02-dissolution-and-extraction/synthetic_data/generate_dataset.py
+# Should print 3 lines (one import + two `create_subscription` calls).
+
+# 3. Run the standalone subscription probe. It does NOTHING except
+# subscribe to the same two topics and print one line per message.
+source /opt/ros/$ROS_DISTRO/setup.bash
+cd gazebo_worlds/02-dissolution-and-extraction/synthetic_data
+python3 test_subscribe.py
+# Expect:
+#   [image]  640x480 bgr8  (#1)
+#   [poses]  6 transforms (beaker_1, beaker_2, ...)  (#1)
+# If nothing prints within 10 s, the issue is the bridge / DDS, not
+# the dataset script.
+
+# 4. Confirm what the bridge advertises and force a BEST_EFFORT echo.
+ros2 topic info /overhead_camera/image_raw -v
+ros2 topic info /world/ketchup_extraction_cell/pose/info -v
+ros2 topic echo /overhead_camera/image_raw --qos-reliability best_effort --once
+ros2 topic echo /world/ketchup_extraction_cell/pose/info --qos-reliability best_effort --once
+# If echo --once hangs, the publisher is not sending. Click ▶ in
+# gz sim, or relaunch with `gz sim -r ...` so it auto-runs.
+
+# 5. DDS daemon hiccup — common after a long session.
+ros2 daemon stop && ros2 daemon start
+
+# 6. Last-resort fallback — switch DDS vendor. Set this in EVERY
+# terminal (gz sim, ros_gz_bridge, generator) BEFORE running.
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+# Re-source ROS 2, then re-run all three terminals.
+```
+
+The `generate_dataset.py` "waiting" message now also prints how
+many image messages and how many pose messages it has actually
+received, so you can tell at a glance whether one side is fine
+and the other is broken, or whether both are broken.
+
+## Troubleshooting
 - **Gazebo window opens blank, no objects.** Old version of this
   SDF added one `<plugin>` tag and broke Gazebo's auto-loaded
   default plugins. The current SDF declares all four required
@@ -270,7 +311,8 @@ ros2 run rqt_image_view rqt_image_view /overhead_camera/image_raw
 ```
 synthetic_data/
 ├── README.md            (this file)
-├── generate_dataset.py  (the ROS 2 node)
+├── generate_dataset.py  (the ROS 2 node — main entry point)
+├── test_subscribe.py    (minimal probe for debugging subscriptions)
 ├── dataset.yaml         (Ultralytics YOLO config)
 └── requirements.txt     (extra Python deps)
 ```

@@ -256,6 +256,8 @@ class DatasetGenerator(Node):
         self._num_frames = num_frames
         self._jitter = jitter
         self._rng = random.Random(seed)
+        self._image_msgs_seen = 0
+        self._pose_msgs_seen = 0
 
         self._images_dir = out_dir / "images"
         self._labels_dir = out_dir / "labels"
@@ -294,8 +296,10 @@ class DatasetGenerator(Node):
     def _on_image(self, msg: Image) -> None:
         # bgr8 keeps it ready for cv2.imwrite without a colour swap.
         self._latest_image = self._bridge.imgmsg_to_cv2(msg, "bgr8")
+        self._image_msgs_seen += 1
 
     def _on_poses(self, msg: TFMessage) -> None:
+        self._pose_msgs_seen += 1
         for t in msg.transforms:
             name = t.child_frame_id
             p = t.transform.translation
@@ -312,9 +316,23 @@ class DatasetGenerator(Node):
             return
 
         if self._latest_image is None or not self._latest_poses:
+            img_status = (
+                f"OK ({self._image_msgs_seen} msgs)"
+                if self._latest_image is not None else
+                f"MISSING (saw {self._image_msgs_seen} msgs)"
+            )
+            pose_status = (
+                f"OK ({self._pose_msgs_seen} msgs, "
+                f"{len(self._latest_poses)} tracked models)"
+                if self._latest_poses else
+                f"MISSING (saw {self._pose_msgs_seen} msgs)"
+            )
             self.get_logger().info(
-                "waiting for first image / poses — is the bridge running "
-                "and is gz sim playing?"
+                f"waiting — image: {img_status}; poses: {pose_status}. "
+                "If both say MISSING with 0 msgs, the script is not "
+                "subscribing to the bridged topics (QoS mismatch, stale "
+                "code, wrong topic names, or no ROS 2 sourced). See "
+                "synthetic_data/README.md > Troubleshooting."
             )
             return
 
