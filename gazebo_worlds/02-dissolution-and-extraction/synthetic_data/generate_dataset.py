@@ -300,13 +300,30 @@ class DatasetGenerator(Node):
 
     def _on_poses(self, msg: TFMessage) -> None:
         self._pose_msgs_seen += 1
+
+        # ros_gz_bridge maps gz.msgs.Pose_V -> tf2_msgs/TFMessage. In some
+        # Gazebo versions child_frame_id is the model name ("beaker_1");
+        # in others it is the link path ("beaker_1::link"). Match the
+        # first segment before "::" so both forms work.
         for t in msg.transforms:
             name = t.child_frame_id
+            head = name.split("::", 1)[0]
             p = t.transform.translation
-            if name in TRACKED:
-                self._latest_poses[name] = (p.x, p.y, p.z)
-            elif name == "overhead_camera":
+            if head in TRACKED:
+                self._latest_poses[head] = (p.x, p.y, p.z)
+            elif head == "overhead_camera":
                 self._cam_pose = (p.x, p.y, p.z)
+
+        # On the very first message, log the unique top-level names so
+        # users can see what the bridge is actually publishing if the
+        # matching above ever fails.
+        if self._pose_msgs_seen == 1:
+            heads = sorted({t.child_frame_id.split("::", 1)[0]
+                            for t in msg.transforms})
+            self.get_logger().info(
+                f"first /pose/info batch has {len(msg.transforms)} "
+                f"transforms; unique top-level names: {heads}"
+            )
 
     # ------------------------------------------------------------------ tick
     def _save_tick(self) -> None:
