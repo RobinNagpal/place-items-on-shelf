@@ -57,20 +57,29 @@ This folder answers that question, step by step.
 
 ## How to read this folder
 
-Two layers:
+Three layers:
 
 - **[`00-types-of-synthetic-data.md`](00-types-of-synthetic-data.md)** —
-  a **catalogue** of every kind of synthetic data you might want,
-  written once. RGB + boxes, RGB + masks, keypoints, depth, 6-DoF
-  poses, force / torque traces, joint-effort logs, OCR / barcode
-  renders, fluid-level sequences, demonstration trajectories,
-  failure-case sets, calibration sets. The per-step files below
-  *refer back to* these by name.
+  the **slim catalogue**, one row per data type, pointing at the
+  per-type files. After review the catalogue was trimmed from
+  twelve types to nine — keypoints, joint-state / effort logs,
+  and fluid-level sequences are gone (Gazebo cannot simulate
+  liquids honestly, and the other two had no clear standalone
+  consumer). What's left: RGB + boxes, segmentation masks,
+  depth, 6-DoF poses, force / torque traces, synthetic text /
+  barcode renders, calibration sets, demonstration trajectories,
+  and failure cases.
+- **[`types/`](types/)** — one file per data type. Each one
+  answers four questions in plain English: **what it is**,
+  **when it is useful**, **who consumes it** (which ML model or
+  which non-ML pipeline), and **how to produce it in Gazebo**.
+  This is the reference for anyone wiring up the simulator.
 - **`0N-<step-slug>.md`** — one file per HPLC workflow step. Each
   one says: what the robot does in that step, what it has to **see
-  or feel** to do it, and which synthetic-data types are useful
-  here (with a concrete label format and the algorithm or model
-  that consumes them).
+  or feel** to do it, and which data types are useful here. These
+  files were written against the original 12-type list and still
+  refer to the old numbering; the per-type files in `types/` are
+  the current source of truth.
 
 | # | File | HPLC step | Project status | Gazebo world |
 |---|------|-----------|----------------|--------------|
