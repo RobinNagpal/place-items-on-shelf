@@ -437,6 +437,20 @@
       <static>true</static>
       <pose>0 0 1.5 0 1.5708 0</pose>
       <link name="optical_frame">
+        <!-- Small dark-grey marker box so the camera is locatable in
+             the GUI. A bare <sensor> renders nothing in Gazebo - the
+             camera is there and publishing frames either way, this
+             cube just makes it visible. Offset to link -X (behind
+             the lens) so it does not show up in the camera's own
+             output. -->
+        <visual name="body">
+          <pose>-0.03 0 0 0 0 0</pose>
+          <geometry><box><size>0.05 0.05 0.05</size></box></geometry>
+          <material>
+            <ambient>0.10 0.10 0.10 1</ambient>
+            <diffuse>0.15 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
         <sensor name="overhead_cam" type="camera">
           <always_on>1</always_on>
           <update_rate>30</update_rate>

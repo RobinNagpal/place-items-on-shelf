@@ -78,11 +78,33 @@ ros2 topic hz /overhead_camera/image_raw       # ~30 Hz
 ros2 topic hz /world/ketchup_extraction_cell/pose/info   # ~250 Hz
 ```
 
-### Terminal 3 — run the generator
+### Terminal 3 — install deps + run the generator
+
+Ubuntu 24.04 ships Python 3.12 with **PEP 668** turned on, which
+blocks `pip install` into the system Python. Pick **one** of these
+three install paths:
+
+```bash
+# Path A — recommended. Use apt; no pip needed at all.
+sudo apt install -y python3-opencv python3-numpy
+
+# Path B — venv that still sees the system ROS 2 packages
+# (rclpy, cv_bridge, sensor_msgs). Use this if you want to keep
+# python3-opencv off the system.
+cd ~/ros2_ws/src/place-items-on-shelf/gazebo_worlds/02-dissolution-and-extraction/synthetic_data
+python3 -m venv --system-site-packages .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Path C — override PEP 668. Only do this if you know what you're
+# doing; it mixes apt-managed and pip-managed packages.
+pip install --break-system-packages -r requirements.txt
+```
+
+Then run the generator:
 
 ```bash
 cd ~/ros2_ws/src/place-items-on-shelf/gazebo_worlds/02-dissolution-and-extraction/synthetic_data
-pip install -r requirements.txt              # one time
 
 # Recommended: --jitter so the frames are not all identical.
 python3 generate_dataset.py --out ./synthetic_dataset --num-frames 50 --jitter
@@ -181,6 +203,24 @@ further:
    captures. Done by editing the SDF before each `gz sim` run, or
    by calling `gz service` on the light entity.
 
+## Verifying the camera is publishing
+
+The camera shows up in the world as a small dark-grey **5 cm cube
+floating 0.6 m above the bench**. That cube is just a marker — a
+Gazebo `<sensor>` on its own renders nothing in the GUI, so without
+the cube the camera would be invisible. The sensor publishes frames
+whether the marker is there or not.
+
+To check frames are actually flowing:
+
+```bash
+# rate should be ~30 Hz once gz sim is playing
+ros2 topic hz /overhead_camera/image_raw
+
+# live preview of what the camera sees (apt: ros-humble-rqt-image-view)
+ros2 run rqt_image_view rqt_image_view /overhead_camera/image_raw
+```
+
 ## Troubleshooting
 
 - **Gazebo window opens blank, no objects.** Old version of this
@@ -188,6 +228,14 @@ further:
   default plugins. The current SDF declares all four required
   plugins (Physics, UserCommands, SceneBroadcaster, Sensors)
   explicitly, so pull the latest world file.
+- **`pip install` fails with `externally-managed-environment`.**
+  Ubuntu 24.04's PEP 668 lock. Use one of the three install paths
+  above — `sudo apt install python3-opencv python3-numpy` is the
+  simplest.
+- **No visible camera in the GUI.** The camera is the small dark
+  cube floating 0.6 m above the bench centre. If you do not see
+  it, pull the latest SDF — earlier versions had a sensor with no
+  visual.
 - **`/overhead_camera/image_raw` exists but `ros2 topic hz` shows
   0 Hz.** Sim is paused. Click ▶ in the Gazebo GUI, or relaunch
   with `gz sim -r ...` to auto-run.
