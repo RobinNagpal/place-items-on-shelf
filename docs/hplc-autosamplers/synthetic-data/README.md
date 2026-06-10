@@ -57,7 +57,7 @@ This folder answers that question, step by step.
 
 ## How to read this folder
 
-Three layers:
+Four layers:
 
 - **[`00-types-of-synthetic-data.md`](00-types-of-synthetic-data.md)** —
   the **slim catalogue**, one row per data type, pointing at the
@@ -80,6 +80,12 @@ Three layers:
   files were written against the original 12-type list and still
   refer to the old numbering; the per-type files in `types/` are
   the current source of truth.
+- **[`industry-methods.md`](industry-methods.md)** — outside-the-
+  Gazebo view: the main ways industry actually produces synthetic
+  data in 2026, and which simulation platform does each one well
+  (Isaac Sim Replicator, Unity Perception, MuJoCo, Drake, CARLA,
+  Omniverse, …). Read this if you want to know what the rest of
+  the world uses and where Gazebo fits.
 
 | # | File | HPLC step | Project status | Gazebo world |
 |---|------|-----------|----------------|--------------|
