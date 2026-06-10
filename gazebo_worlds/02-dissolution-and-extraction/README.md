@@ -121,10 +121,25 @@ A `paracetamol_dissolution.sdf` sibling would cover the clean
 dissolution case later; other steps get their own subfolders under
 `gazebo_worlds/`.
 
+## Synthetic-data generator
+
+The world also has an **overhead RGB camera** bolted on so it can
+produce a YOLO-format dataset of the two object classes the arm
+needs to find here: `solvent_bottle` and `beaker`. See
+[`synthetic_data/README.md`](synthetic_data/README.md) for the
+three-terminal run recipe. This is the first concrete
+implementation of
+[`docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md`](../../docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md).
+
 ## File list
 
 ```
 02-dissolution-and-extraction/
 ├── README.md                  (this file)
-└── ketchup_extraction.sdf     (the Gazebo world)
+├── ketchup_extraction.sdf     (the Gazebo world, now with an overhead camera)
+└── synthetic_data/            (RGB + YOLO-box dataset generator)
+    ├── README.md
+    ├── generate_dataset.py
+    ├── dataset.yaml
+    └── requirements.txt
 ```

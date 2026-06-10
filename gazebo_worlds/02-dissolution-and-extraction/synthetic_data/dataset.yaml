@@ -1,0 +1,30 @@
+# Ultralytics-style dataset spec for the Step 2 (dissolution /
+# extraction) synthetic dataset.
+#
+# `generate_dataset.py` writes the dataset under `--out` in the
+# layout below. `train`, `val`, and `test` all point at the same
+# folder for now — split them later when the set is bigger.
+#
+#   synthetic_dataset/
+#   ├── images/frame_<N>.jpg
+#   └── labels/frame_<N>.txt
+#
+# Each label file holds one detection per line, in normalised YOLO
+# format:  `<class_id> <cx> <cy> <w> <h>` (fractions of image
+# width / height). Class IDs match `names:` below.
+#
+# To train, point Ultralytics at this file:
+#
+#   from ultralytics import YOLO
+#   YOLO("yolov8n.pt").train(data="dataset.yaml", epochs=50, imgsz=640)
+
+path: ./synthetic_dataset
+train: images
+val:   images
+test:  images
+
+# Two classes, picked for the Step 2 ketchup-extraction world.
+# Vials are not modelled here — see Steps 5 / 8 for those.
+names:
+  0: solvent_bottle   # 500 mL Schott reagent bottle on the bench left
+  1: beaker           # 100 mL Pyrex low-form beaker on the bench right
