@@ -457,9 +457,36 @@
       </link>
     </model>
 
-    <!-- Without this plugin the camera sensor above is inert and
-         publishes no frames. The default `gz sim` config does not
-         load the sensors system automatically. -->
+    <!-- ============================================================
+         World-level system plugins.
+
+         IMPORTANT: as soon as any <plugin> tag appears at the world
+         level, Gazebo Sim STOPS auto-loading its default plugin set.
+         If only the sensors plugin is listed here, the world opens
+         blank (no physics, no scene broadcaster, the GUI client
+         renders nothing). We therefore declare all four required
+         plugins explicitly so the world is self-contained and works
+         the same regardless of the user's `~/.gz/sim/<ver>/server.config`.
+
+           Physics            : the physics engine.
+           UserCommands       : enables /world/.../set_pose,
+                                /world/.../create, etc. The
+                                synthetic_data generator's jitter
+                                mode uses set_pose.
+           SceneBroadcaster   : broadcasts scene state to the GUI
+                                client (and ros_gz_bridge). Without
+                                it the GUI is blank.
+           Sensors            : actually runs the overhead camera.
+         ============================================================ -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
     <plugin filename="gz-sim-sensors-system"
             name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>

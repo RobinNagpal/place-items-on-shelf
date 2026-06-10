@@ -83,8 +83,20 @@ ros2 topic hz /world/ketchup_extraction_cell/pose/info   # ~250 Hz
 ```bash
 cd ~/ros2_ws/src/place-items-on-shelf/gazebo_worlds/02-dissolution-and-extraction/synthetic_data
 pip install -r requirements.txt              # one time
-python3 generate_dataset.py --out ./synthetic_dataset --num-frames 50
+
+# Recommended: --jitter so the frames are not all identical.
+python3 generate_dataset.py --out ./synthetic_dataset --num-frames 50 --jitter
 ```
+
+`--jitter` teleports every tracked object (beakers, solvent bottle)
+and the camera to small random offsets before each save, using
+`gz service /world/.../set_pose`. Defaults:
+
+- objects: ±20 mm in X/Y, ±20° yaw
+- camera: ±50 mm in X/Y (Z and the straight-down pitch stay fixed)
+
+Drop `--jitter` to capture the canonical scene only (useful for a
+quick sanity check that the bridge is working).
 
 After ~50 seconds the script exits. You now have:
 
@@ -149,27 +161,43 @@ gz sim -s -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 Terminals 2 and 3 stay exactly the same. The camera still
 renders frames using OGRE2 in software / headless mode.
 
-## Where it falls short, and what to do about it
+## Adding more variety
 
-The world is **static** — every beaker and the solvent bottle sit
-at the same `<pose>` for the whole run. So 50 frames will all
-look near-identical. That is fine for verifying the pipeline
-works; it is **not enough variety to train a real YOLO model.**
+`--jitter` already shuffles object X/Y/yaw and camera X/Y. To go
+further:
 
-Two cheap ways to add variety:
+1. **Wider object jitter.** Edit `OBJ_JITTER_XY`, `OBJ_JITTER_YAW`,
+   `CAM_JITTER_XY` at the top of `generate_dataset.py`. Anything
+   above ±40 mm risks beakers falling off the bench — bump the
+   bench size in the SDF if you want larger jitter.
+2. **Tilted camera angles.** The current camera always looks
+   straight down so the pinhole projection stays a one-liner.
+   To capture oblique views, replace `project_point` with
+   `cv2.projectPoints` and a proper extrinsic matrix, then jitter
+   the camera's roll / pitch / yaw in addition to its X / Y.
+   Left as a follow-up.
+3. **Lighting and material randomisation.** Vary the `<light>`
+   direction and intensity, swap material textures between
+   captures. Done by editing the SDF before each `gz sim` run, or
+   by calling `gz service` on the light entity.
 
-1. **Re-pose objects between frames.** Call
-   `gz service /world/ketchup_extraction_cell/set_pose ...` with
-   random offsets (e.g. ±20 mm on beaker X/Y, ±10 mm on solvent
-   bottle X/Y) between saves. The current script has no flag for
-   this yet — add a `--jitter` option later.
-2. **Re-pose the camera.** Nudge the overhead camera ±2 cm in
-   X/Y and ±2° in roll between saves. Same `set_pose` trick.
+## Troubleshooting
 
-Both are left as follow-ups. This file is the minimum-viable
-skeleton — capture works, projection math works, dataset layout
-matches what `exercises/03-tiny-yolo/dataset.yaml` already
-expects.
+- **Gazebo window opens blank, no objects.** Old version of this
+  SDF added one `<plugin>` tag and broke Gazebo's auto-loaded
+  default plugins. The current SDF declares all four required
+  plugins (Physics, UserCommands, SceneBroadcaster, Sensors)
+  explicitly, so pull the latest world file.
+- **`/overhead_camera/image_raw` exists but `ros2 topic hz` shows
+  0 Hz.** Sim is paused. Click ▶ in the Gazebo GUI, or relaunch
+  with `gz sim -r ...` to auto-run.
+- **`gz service set_pose` calls hang or print "service call
+  timed out".** The UserCommands plugin is not loaded. Same
+  fix — pull the latest SDF.
+- **Boxes look offset from the objects in the annotated frame.**
+  The camera intrinsics in `generate_dataset.py` (IMG_W, IMG_H,
+  HFOV, NOMINAL_CAM) are out of sync with the `<sensor type="camera">`
+  tag in the SDF. Keep them aligned.
 
 ## File list
 
