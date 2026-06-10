@@ -32,23 +32,31 @@ ground truth for free.
 
 ## Requirements
 
-- **WSL2 Ubuntu 22.04** (or native Ubuntu 22.04).
+- **WSL2 Ubuntu 22.04 or 24.04** (or native Ubuntu).
   - Windows 11 with WSLg shows GUI windows out of the box.
   - On Windows 10 WSL2 without an X server the `gz sim` GUI will
     not open, but `gz sim -s -r` (headless server, auto-run) still
     publishes camera frames. See "Headless WSL fallback" below.
-- **ROS 2 Humble** — install `ros-humble-desktop`.
-- **Gazebo Garden** (`gz sim`). Older Fortress (`ign gazebo`)
-  also works; the bridge syntax loses the `gz.msgs.` prefix.
-- `ros-humble-ros-gz-bridge` for the topic bridge.
-- Python packages: `pip install -r requirements.txt`.
+- **ROS 2 Humble** (Ubuntu 22.04) **or Jazzy** (Ubuntu 24.04). Either
+  works — the script uses APIs that are stable across both. Install
+  the matching desktop meta-package: `ros-humble-desktop` or
+  `ros-jazzy-desktop`.
+- **Gazebo** — `gz sim`. Humble pairs with Garden, Jazzy with
+  Harmonic. Both expose the same plugin and topic names this world
+  uses.
+- `ros-$ROS_DISTRO-ros-gz-bridge` for the topic bridge.
+- Python packages: see the install paths below — `pip install` is
+  blocked on Ubuntu 24.04.
 
 ## Run it — three terminals
 
-Source ROS 2 at the top of every new terminal:
+Source ROS 2 at the top of every new terminal. Substitute your
+distro (`humble` or `jazzy`):
 
 ```bash
-source /opt/ros/humble/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
+# or, explicitly:
+source /opt/ros/jazzy/setup.bash
 ```
 
 ### Terminal 1 — start the simulator
@@ -223,6 +231,16 @@ ros2 run rqt_image_view rqt_image_view /overhead_camera/image_raw
 
 ## Troubleshooting
 
+- **Script prints "waiting for first image / poses..." forever,
+  but `ros2 topic list` shows both topics.** This is a QoS
+  mismatch. The bridge publishes the camera frames with
+  `BEST_EFFORT` reliability; a subscriber with the default
+  `RELIABLE` QoS never matches it. Confirm with
+  `ros2 topic hz /overhead_camera/image_raw` — if you see
+  "topic does not appear to be published yet" first, then a rate,
+  it is QoS. The current script subscribes with
+  `qos_profile_sensor_data` (BEST_EFFORT) so this is fixed; pull
+  the latest if you wrote an older copy.
 - **Gazebo window opens blank, no objects.** Old version of this
   SDF added one `<plugin>` tag and broke Gazebo's auto-loaded
   default plugins. The current SDF declares all four required

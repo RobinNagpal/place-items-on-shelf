@@ -47,6 +47,7 @@ import cv2
 import rclpy
 from cv_bridge import CvBridge
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from tf2_msgs.msg import TFMessage
 
@@ -261,14 +262,23 @@ class DatasetGenerator(Node):
         self._images_dir.mkdir(parents=True, exist_ok=True)
         self._labels_dir.mkdir(parents=True, exist_ok=True)
 
+        # ros_gz_bridge publishes the camera with BEST_EFFORT QoS (sensor
+        # data). A subscriber with the default RELIABLE QoS never matches
+        # it, so callbacks never fire and the script just prints
+        # "waiting for first image..." forever. qos_profile_sensor_data is
+        # BEST_EFFORT and matches BEST_EFFORT or RELIABLE publishers, so it
+        # is the safe choice for both topics.
         self.create_subscription(
-            Image, "/overhead_camera/image_raw", self._on_image, 10
+            Image,
+            "/overhead_camera/image_raw",
+            self._on_image,
+            qos_profile_sensor_data,
         )
         self.create_subscription(
             TFMessage,
             f"/world/{WORLD_NAME}/pose/info",
             self._on_poses,
-            10,
+            qos_profile_sensor_data,
         )
 
         self.create_timer(save_period_s, self._save_tick)
