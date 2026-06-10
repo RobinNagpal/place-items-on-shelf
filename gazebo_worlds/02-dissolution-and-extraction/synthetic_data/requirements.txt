@@ -1,0 +1,12 @@
+# Extra Python packages on top of a ROS 2 Humble desktop install.
+# A desktop install already provides: rclpy, cv_bridge, sensor_msgs,
+# tf2_msgs, vision_msgs, and a system OpenCV via apt
+# (`python3-opencv`). If you installed ros-humble-ros-base instead
+# of ros-humble-desktop, also run:
+#
+#   sudo apt install ros-humble-cv-bridge ros-humble-vision-msgs \
+#                    ros-humble-ros-gz-bridge python3-opencv
+
+# Pinned loosely — the script uses very stable APIs.
+numpy>=1.21
+opencv-python>=4.5
