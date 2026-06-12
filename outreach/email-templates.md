@@ -28,32 +28,56 @@ RLDS, COCO, HDF5, MCAP, YOLO).
 
 ## Final email (this is the one to send)
 
-Both links below are written in Markdown link form so that, when pasted
-into a Gmail / Outlook compose window, the URL is hidden behind the
-anchor text. (In Gmail: paste, then press `Ctrl+K` if it doesn't
-auto-detect; in Outlook: paste, select the text, and use **Insert link**.)
-Sending the URL bare also works — embedding is just cleaner.
+> **How to copy this into Gmail.** Copy the lines between the two `---`
+> rulers below — from `Hi [name],` to `DoDAO` — and paste straight into
+> the Gmail compose window. Do **not** copy the Markdown link form from
+> earlier drafts: Gmail does not render Markdown, so `[text](url)` shows
+> up as literal brackets in the sent mail. The bare URLs below are
+> auto-detected by Gmail and turned into clickable links on send.
+>
+> **If you want the link to show as anchor text instead of the bare URL**
+> (e.g. the word "poster" instead of `https://dodao.io/robotics/poster.pdf`),
+> see the "Anchor-text version" below.
 
 **Subject:** Simulation and synthetic data for [company name]
 
+---
+
 Hi [name],
 
-I am writing from DoDAO. We help robotics teams with two things that
-come before training and testing on hardware:
+I am writing from DoDAO. We help robotics teams with two things that come before training and testing on hardware:
 
-- A clean simulation world for your robot — robot model, workspace,
-  sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
-- Labelled synthetic data for your models — images, masks, depth, pose,
-  demonstration trajectories, and edge cases, shipped in the format your
-  team already uses.
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
 
-You can [read more about the services](https://dodao.io/robotics), and a
-one-page [overview poster](https://dodao.io/robotics/poster.pdf) is
-available too.
+You can read more about the services at https://dodao.io/robotics. A one-page overview poster is also available at https://dodao.io/robotics/poster.pdf.
 
 Thanks,
 Ryan Smith
 DoDAO
+
+---
+
+### Anchor-text version (optional, slightly cleaner look)
+
+Gmail will not render this if you paste it as text — you have to build
+it inside the compose window. Steps:
+
+1. Type the body exactly like the version above, but replace the two
+   sentences after the bullet list with this:
+
+   > You can read more about the services here, and a one-page overview
+   > poster is also available.
+
+2. Select the word **here**, press `Ctrl+K` (Windows / Linux) or `Cmd+K`
+   (Mac), and paste `https://dodao.io/robotics`.
+3. Select **overview poster**, press `Ctrl+K` / `Cmd+K`, and paste
+   `https://dodao.io/robotics/poster.pdf`.
+
+That gives you a clean "here" / "overview poster" link without the long
+URL showing. Both look fine to recipients — pick whichever you prefer.
+The bare-URL version above is the safer default because it copy-pastes
+in one step and looks identical in plain-text clients.
 
 **Notes on the chosen wording**
 
