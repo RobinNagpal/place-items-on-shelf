@@ -26,6 +26,51 @@ RLDS, COCO, HDF5, MCAP, YOLO).
 
 ---
 
+## Final email (this is the one to send)
+
+Both links below are written in Markdown link form so that, when pasted
+into a Gmail / Outlook compose window, the URL is hidden behind the
+anchor text. (In Gmail: paste, then press `Ctrl+K` if it doesn't
+auto-detect; in Outlook: paste, select the text, and use **Insert link**.)
+Sending the URL bare also works — embedding is just cleaner.
+
+**Subject:** Simulation and synthetic data for [company name]
+
+Hi [name],
+
+I am writing from DoDAO. We help robotics teams with two things that
+come before training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace,
+  sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose,
+  demonstration trajectories, and edge cases, shipped in the format your
+  team already uses.
+
+You can [read more about the services](https://dodao.io/robotics), and a
+one-page [overview poster](https://dodao.io/robotics/poster.pdf) is
+available too.
+
+Thanks,
+Ryan Smith
+DoDAO
+
+**Notes on the chosen wording**
+
+- "Two things" replaces the earlier "two pieces of work" — same meaning,
+  reads more natural in English.
+- Grammar fix: the earlier draft had "If either is useful for [company
+  name], You can read more at ..." — the half-sentence and the stray
+  capital `Y` are gone.
+- No call to action by design. The reader can click either link if
+  interested; there is nothing they are asked to do.
+- The poster URL assumes the file at `academy-ui/public/robotics/poster.pdf`
+  is deployed to `https://dodao.io/robotics/poster.pdf`. If the academy-ui
+  app is hosted on a different domain or sub-path, swap the URL — the
+  email body does not change.
+
+---
+
 ## Variant 1 — Direct introduction
 
 **Subject:** Simulation and synthetic data for [company name]
