@@ -59,7 +59,7 @@ from typing import List, Optional, Tuple
 WORLD = "ketchup_extraction_cell"
 CAMERA_MODEL = "overhead_camera"
 CAMERA_TOPIC = "/overhead_camera/image_raw"
-BG_MODEL_NAME = "__bench_background_plane__"
+BG_MODEL_NAME = "bench_background_plane"  # plain name — gz reserves names that start with "__"
 DEFAULT_SAVE_DIR = Path("captured_frames")
 
 
@@ -328,6 +328,13 @@ def build_background_sdf(name: str, color_rgb: Tuple[float, float, float]) -> st
 
 
 def spawn_model(name: str, sdf_xml: str, x: float, y: float, z: float) -> Tuple[bool, str]:
+    """Call /world/<world>/create with a fully-formed EntityFactory request.
+
+    NOTE: model names starting with `__` are reserved by gz-sim. Any
+    such spawn replies data: false here but the actual reason
+    ("Error Code 3: ... is reserved") only lands in gz sim's server
+    log. Always pick a plain name (no leading double underscores).
+    """
     req = (
         f'sdf: "{_pb_str(sdf_xml)}" '
         f'name: "{_pb_str(name)}" '
@@ -346,8 +353,11 @@ def spawn_model(name: str, sdf_xml: str, x: float, y: float, z: float) -> Tuple[
         ],
         capture_output=True, text=True,
     )
-    return ("data: true" in (result.stdout or ""),
-            (result.stdout or result.stderr or "").strip())
+    ok = "data: true" in (result.stdout or "")
+    reply = (result.stdout or "").strip()
+    if result.stderr:
+        reply = (reply + "\n--- stderr ---\n" + result.stderr.strip()).strip()
+    return ok, reply
 
 
 def remove_model(name: str) -> Tuple[bool, str]:
@@ -515,7 +525,14 @@ def main() -> None:
         sdf = build_background_sdf(BG_MODEL_NAME, color)
         ok, stdout = spawn_model(BG_MODEL_NAME, sdf, PLANE_X, PLANE_Y, PLANE_Z)
         if not ok:
-            print(f"  spawn FAIL: {stdout.splitlines()[0] if stdout else ''}")
+            # Print every line of stdout/stderr so reserved-name errors,
+            # SDF parse errors and "model already exists" all show up
+            # in the script's terminal rather than only in gz sim's logs.
+            print(f"  spawn FAIL — gz service reply:")
+            for line in (stdout or "(no reply text)").splitlines() or [stdout]:
+                print(f"    {line}")
+            print("  Hint: names starting with '__' are reserved by gz —")
+            print("        pick a name without leading double underscores.")
             continue
 
         time.sleep(args.dwell)

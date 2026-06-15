@@ -211,6 +211,14 @@ in this minimal warm-up.
 
 ## Troubleshooting
 
+- **All five frames look identical** — same wood-coloured bench, no
+  visible plane. The most likely cause is gz-sim's *reserved-name*
+  rule: any model name starting with double underscores
+  (`__...`) is silently rejected by `/world/.../create` with a
+  server-side `Error Code 3: ... is reserved` written to Terminal 1's
+  gz sim log (NOT to the Python script's stdout). This script uses
+  the plain name `bench_background_plane` — if you renamed it, keep
+  the new name plain too.
 - **`spawn FAIL: Could not parse SDF`.** Older gz versions only
   accept `<sdf version='1.9'>` or earlier. Edit
   `build_background_sdf()` to drop the version number.

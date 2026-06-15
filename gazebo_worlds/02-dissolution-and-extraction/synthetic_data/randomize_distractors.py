@@ -356,7 +356,14 @@ def build_distractor_sdf(name: str, kind: str, geometry_block: str,
 
 
 def spawn_model(name: str, sdf_xml: str, x: float, y: float, z: float) -> Tuple[bool, str]:
-    """Call /world/<world>/create with a fully-formed EntityFactory request."""
+    """Call /world/<world>/create with a fully-formed EntityFactory request.
+
+    NOTE: model names starting with `__` are reserved by gz-sim. If
+    you try to spawn one, the service writes
+    "Error Code 3: ... is reserved" to gz sim's *server* log and
+    replies data: false to the client — so the failure is silent on
+    our side. Pick a plain name (no leading double underscores).
+    """
     req = (
         f'sdf: "{_pb_str(sdf_xml)}" '
         f'name: "{_pb_str(name)}" '
@@ -376,7 +383,10 @@ def spawn_model(name: str, sdf_xml: str, x: float, y: float, z: float) -> Tuple[
         capture_output=True, text=True,
     )
     ok = "data: true" in (result.stdout or "")
-    return ok, (result.stdout or result.stderr or "").strip()
+    reply = (result.stdout or "").strip()
+    if result.stderr:
+        reply = (reply + "\n--- stderr ---\n" + result.stderr.strip()).strip()
+    return ok, reply
 
 
 def remove_model(name: str) -> Tuple[bool, str]:
@@ -568,7 +578,7 @@ def main() -> None:
     # Best-effort: clean up any leftover distractors from a previous
     # interrupted run before we start spawning new ones.
     for i in range(20):
-        remove_model(f"__distractor_{i:02d}")
+        remove_model(f"distractor_{i:02d}")
 
     print("\nwaiting for the first frame ...")
     sub_started_at = time.time()
@@ -598,11 +608,16 @@ def main() -> None:
                 continue
             x, y = xy
             z = BENCH_TOP_Z + z_off
-            name = f"__distractor_{d_idx:02d}"
+            name = f"distractor_{d_idx:02d}"
             sdf = build_distractor_sdf(name, kind, geom, color)
             ok, stdout = spawn_model(name, sdf, x, y, z)
             if not ok:
-                print(f"  -> spawn FAIL #{d_idx} ({slug}): {stdout.splitlines()[0] if stdout else ''}")
+                # Print every line of the gz service reply (and stderr)
+                # so we don't repeat the silent-fail debugging episode
+                # caused by gz reserving names starting with '__'.
+                print(f"  -> spawn FAIL #{d_idx} ({slug}) — gz service reply:")
+                for line in (stdout or "(no reply text)").splitlines() or [stdout]:
+                    print(f"       {line}")
                 continue
             spawned.append((name, {
                 "slug": slug, "x": x, "y": y, "z": z, "footprint_r": footprint_r,

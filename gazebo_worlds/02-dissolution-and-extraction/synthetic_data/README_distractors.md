@@ -200,6 +200,14 @@ A new entry only needs:
 
 ## Troubleshooting
 
+- **Every frame looks identical and the bench has no clutter.**
+  gz-sim's *reserved-name* rule: any model name starting with
+  double underscores (`__...`) is silently rejected by
+  `/world/.../create` — the server replies `data: false` and writes
+  `Error Code 3: ... is reserved` to Terminal 1's gz sim log, not
+  to the Python script. Distractors here use plain names
+  (`distractor_00`, `distractor_01`, ...) for that reason. If you
+  rename them, keep the new names plain too.
 - **Every spawn FAILs with `Could not find requested service`.**
   Either gz sim isn't running, or the `UserCommands` plugin isn't
   loaded. `gz service -l | grep create` must list
