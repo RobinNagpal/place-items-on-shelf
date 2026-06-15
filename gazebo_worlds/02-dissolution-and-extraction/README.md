@@ -125,31 +125,37 @@ dissolution case later; other steps get their own subfolders under
 
 The world has an **overhead RGB camera** bolted on so it can produce
 a small dataset of the bench from above. The current implementation
-covers three of the six domain-randomisation axes:
+covers five of the six domain-randomisation axes:
 
 - **Step 1 — camera-pose variation:** `synthetic_data/move_camera.py`
-  parks the same scene under five different camera viewpoints and
-  emits YOLO labels by projecting each object's known world-space
-  bounding box.
+  parks the same scene under five different camera viewpoints.
 - **Step 2 — object-pose randomisation:**
   `synthetic_data/randomize_objects.py` holds the camera still and
-  teleports each labelled object (solvent bottle + three beakers)
-  to a fresh `(x, y, yaw)` every frame, then re-projects the
-  rotated bbox to update the labels.
+  teleports each labelled object to a fresh `(x, y, yaw)` per frame.
 - **Step 3 — lighting randomisation:**
-  `synthetic_data/randomize_lighting.py` holds camera AND objects
-  still and only changes the world's `<light name="sun">` per
-  frame — direction, colour temperature and intensity — via the
-  `gz service .../light_config` endpoint.
+  `synthetic_data/randomize_lighting.py` only changes the world's
+  `<light name="sun">` per frame — direction, colour, intensity —
+  via the `light_config` service.
+- **Step 5 — distractor objects:**
+  `synthetic_data/randomize_distractors.py` spawns 2-4 random
+  unlabelled clutter items (pens, tape rolls, notebooks, ...) on
+  the bench per frame via `create`/`remove`, while keeping the
+  labelled objects fixed.
+- **Step 6 — background swap:**
+  `synthetic_data/randomize_background.py` spawns a thin coloured
+  plane on top of the bench per frame so the visible background
+  cycles through five common lab mats (white paper, black mat,
+  blue lab mat, green cut mat, grey rubber).
 
-Materials, distractors and background variation (axes #4–#6) are
-still deferred.
+Materials / textures (axis #4) is still deferred.
 
-See [`synthetic_data/README.md`](synthetic_data/README.md),
-[`synthetic_data/README_object_pose.md`](synthetic_data/README_object_pose.md)
-and
-[`synthetic_data/README_lighting.md`](synthetic_data/README_lighting.md)
-for the two-terminal recipes. All three scripts use the same
+See [`synthetic_data/README.md`](synthetic_data/README.md) and the
+per-axis walkthroughs
+([`README_object_pose.md`](synthetic_data/README_object_pose.md),
+[`README_lighting.md`](synthetic_data/README_lighting.md),
+[`README_distractors.md`](synthetic_data/README_distractors.md),
+[`README_background.md`](synthetic_data/README_background.md))
+for the two-terminal recipes. All five scripts use the same
 gz-transport Python subscriber to receive frames — no ROS bridge,
 no `cv_bridge`.
 
@@ -162,11 +168,15 @@ This is the first concrete warm-up for
 02-dissolution-and-extraction/
 ├── README.md                  (this file)
 ├── ketchup_extraction.sdf     (the Gazebo world; overhead camera publishes frames)
-└── synthetic_data/            (Steps 1-3: camera-pose, object-pose, lighting variation)
+└── synthetic_data/            (Steps 1, 2, 3, 5, 6 — five of the six DR axes)
     ├── README.md
     ├── README_object_pose.md
     ├── README_lighting.md
+    ├── README_distractors.md
+    ├── README_background.md
     ├── move_camera.py
     ├── randomize_objects.py
-    └── randomize_lighting.py
+    ├── randomize_lighting.py
+    ├── randomize_distractors.py
+    └── randomize_background.py
 ```

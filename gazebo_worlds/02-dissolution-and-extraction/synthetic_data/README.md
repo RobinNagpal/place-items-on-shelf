@@ -11,8 +11,8 @@ domain-randomisation axes from
 | 2 | Object pose       | `randomize_objects.py`    | **Done** — see [`README_object_pose.md`](README_object_pose.md) |
 | 3 | Lighting          | `randomize_lighting.py`   | **Done** — see [`README_lighting.md`](README_lighting.md) |
 | 4 | Materials         | —                         | not yet |
-| 5 | Distractors       | —                         | not yet |
-| 6 | Background        | —                         | not yet |
+| 5 | Distractors       | `randomize_distractors.py`| **Done** — see [`README_distractors.md`](README_distractors.md) |
+| 6 | Background        | `randomize_background.py` | **Done** — see [`README_background.md`](README_background.md) |
 
 The rest of *this* file documents `move_camera.py` (axis #1). For the
 object-pose script (axis #2), see
@@ -287,8 +287,8 @@ Short version:
 | 2 | Object pose       | **Yes** — see [`README_object_pose.md`](README_object_pose.md) and `randomize_objects.py`. |
 | 3 | Lighting          | **Yes** — see [`README_lighting.md`](README_lighting.md) and `randomize_lighting.py`. |
 | 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
-| 5 | Distractor objects | No — would require spawning random clutter models. |
-| 6 | Background        | No — would require swapping the floor / walls / skybox. |
+| 5 | Distractor objects | **Yes** — see [`README_distractors.md`](README_distractors.md) and `randomize_distractors.py`. |
+| 6 | Background        | **Yes** — see [`README_background.md`](README_background.md) and `randomize_background.py`. |
 
 A real production-quality YOLO training set varies all six. We are
 deliberately doing only #1 right now and shipping the labels for it
@@ -308,9 +308,13 @@ synthetic_data/
 ├── README.md                  (this file — Step 1, camera-pose variation)
 ├── README_object_pose.md      (Step 2 — object-pose randomisation walkthrough)
 ├── README_lighting.md         (Step 3 — lighting randomisation walkthrough)
+├── README_distractors.md      (Step 5 — distractor-objects walkthrough)
+├── README_background.md       (Step 6 — background-swap walkthrough)
 ├── move_camera.py             (subscribe + teleport camera + save PNGs)
 ├── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
-└── randomize_lighting.py      (subscribe + reconfigure the sun light + save PNGs)
+├── randomize_lighting.py      (subscribe + reconfigure the sun light + save PNGs)
+├── randomize_distractors.py   (spawn random clutter on the bench + save PNGs)
+└── randomize_background.py    (swap a coloured plane over the bench + save PNGs)
 ```
 
 ## Related docs
