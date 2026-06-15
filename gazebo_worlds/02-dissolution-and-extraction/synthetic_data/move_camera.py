@@ -29,12 +29,21 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import subprocess
 import time
+from pathlib import Path
 from typing import List, Tuple
 
 WORLD = "ketchup_extraction_cell"
 CAMERA_MODEL = "overhead_camera"
+
+# This must match the <save><path>...</path></save> value in the SDF
+# (gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf).
+# Gazebo resolves it relative to the cwd of `gz sim`, NOT relative to
+# this script. The script just prints it so the user knows where to
+# look.
+SAVE_DIR_RELATIVE = "captured_frames"
 
 # Each view is (label, x, y, z, roll, pitch, yaw) in world coords.
 # Camera optical axis is +X of its own frame. pitch = +pi/2 means the
@@ -103,6 +112,35 @@ def cycle_once(dwell_s: float) -> None:
             time.sleep(dwell_s)
 
 
+def report_save_dir() -> None:
+    """Print where Gazebo should be writing the PNGs.
+
+    Gazebo's <save> element resolves <path> relative to the cwd where
+    `gz sim` was launched — NOT relative to this script's location.
+    We print the candidate path so the user knows where to look.
+    """
+    cwd = Path.cwd()
+    expected = (cwd / SAVE_DIR_RELATIVE).resolve()
+    print()
+    print("--- where to find your images ---")
+    print(f"`gz sim` writes PNGs to:  ./{SAVE_DIR_RELATIVE}/  (relative to the cwd of gz sim)")
+    print(f"If you launched gz sim from THIS shell's cwd ({cwd}),")
+    print(f"  -> look in:  {expected}")
+    print("If you launched gz sim from a different shell, run there:")
+    print(f"  -> ls -lh {SAVE_DIR_RELATIVE}/")
+    print("Or search the whole home directory:")
+    print(f"  -> find ~ -type d -name {SAVE_DIR_RELATIVE} 2>/dev/null")
+    if expected.exists():
+        pngs = sorted(expected.glob("*.png"))
+        print(f"FOUND: {expected} exists with {len(pngs)} PNG(s).")
+        if pngs:
+            print(f"  newest: {pngs[-1].name}  ({pngs[-1].stat().st_size} bytes)")
+    else:
+        print(f"NOTE: {expected} does NOT exist from this shell.")
+        print("      Either gz sim was launched from elsewhere, or <save> is not firing.")
+        print("      See synthetic_data/README.md > Troubleshooting.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dwell", type=float, default=2.0,
@@ -119,6 +157,8 @@ def main() -> None:
             print("\nstopped by user.")
     else:
         cycle_once(args.dwell)
+
+    report_save_dir()
 
 
 if __name__ == "__main__":

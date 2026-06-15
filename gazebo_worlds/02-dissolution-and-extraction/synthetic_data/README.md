@@ -84,10 +84,24 @@ gz sim -s -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 `-s` is "server only, no GUI", and `-r` still auto-plays. The
 camera sensor still renders and `<save>` still writes PNGs.
 
-## Output
+## Where the images are stored — read this carefully
+
+Gazebo's `<save><path>captured_frames</path></save>` element uses a
+**path relative to the cwd of `gz sim`**, NOT relative to the SDF
+file and NOT relative to this script. That detail trips everyone up
+the first time.
+
+If you launched `gz sim` from the repo root, as in the recipe above:
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+gz sim -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
+```
+
+then the images land at:
 
 ```
-./captured_frames/
+~/ros2_ws/src/place-items-on-shelf/captured_frames/
 ├── 1.png
 ├── 2.png
 ├── 3.png
@@ -97,11 +111,27 @@ camera sensor still renders and `<save>` still writes PNGs.
 Filenames are auto-assigned by Gazebo — sequential integers starting
 at 1. Each PNG is 640 × 480 BGR.
 
+The `move_camera.py` script prints the *expected* path at the end of
+its run, and notes whether that folder exists yet — useful when you
+are not sure which shell launched `gz sim`. Sample tail:
+
+```
+--- where to find your images ---
+`gz sim` writes PNGs to:  ./captured_frames/  (relative to the cwd of gz sim)
+If you launched gz sim from THIS shell's cwd (/home/.../place-items-on-shelf),
+  -> look in:  /home/.../place-items-on-shelf/captured_frames
+FOUND: /home/.../place-items-on-shelf/captured_frames exists with 14 PNG(s).
+  newest: 14.png  (52341 bytes)
+```
+
+If `move_camera.py` reports `does NOT exist from this shell`, see the
+Troubleshooting section below.
+
 Gazebo does NOT label the files with the camera pose, so if you want
-"this PNG was taken at view X" you need to look at the timestamps and
-match them against the print-out from `move_camera.py`. For Step 1
-that mapping is good enough; the proper "label-per-frame" pipeline is
-deferred to Step 2.
+"this PNG was taken at view X" you need to look at the modified
+timestamps and match them against the print-out from
+`move_camera.py`. For Step 1 that mapping is good enough; the proper
+"label-per-frame" pipeline is deferred to Step 2.
 
 ## What's next (the three-step plan)
 
@@ -125,10 +155,31 @@ the SDF before each cycle.
 
 ## Troubleshooting
 
-- **`captured_frames/` does not appear.** Either Gazebo is paused
-  (click ▶ in the GUI, or use `-r` on the CLI) or you launched
-  `gz sim` from a folder where the user has no write permission.
-  Try `cd` to the repo root before running.
+- **`captured_frames/` does not appear.** The `<save>` path is
+  relative to wherever you launched `gz sim`. Find it with:
+
+  ```bash
+  find ~ -type d -name captured_frames 2>/dev/null
+  ```
+
+  Possible causes if `find` returns nothing:
+  1. **`gz sim` is paused.** Click ▶ in the GUI, or use `-r` on
+     the CLI. The sensor only renders (and only saves) while sim
+     time is advancing.
+  2. **No write permission in the cwd.** Re-launch `gz sim` from
+     `~` or from inside the repo.
+  3. **Your `gz sim` version does not implement the `<save>`
+     element.** Older Garden builds parsed it but did not act on
+     it. Check `gz sim --version`; Garden (gz-sensors 7.x+) and
+     Harmonic (gz-sensors 8.x+) both implement it. If yours is
+     older, upgrade or switch to a different capture method
+     (e.g. `rqt_image_view` recording, or extend `move_camera.py`
+     to subscribe to the image topic and save frames itself).
+  4. **`<always_on>1</always_on>` isn't being honoured.** Open the
+     "Image Display" plugin in Gazebo and pick
+     `overhead_camera/image_raw` — that forces the sensor to
+     render and write frames. Then `captured_frames/` should
+     start filling.
 - **`gz service` says "service call timed out".** The world's
   `UserCommands` plugin is not loaded. The SDF in this repo
   declares it explicitly (line ~498 of `ketchup_extraction.sdf`),
