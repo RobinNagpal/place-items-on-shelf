@@ -14,9 +14,17 @@ world. Two pieces:
    - **aims** each camera at a fixed `LOOK_AT_TARGET` on the bench
      (so the scene is always centred — the orientation is computed
      from the position, never hand-written),
-   - **saves** the latest frame to disk as a PNG after each pose.
+   - **saves** the latest frame to disk as a PNG after each pose,
+   - **also writes a YOLO label `.txt`** next to each PNG, by
+     projecting the solvent bottle's known world-space bounding
+     box through a pinhole camera model with the same intrinsics
+     as the SDF camera. Single class for now
+     (`solvent_bottle`, class id 0) — multi-class is a few extra
+     lines in `LABELED_OBJECTS`.
 
 NO ROS. NO `ros_gz_bridge`. NO `cv_bridge`. NO complicated QoS dance.
+NO manual labelling either: the labels come straight from the
+simulator's ground-truth geometry.
 
 ## Why this rewrite
 
@@ -83,13 +91,15 @@ Sample output:
 gz-transport Python: Harmonic (transport13 + msgs10)
 subscribing to       /overhead_camera/image_raw
 saving PNGs to       /home/.../place-items-on-shelf/captured_frames/
+YOLO classes file    /home/.../captured_frames/classes.txt  (1 class(es))
+image intrinsics     640x480  hfov=60deg  fx=554.3
 
 waiting for the first frame ...
 first frame received after 0.3 s (got 1 frames so far).
 [top]       pos=(+0.05,+0.00,+1.50)  -> aim at (0.05, 0.0, 0.94)  pitch=+90deg  yaw=+0deg   set_pose=OK
-[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)
+[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)  labels=1 -> cycle00_top_0.txt
 [front_+x]  pos=(+0.60,+0.00,+1.40)  -> aim at (0.05, 0.0, 0.94)  pitch=+40deg  yaw=+180deg set_pose=OK
-[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)
+[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)  labels=1 -> cycle00_front_+x_0.txt
 ...
 
 done. saved 5 PNGs -> /home/.../captured_frames/
@@ -108,22 +118,74 @@ python3 .../move_camera.py --loop
 python3 .../move_camera.py --out /tmp/my_dataset
 ```
 
-## Where the images land
+## Where the images and labels land
 
 By default: `./captured_frames/` relative to wherever you launched
 `move_camera.py`. Following the recipe above, that is:
 
 ```
 ~/ros2_ws/src/place-items-on-shelf/captured_frames/
-├── cycle00_top_0.png
+├── classes.txt                    # one class name per line, ordered by class id
+├── cycle00_top_0.png              # the image
+├── cycle00_top_0.txt              # the YOLO label for that image
 ├── cycle00_front_+x_0.png
+├── cycle00_front_+x_0.txt
 ├── cycle00_back_-x_0.png
+├── cycle00_back_-x_0.txt
 ├── cycle00_left_+y_0.png
-└── cycle00_right_-y_0.png
+├── cycle00_left_+y_0.txt
+├── cycle00_right_-y_0.png
+└── cycle00_right_-y_0.txt
 ```
 
 The script prints the absolute path on every save, so there is no
 guessing — just copy the path it printed.
+
+### YOLO label format (what's inside the `.txt`)
+
+Each `.txt` is the standard Ultralytics YOLO format — one detection per line:
+
+```
+<class_id> <x_center_norm> <y_center_norm> <width_norm> <height_norm>
+```
+
+All four numbers are normalised to `[0, 1]` (so the dataset is
+resolution-independent). For our single-class setup `<class_id>` is
+always `0` and the class name is in `classes.txt`. Example contents:
+
+```
+0 0.100270 0.367055 0.200544 0.236877
+```
+
+An empty `.txt` is valid YOLO too — it means "no objects of any
+labelled class are visible in this frame." The script writes an
+empty file (rather than skipping it) so the image/label pairing
+stays 1:1 even if the bottle moves off-screen later.
+
+### How the labels are computed
+
+There is **no neural network and no labelling tool**. The bbox is
+pure geometry:
+
+1. The solvent bottle's tight axis-aligned bbox in world coords is
+   hard-coded in `LABELED_OBJECTS` (derived once from its SDF
+   geometry: body Ø85×150 mm + cap Ø50×25 mm at world pose
+   (0.10, 0.25, 0.975)).
+2. For each viewpoint we transform the bbox's 8 corners into the
+   camera's body frame using the same RPY we just teleported to.
+3. We re-map body → optical (Gazebo's body +X is forward; the
+   pinhole equation expects +Z = forward) and project with the
+   pinhole formula `u = fx·X/Z + cx`, `v = fy·Y/Z + cy`. The
+   intrinsics are derived from the SDF's `<horizontal_fov>1.0472</horizontal_fov>`
+   and `640×480` image size.
+4. Take the axis-aligned bbox of the 8 projected pixels, clamp to
+   the image, normalise. Done.
+
+This works only because the bottle is rigid and we know its 3D
+geometry exactly. When Step 2 starts moving objects randomly, the
+bbox center will change every frame — we'll read each object's
+current pose from the world's pose-info topic instead of hard-coding
+it in `LABELED_OBJECTS`.
 
 ## Troubleshooting
 
@@ -168,25 +230,34 @@ guessing — just copy the path it printed.
   with PIL `mode="RGB"`. If you swap to a BGR camera format, also
   swap the `mode="RGB"` argument in `msg_to_png()`.
 
-## What's next (the three-step plan)
+## What's next — domain randomisation, the 6 axes
 
-This folder implements **Step 1 only**: place a camera, subscribe
-to its frames, move the camera between captures.
+This folder currently implements **only one** of the six
+randomisation axes used in production synthetic-data pipelines:
+**camera-pose variation**. The full list — and where we stand on
+each — is documented in
+[`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md).
+Short version:
 
-- **Step 1 — move the camera.** (this README) Different angles of
-  the same static scene. → ~5 PNGs per default cycle, ~15 with
-  `--shots 3`.
-- **Step 2 — move the objects.** Random jitter on the beakers and the
-  solvent bottle between captures, plus a per-frame YOLO / COCO label
-  derived from the world's pose-info topic.
-- **Step 3 — change lighting.** Vary `<light>` direction and intensity
-  for domain randomisation.
+| # | Axis              | Done here?                                   |
+|---|-------------------|----------------------------------------------|
+| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS`. |
+| 2 | Object pose       | No — Step 2 will jitter `set_pose` on the beakers + bottle. |
+| 3 | Lighting          | No — Step 3 will vary `<light>` direction + intensity. |
+| 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
+| 5 | Distractor objects | No — would require spawning random clutter models. |
+| 6 | Background        | No — would require swapping the floor / walls / skybox. |
 
-Step 2 reuses the `set_pose` pattern from `move_camera.py` —
-same `gz service` call, applied to the beakers and the bottle
-instead of (or in addition to) the camera. Step 3 edits the
-`<light>` block in the SDF, or calls `gz service` on the light
-entity, between cycles.
+A real production-quality YOLO training set varies all six. We are
+deliberately doing only #1 right now and shipping the labels for it
+so the geometry / projection / file-format plumbing is in place
+before we layer on the rest. When we move to NVIDIA Isaac Sim
+Replicator, these same six axes become one-line Replicator
+randomisers each.
+
+The labels emitted by **this** script already match the format the
+later steps will produce — so the same training command will work
+whether you have 5 PNGs (now) or 5000 (after Step 2).
 
 ## File list
 

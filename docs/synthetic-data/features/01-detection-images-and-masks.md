@@ -77,22 +77,79 @@ post-processing on their side.
 
 ## How we generate it (the methods)
 
-- **Domain randomisation** — every frame has different lighting,
-  random textures on the table and walls, the camera shifted a few
-  cm, and a few distractor objects scattered around. The model trains
-  on variation, so it does not memorise "what sim looks like."
-- **Photo-real rendering** — when the customer's real camera is high
-  quality (RealSense, Basler, FLIR), we render with Isaac Sim's RTX
-  path tracer so the synthetic frames look close to a real photo.
-- **Procedural scenes** — when the cell layout itself can vary (rack
-  in slightly different position, products restocked in random
-  order), we generate the layout from code every time, not from one
-  fixed scene.
+We rely on three families of techniques, in roughly this order of
+importance: **domain randomisation**, then **photo-real rendering**,
+then **procedural scenes**.
 
-We do **not** add sensor noise to the RGB by default — the model needs
-to see *clean* edges of objects to learn the boxes. Noise is added at
-training time using standard augmentation (`Albumentations`,
-`torchvision.transforms`).
+### 1. Domain randomisation — the six axes
+
+The single most important technique for sim-to-real transfer. The
+idea: vary as many aspects of the scene as possible per frame, so
+the model is forced to learn the *invariant* (the object) and ignore
+everything else. Choosing just one or two axes is what produces
+brittle detectors that overfit to "what sim looks like."
+
+The six axes the literature (NVIDIA Replicator, BlenderProc,
+OpenAI's 2017 DR paper) and production pipelines actually turn:
+
+1. **Camera pose** — yaw / pitch / distance jitter, sometimes a few
+   centimetres of position noise too. Cheap, easy, the obvious
+   first axis. By itself it is **not enough** — you also need
+   the object to move, not just the viewpoint.
+2. **Object pose** — every object's translation (±5 cm typical) and
+   yaw (±20° typical) randomised per frame. This is the single
+   most important axis once camera pose is done; without it the
+   model memorises one staged scene.
+3. **Lighting** — direction, intensity, colour temperature, and
+   often the *number* of lights. Add ambient fill, change the sun
+   angle, sometimes drop in a coloured fill light.
+4. **Materials / textures** — randomise the bench colour, the floor
+   texture, the wall pattern. Even pattern the *target* objects
+   with random textures sometimes (so the model learns the
+   *shape*, not the colour). Often called "structured DR".
+5. **Distractor objects** — spawn 1-10 random clutter items (a pen,
+   a tape roll, a clipboard, an unrelated bottle) at random poses
+   in each frame so the model learns "not every cylindrical
+   object is a beaker".
+6. **Background** — swap the floor / walls / skybox between frames.
+   Common trick: render onto a random photo from COCO behind the
+   bench.
+
+Rule of thumb: vary 1-2 axes and the detector overfits; vary 5-6
+aggressively and it generalises to real photos it was never trained
+on. The exercise under
+[`gazebo_worlds/02-dissolution-and-extraction/synthetic_data/`](../../../gazebo_worlds/02-dissolution-and-extraction/synthetic_data/)
+currently implements only axis #1 (camera pose) on purpose, as the
+warm-up; production datasets need all six.
+
+### 2. Photo-real rendering
+
+When the customer's real camera is high-quality (RealSense, Basler,
+FLIR), we render with Isaac Sim's RTX path tracer so the synthetic
+frames look close to a real photo (PBR materials, ray-traced
+shadows, screen-space reflections). For geometric-only tasks
+("which slot is the vial in?") Gazebo's faster OGRE renderer is
+enough.
+
+### 3. Procedural scenes
+
+When the cell layout itself can vary (rack in slightly different
+position, products restocked in random order), we generate the
+layout from code every time, not from one fixed scene. This is
+randomisation axis #2 on steroids — instead of jittering known
+poses, we re-instantiate the whole scene from a small set of
+parameters.
+
+### What we do NOT add
+
+We do **not** bake sensor noise (Gaussian RGB noise, motion blur,
+JPEG compression artefacts) into the rendered frames. The model
+needs to see *clean* edges of objects to learn the boxes; noise is
+added at training time using standard augmentation libraries
+(`Albumentations`, `torchvision.transforms`). Treating noise as a
+training-time transform — not a generation-time bake-in — also lets
+the same dataset feed multiple models with different augmentation
+budgets.
 
 ## Pain points this solves
 
