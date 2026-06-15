@@ -469,6 +469,28 @@ def spawn_model(name: str, sdf_xml: str, x: float, y: float, z: float) -> Tuple[
     return ok, ((result.stdout or "") + ("\n--- stderr ---\n" + result.stderr if result.stderr else "")).strip()
 
 
+def list_world_models() -> List[str]:
+    """Return the names of every model currently in the world.
+
+    Used to skip /remove calls for models we never spawned in the
+    first place — otherwise gz sim's UserCommands plugin logs a noisy
+    `Entity named [...] of type [2] not found, so not removed` for
+    every miss in the gz sim terminal, which makes a clean startup
+    look broken to the user.
+    """
+    result = subprocess.run(
+        ["gz", "model", "-l"],
+        capture_output=True, text=True,
+    )
+    out = []
+    for line in (result.stdout or "").splitlines():
+        line = line.strip()
+        if not line or line.endswith(":"):
+            continue
+        out.append(line.lstrip("- ").strip())
+    return out
+
+
 def remove_model(name: str) -> Tuple[bool, str]:
     req = f'name: "{_pb_str(name)}" type: MODEL'
     result = subprocess.run(
@@ -555,10 +577,17 @@ def park_scene_to_defaults(cam_rpy) -> None:
 
 
 def cleanup_all_overlays() -> None:
-    """Best-effort removal of every overlay this script may have spawned."""
-    remove_model(MAT_MODEL_NAME)
-    for _slug, model_name, _xyz, _r, _l in WRAPS:
-        remove_model(model_name)
+    """Best-effort removal of every overlay this script may have spawned.
+
+    Only sends /remove for models that are actually in the world right
+    now — gz sim logs a stderr `Entity named [...] not found, so not
+    removed` line for every miss, which is just noise on a clean run.
+    """
+    present = set(list_world_models())
+    candidates = [MAT_MODEL_NAME] + [w[1] for w in WRAPS]
+    for name in candidates:
+        if name in present:
+            remove_model(name)
 
 
 # ---------------------------------------------------------------------------

@@ -107,6 +107,19 @@ OpenAI's 2017 DR paper) and production pipelines actually turn:
    texture, the wall pattern. Even pattern the *target* objects
    with random textures sometimes (so the model learns the
    *shape*, not the colour). Often called "structured DR".
+
+   For real textures (not just flat colours), Gazebo accepts PBR
+   maps inside `<material><pbr><metal>`: `<albedo_map>`,
+   `<normal_map>`, `<roughness_map>`, `<metalness_map>`. Drop a
+   folder of free PBR sets (e.g. from
+   [Polyhaven](https://polyhaven.com/textures) or
+   [ambientCG](https://ambientcg.com)) under
+   `gazebo_worlds/.../textures/`, export
+   `GZ_SIM_RESOURCE_PATH=$PWD/gazebo_worlds/...` so `file://`
+   paths resolve, and swap the script's `<diffuse>` line for an
+   `<albedo_map>file:///abs/path.png</albedo_map>`. The same
+   spawn-and-remove flow used for colour randomisation works for
+   texture randomisation — and uses no extra Gazebo plugin.
 5. **Distractor objects** — spawn 1-10 random clutter items (a pen,
    a tape roll, a clipboard, an unrelated bottle) at random poses
    in each frame so the model learns "not every cylindrical
