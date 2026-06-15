@@ -9,7 +9,7 @@ domain-randomisation axes from
 |---|-------------------|---------------------------|--------|
 | 1 | Camera pose       | `move_camera.py`          | **Done** — this README |
 | 2 | Object pose       | `randomize_objects.py`    | **Done** — see [`README_object_pose.md`](README_object_pose.md) |
-| 3 | Lighting          | —                         | not yet |
+| 3 | Lighting          | `randomize_lighting.py`   | **Done** — see [`README_lighting.md`](README_lighting.md) |
 | 4 | Materials         | —                         | not yet |
 | 5 | Distractors       | —                         | not yet |
 | 6 | Background        | —                         | not yet |
@@ -285,7 +285,7 @@ Short version:
 |---|-------------------|----------------------------------------------|
 | 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS` (this script). |
 | 2 | Object pose       | **Yes** — see [`README_object_pose.md`](README_object_pose.md) and `randomize_objects.py`. |
-| 3 | Lighting          | No — would vary `<light>` direction + intensity. |
+| 3 | Lighting          | **Yes** — see [`README_lighting.md`](README_lighting.md) and `randomize_lighting.py`. |
 | 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
 | 5 | Distractor objects | No — would require spawning random clutter models. |
 | 6 | Background        | No — would require swapping the floor / walls / skybox. |
@@ -307,8 +307,10 @@ whether you have 5 PNGs (now) or 5000 (after Step 2).
 synthetic_data/
 ├── README.md                  (this file — Step 1, camera-pose variation)
 ├── README_object_pose.md      (Step 2 — object-pose randomisation walkthrough)
+├── README_lighting.md         (Step 3 — lighting randomisation walkthrough)
 ├── move_camera.py             (subscribe + teleport camera + save PNGs)
-└── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
+├── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
+└── randomize_lighting.py      (subscribe + reconfigure the sun light + save PNGs)
 ```
 
 ## Related docs
