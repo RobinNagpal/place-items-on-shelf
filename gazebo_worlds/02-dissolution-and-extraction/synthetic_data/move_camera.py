@@ -45,10 +45,12 @@ Run order:
 
 Common flags:
 
-  --dwell 4     spend 4 s at each view (default 2)
-  --loop        cycle forever (Ctrl+C to stop)
-  --out PATH    output folder (default ./captured_frames)
-  --shots N     PNGs to save per view (default 1)
+  --dwell 4      spend 4 s at each view (default 2)
+  --loop         cycle forever (Ctrl+C to stop)
+  --out PATH     output folder (default ./captured_frames)
+  --shots N      PNGs to save per view (default 1)
+  --no-overlay   skip the bbox-annotated debug PNGs
+                 (default: also save them in <out>/overlays/)
 """
 
 from __future__ import annotations
@@ -101,7 +103,8 @@ def _import_image_libs():
     try:
         import numpy as np  # type: ignore
         from PIL import Image as PILImage  # type: ignore
-        return np, PILImage
+        from PIL import ImageDraw as PILImageDraw  # type: ignore
+        return np, PILImage, PILImageDraw
     except ImportError as e:
         sys.exit(
             "ERROR: numpy and Pillow are required to write PNGs.\n"
@@ -111,7 +114,7 @@ def _import_image_libs():
 
 
 GzNode, GzImage, GZ_LABEL = _import_gz_bindings()
-np, PILImage = _import_image_libs()
+np, PILImage, PILImageDraw = _import_image_libs()
 
 
 # ---------------------------------------------------------------------------
@@ -310,20 +313,19 @@ def world_to_pixel(
     return (u, v)
 
 
-def yolo_bbox_for_aabb(
+def pixel_bbox_for_aabb(
     center: Tuple[float, float, float],
     half_extents: Tuple[float, float, float],
     cam_pos: Tuple[float, float, float],
     cam_rpy: Tuple[float, float, float],
 ) -> Optional[Tuple[float, float, float, float]]:
-    """Project a world-frame AABB to a YOLO-format bbox.
+    """Project a world-frame AABB to a pixel-space rectangle.
 
-    Returns (cx, cy, w, h) normalised to [0, 1] for use in a YOLO label
-    file, or None if the box is entirely behind the camera / entirely
-    off-screen.
+    Returns (u_min, v_min, u_max, v_max) clamped to image bounds, or
+    None if the box is entirely behind the camera / off-screen.
 
     Approach: project all 8 corners, take the min/max of the projected
-    pixels, clamp to image bounds. This is the standard "axis-aligned
+    pixels, clamp to [0, W] x [0, H]. This is the standard "axis-aligned
     bounding box of the projected oriented bounding box" trick — it
     over-estimates by a few pixels at oblique angles but is fine for a
     640x480 dataset and matches what most Replicator / BlenderProc
@@ -349,6 +351,29 @@ def yolo_bbox_for_aabb(
     v_max = min(float(IMG_H), max(vs))
     if u_max <= u_min or v_max <= v_min:
         return None  # the box is fully off-screen after clamping
+    return (u_min, v_min, u_max, v_max)
+
+
+def yolo_bbox_for_aabb(
+    center: Tuple[float, float, float],
+    half_extents: Tuple[float, float, float],
+    cam_pos: Tuple[float, float, float],
+    cam_rpy: Tuple[float, float, float],
+) -> Optional[Tuple[float, float, float, float]]:
+    """Project a world-frame AABB to a YOLO-format bbox.
+
+    Returns (cx, cy, w, h) normalised to [0, 1] for use in a YOLO label
+    file, or None if the box is entirely behind the camera / off-screen.
+
+    Thin wrapper over ``pixel_bbox_for_aabb()``: same projection, just
+    normalised so the same number works at any image resolution. Both
+    functions are kept because the overlay drawer needs the raw pixel
+    rect and the YOLO writer needs the normalised one.
+    """
+    rect = pixel_bbox_for_aabb(center, half_extents, cam_pos, cam_rpy)
+    if rect is None:
+        return None
+    u_min, v_min, u_max, v_max = rect
     cu = (u_min + u_max) / 2.0 / IMG_W
     cv = (v_min + v_max) / 2.0 / IMG_H
     cw = (u_max - u_min) / IMG_W
@@ -388,6 +413,49 @@ def write_classes_file(out_dir: Path) -> Path:
     by_id = sorted(LABELED_OBJECTS, key=lambda e: e[0])
     path.write_text("\n".join(name for _id, name, _c, _h in by_id) + "\n")
     return path
+
+
+# ---------------------------------------------------------------------------
+# Bbox overlay (visual sanity check — NOT for training)
+# ---------------------------------------------------------------------------
+def save_overlay(
+    msg,
+    out_path: Path,
+    cam_pos: Tuple[float, float, float],
+    cam_rpy: Tuple[float, float, float],
+) -> int:
+    """Render the same image with one green rectangle per labelled object.
+
+    Lives in an ``overlays/`` subfolder so it never pollutes the YOLO
+    training dir — Ultralytics walks the image folder and would
+    otherwise pick these up as extra (mislabelled) training images.
+
+    Returns the number of boxes drawn so the caller can print a sanity
+    count. If a box is off-screen or behind the camera it is silently
+    skipped (the .txt label already records "no detection" for that
+    object in this frame).
+    """
+    arr = np.frombuffer(msg.data, dtype=np.uint8).reshape(
+        (msg.height, msg.width, 3)
+    )
+    im = PILImage.fromarray(arr, mode="RGB")
+    draw = PILImageDraw.Draw(im)
+    drew = 0
+    for class_id, name, center, half_extents in LABELED_OBJECTS:
+        rect = pixel_bbox_for_aabb(center, half_extents, cam_pos, cam_rpy)
+        if rect is None:
+            continue
+        u0, v0, u1, v1 = rect
+        # Bright green is the standard "ground-truth bbox" colour (red
+        # is reserved for model predictions in most viz tools).
+        draw.rectangle([u0, v0, u1, v1], outline=(0, 255, 0), width=2)
+        # Label text just inside the top-left corner. PIL's default
+        # bitmap font is tiny but readable at 640x480 and avoids the
+        # need to ship a .ttf file.
+        draw.text((u0 + 3, v0 + 3), f"{name} ({class_id})", fill=(0, 255, 0))
+        drew += 1
+    im.save(out_path)
+    return drew
 
 
 # ---------------------------------------------------------------------------
@@ -456,7 +524,7 @@ def wait_for_first_frame(cache: FrameCache, timeout_s: float = 5.0) -> bool:
 # Cycle: teleport, dwell, save
 # ---------------------------------------------------------------------------
 def cycle_once(cache: FrameCache, dwell_s: float, shots: int, save_dir: Path,
-               cycle_idx: int) -> int:
+               cycle_idx: int, overlay_dir: Optional[Path]) -> int:
     saved = 0
     for label, x, y, z in CAMERA_POSITIONS:
         cam_pos = (x, y, z)
@@ -486,10 +554,15 @@ def cycle_once(cache: FrameCache, dwell_s: float, shots: int, save_dir: Path,
             txt_path = img_path.with_suffix(".txt")
             msg_to_png(cache.latest, img_path)
             n_boxes = write_yolo_labels(txt_path, cam_pos, cam_rpy)
+            extra = ""
+            if overlay_dir is not None:
+                ov_path = overlay_dir / f"{img_path.stem}_bbox.png"
+                drew = save_overlay(cache.latest, ov_path, cam_pos, cam_rpy)
+                extra = f"  overlay={drew} -> overlays/{ov_path.name}"
             saved += 1
             print(f"[{label}]  -> {img_path.resolve()}  "
                   f"({cache.latest.width}x{cache.latest.height})  "
-                  f"labels={n_boxes} -> {txt_path.name}")
+                  f"labels={n_boxes} -> {txt_path.name}{extra}")
             if shots > 1:
                 time.sleep(max(0.2, dwell_s / shots))
     return saved
@@ -505,11 +578,23 @@ def main() -> None:
                    help="output folder for PNGs (default: ./captured_frames)")
     p.add_argument("--shots", type=int, default=1,
                    help="PNGs to save per view (default: 1)")
+    p.add_argument(
+        "--no-overlay",
+        dest="overlay",
+        action="store_false",
+        help="skip the bbox-annotated overlay PNGs "
+             "(default: also save them under <out>/overlays/)",
+    )
+    p.set_defaults(overlay=True)
     args = p.parse_args()
 
     save_dir = args.out.resolve()
     save_dir.mkdir(parents=True, exist_ok=True)
     classes_path = write_classes_file(save_dir)
+    overlay_dir: Optional[Path] = None
+    if args.overlay:
+        overlay_dir = save_dir / "overlays"
+        overlay_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"gz-transport Python: {GZ_LABEL}")
     print(f"subscribing to       {CAMERA_TOPIC}")
@@ -518,6 +603,11 @@ def main() -> None:
           f"({len(LABELED_OBJECTS)} class(es))")
     print(f"image intrinsics     {IMG_W}x{IMG_H}  "
           f"hfov={math.degrees(HFOV_RAD):.0f}deg  fx={FX:.1f}")
+    if overlay_dir is not None:
+        print(f"bbox overlays to     {overlay_dir}/  "
+              f"(disable with --no-overlay)")
+    else:
+        print("bbox overlays        OFF (--no-overlay was passed)")
     print()
 
     node = GzNode()
@@ -547,13 +637,15 @@ def main() -> None:
     if args.loop:
         try:
             while True:
-                total += cycle_once(cache, args.dwell, args.shots, save_dir, cycle_idx)
+                total += cycle_once(cache, args.dwell, args.shots, save_dir,
+                                    cycle_idx, overlay_dir)
                 cycle_idx += 1
         except KeyboardInterrupt:
             print()
             print(f"stopped by user. saved {total} PNGs -> {save_dir}/")
     else:
-        total = cycle_once(cache, args.dwell, args.shots, save_dir, cycle_idx)
+        total = cycle_once(cache, args.dwell, args.shots, save_dir,
+                           cycle_idx, overlay_dir)
         print()
         print(f"done. saved {total} PNGs -> {save_dir}/")
 

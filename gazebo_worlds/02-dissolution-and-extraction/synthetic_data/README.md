@@ -20,7 +20,11 @@ world. Two pieces:
      box through a pinhole camera model with the same intrinsics
      as the SDF camera. Single class for now
      (`solvent_bottle`, class id 0) — multi-class is a few extra
-     lines in `LABELED_OBJECTS`.
+     lines in `LABELED_OBJECTS`,
+   - **also saves a debug overlay PNG** under `<out>/overlays/`
+     with the bbox drawn in green directly on the image, so you
+     can eyeball-check that the labels actually wrap the object.
+     Pass `--no-overlay` to skip these once you trust the math.
 
 NO ROS. NO `ros_gz_bridge`. NO `cv_bridge`. NO complicated QoS dance.
 NO manual labelling either: the labels come straight from the
@@ -93,13 +97,14 @@ subscribing to       /overhead_camera/image_raw
 saving PNGs to       /home/.../place-items-on-shelf/captured_frames/
 YOLO classes file    /home/.../captured_frames/classes.txt  (1 class(es))
 image intrinsics     640x480  hfov=60deg  fx=554.3
+bbox overlays to     /home/.../captured_frames/overlays/  (disable with --no-overlay)
 
 waiting for the first frame ...
 first frame received after 0.3 s (got 1 frames so far).
 [top]       pos=(+0.05,+0.00,+1.50)  -> aim at (0.05, 0.0, 0.94)  pitch=+90deg  yaw=+0deg   set_pose=OK
-[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)  labels=1 -> cycle00_top_0.txt
+[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)  labels=1 -> cycle00_top_0.txt  overlay=1 -> overlays/cycle00_top_0_bbox.png
 [front_+x]  pos=(+0.60,+0.00,+1.40)  -> aim at (0.05, 0.0, 0.94)  pitch=+40deg  yaw=+180deg set_pose=OK
-[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)  labels=1 -> cycle00_front_+x_0.txt
+[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)  labels=1 -> cycle00_front_+x_0.txt  overlay=1 -> overlays/cycle00_front_+x_0_bbox.png
 ...
 
 done. saved 5 PNGs -> /home/.../captured_frames/
@@ -116,6 +121,11 @@ python3 .../move_camera.py --loop
 
 # Save somewhere else.
 python3 .../move_camera.py --out /tmp/my_dataset
+
+# Production-mode capture: no overlays in the output dir.
+# (The trainer ignores .txt files in subdirs, but skipping overlays
+#  saves disk + skips the PIL draw step.)
+python3 .../move_camera.py --no-overlay
 ```
 
 ## Where the images and labels land
@@ -135,8 +145,21 @@ By default: `./captured_frames/` relative to wherever you launched
 ├── cycle00_left_+y_0.png
 ├── cycle00_left_+y_0.txt
 ├── cycle00_right_-y_0.png
-└── cycle00_right_-y_0.txt
+├── cycle00_right_-y_0.txt
+└── overlays/                      # bbox-annotated copies for visual QA only
+    ├── cycle00_top_0_bbox.png     #   - green rectangle = ground-truth bbox
+    ├── cycle00_front_+x_0_bbox.png#   - text label = "<class_name> (<class_id>)"
+    ├── cycle00_back_-x_0_bbox.png #   - in a subfolder so the YOLO trainer
+    ├── cycle00_left_+y_0_bbox.png #     doesn't pick them up as extra images
+    └── cycle00_right_-y_0_bbox.png
 ```
+
+The `overlays/` subfolder is meant for **you**, not for training. Open
+any `_bbox.png` and you should see the green rectangle hugging the
+target object. If the rectangle is in the wrong place, the labels
+in the sibling `.txt` are wrong — fix the projection math, not the
+overlay. Pass `--no-overlay` to skip generating these once you trust
+the math.
 
 The script prints the absolute path on every save, so there is no
 guessing — just copy the path it printed.
