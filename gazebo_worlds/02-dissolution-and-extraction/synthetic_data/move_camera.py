@@ -54,7 +54,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 WORLD = "ketchup_extraction_cell"
 CAMERA_MODEL = "overhead_camera"
@@ -110,25 +110,80 @@ np, PILImage = _import_image_libs()
 
 
 # ---------------------------------------------------------------------------
-# Camera viewpoints. (label, x, y, z, roll, pitch, yaw) in world frame.
-# pitch = +pi/2 means "looking straight down"; oblique views drop the
-# pitch toward pi/3 and add a yaw so the camera still faces the bench.
+# Where the camera always points to.
+#
+# All bench objects are clustered around this point (solvent bottle near
+# (0.10, 0.25, 0.97), three beakers along x ~ 0.05, y in [-0.30, -0.06],
+# bench top at z = 0.90). Aiming every view at this single point keeps
+# the scene centred no matter where the camera sits.
+#
+# If you add new objects somewhere else in the world, either move this
+# target or add per-view targets.
 # ---------------------------------------------------------------------------
-View = Tuple[str, float, float, float, float, float, float]
-VIEWS: List[View] = [
-    ("top",          0.00,  0.00, 1.50, 0.0, math.pi / 2,         0.0),
-    ("oblique_+x",   0.45,  0.00, 1.25, 0.0, math.pi / 3,         0.0),
-    ("oblique_-x",  -0.45,  0.00, 1.25, 0.0, math.pi / 3,    math.pi),
-    ("oblique_+y",   0.00,  0.45, 1.25, 0.0, math.pi / 3,    math.pi / 2),
-    ("oblique_-y",   0.00, -0.45, 1.25, 0.0, math.pi / 3,   -math.pi / 2),
+LOOK_AT_TARGET: Tuple[float, float, float] = (0.05, 0.0, 0.94)
+
+
+# ---------------------------------------------------------------------------
+# Camera positions only. Orientation (pitch + yaw) is computed at runtime
+# by look_at(), so we never hand-write rotations and never face the wrong
+# way again.
+#
+# Each entry is (label, x, y, z) in world frame, with units in metres.
+# ---------------------------------------------------------------------------
+CameraPos = Tuple[str, float, float, float]
+CAMERA_POSITIONS: List[CameraPos] = [
+    # Straight down, ~0.6 m above the bench top.
+    ("top",        0.05,  0.00, 1.50),
+    # In front of the bench (+X side), high enough to tilt down ~40 deg.
+    ("front_+x",   0.60,  0.00, 1.40),
+    # Behind the bench (-X side, near the arm marker), looking forward.
+    ("back_-x",   -0.50,  0.00, 1.40),
+    # Operator's left (+Y side), looking right.
+    ("left_+y",    0.05,  0.55, 1.40),
+    # Operator's right (-Y side), looking left.
+    ("right_-y",   0.05, -0.55, 1.40),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Math helpers
 # ---------------------------------------------------------------------------
+def look_at(
+    cam_pos: Tuple[float, float, float],
+    target: Tuple[float, float, float],
+) -> Tuple[float, float, float]:
+    """Return (roll, pitch, yaw) so a camera at ``cam_pos`` points at ``target``.
+
+    Convention used by gz-sim cameras:
+      - The camera body's +X axis is the looking direction.
+      - +Z is up.
+      - The SDF pose RPY is Z-Y-X intrinsic: rotation = Rz(yaw) * Ry(pitch) * Rx(roll).
+
+    With that order, the body +X direction in world frame after rotation is
+        ( cos(yaw) * cos(pitch),
+          sin(yaw) * cos(pitch),
+         -sin(pitch) )
+    so for the camera to look at the target we need:
+        yaw   = atan2(dy, dx)
+        pitch = atan2(-dz, sqrt(dx^2 + dy^2))
+    where (dx, dy, dz) = target - cam_pos.
+
+    Roll is set to 0 (no rotation about the look axis -> image stays upright).
+    """
+    dx = target[0] - cam_pos[0]
+    dy = target[1] - cam_pos[1]
+    dz = target[2] - cam_pos[2]
+    horiz = math.sqrt(dx * dx + dy * dy)
+    yaw = math.atan2(dy, dx)
+    pitch = math.atan2(-dz, horiz)
+    return (0.0, pitch, yaw)
+
+
 def rpy_to_quat(roll: float, pitch: float, yaw: float) -> Tuple[float, float, float, float]:
-    """Roll-pitch-yaw (ZYX intrinsic) -> (qx, qy, qz, qw)."""
+    """Roll-pitch-yaw (Z-Y-X intrinsic) -> (qx, qy, qz, qw).
+
+    Matches the convention used by SDF <pose> and by look_at() above.
+    """
     cr, cp, cy = math.cos(roll / 2.0), math.cos(pitch / 2.0), math.cos(yaw / 2.0)
     sr, sp, sy = math.sin(roll / 2.0), math.sin(pitch / 2.0), math.sin(yaw / 2.0)
     return (
@@ -182,7 +237,7 @@ class FrameCache:
     def __init__(self) -> None:
         self.latest = None
         self.count = 0
-        self.first_seen_at: float | None = None
+        self.first_seen_at: Optional[float] = None
 
     def on_image(self, msg) -> None:
         if self.latest is None:
@@ -207,13 +262,15 @@ def wait_for_first_frame(cache: FrameCache, timeout_s: float = 5.0) -> bool:
 def cycle_once(cache: FrameCache, dwell_s: float, shots: int, save_dir: Path,
                cycle_idx: int) -> int:
     saved = 0
-    for label, x, y, z, r, p, yw in VIEWS:
+    for label, x, y, z in CAMERA_POSITIONS:
+        r, p, yw = look_at((x, y, z), LOOK_AT_TARGET)
         qx, qy, qz, qw = rpy_to_quat(r, p, yw)
         ok = set_pose(CAMERA_MODEL, x, y, z, qx, qy, qz, qw)
         status = "OK" if ok else "FAIL (is gz sim running?)"
         print(
             f"[{label}]  pos=({x:+.2f}, {y:+.2f}, {z:+.2f})  "
-            f"rpy=({r:+.2f}, {p:+.2f}, {yw:+.2f})  set_pose={status}"
+            f"-> aim at {LOOK_AT_TARGET}  pitch={math.degrees(p):+.0f}deg "
+            f"yaw={math.degrees(yw):+.0f}deg  set_pose={status}"
         )
         if not ok:
             continue

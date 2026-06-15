@@ -9,8 +9,11 @@ world. Two pieces:
 2. **`move_camera.py`** — a single Python script that:
    - **subscribes** to that topic via the gz-transport Python
      bindings,
-   - **teleports** the camera through five preset viewpoints
-     (top + four obliques) using `gz service set_pose`,
+   - **teleports** the camera through five preset positions
+     (top + front + back + left + right) using `gz service set_pose`,
+   - **aims** each camera at a fixed `LOOK_AT_TARGET` on the bench
+     (so the scene is always centred — the orientation is computed
+     from the position, never hand-written),
    - **saves** the latest frame to disk as a PNG after each pose.
 
 NO ROS. NO `ros_gz_bridge`. NO `cv_bridge`. NO complicated QoS dance.
@@ -83,10 +86,10 @@ saving PNGs to       /home/.../place-items-on-shelf/captured_frames/
 
 waiting for the first frame ...
 first frame received after 0.3 s (got 1 frames so far).
-[top]         pos=(+0.00, +0.00, +1.50)  rpy=(+0.00, +1.57, +0.00)  set_pose=OK
-[top]         -> /home/.../captured_frames/cycle00_top_0.png  (640x480)
-[oblique_+x]  pos=(+0.45, +0.00, +1.25)  rpy=(+0.00, +1.05, +0.00)  set_pose=OK
-[oblique_+x]  -> /home/.../captured_frames/cycle00_oblique_+x_0.png  (640x480)
+[top]       pos=(+0.05,+0.00,+1.50)  -> aim at (0.05, 0.0, 0.94)  pitch=+90deg  yaw=+0deg   set_pose=OK
+[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)
+[front_+x]  pos=(+0.60,+0.00,+1.40)  -> aim at (0.05, 0.0, 0.94)  pitch=+40deg  yaw=+180deg set_pose=OK
+[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)
 ...
 
 done. saved 5 PNGs -> /home/.../captured_frames/
@@ -113,10 +116,10 @@ By default: `./captured_frames/` relative to wherever you launched
 ```
 ~/ros2_ws/src/place-items-on-shelf/captured_frames/
 ├── cycle00_top_0.png
-├── cycle00_oblique_+x_0.png
-├── cycle00_oblique_-x_0.png
-├── cycle00_oblique_+y_0.png
-└── cycle00_oblique_-y_0.png
+├── cycle00_front_+x_0.png
+├── cycle00_back_-x_0.png
+├── cycle00_left_+y_0.png
+└── cycle00_right_-y_0.png
 ```
 
 The script prints the absolute path on every save, so there is no
@@ -152,6 +155,13 @@ guessing — just copy the path it printed.
   `--dwell 4` so the sensor has more time to publish a fresh frame),
   or the camera is not actually being moved (re-run and check that
   every line ends in `set_pose=OK`).
+
+- **Oblique frames are blank / show nothing but the floor.**
+  The camera is moving but facing the wrong way. The script now
+  computes pitch+yaw with `look_at()` aimed at `LOOK_AT_TARGET`,
+  so if you have moved the bench objects somewhere new, edit
+  `LOOK_AT_TARGET` at the top of `move_camera.py` to point at the
+  new cluster.
 
 - **Colours look wrong (BGR/RGB swap).**
   The SDF declares `<format>R8G8B8</format>` and the script saves
