@@ -2,105 +2,49 @@ name,relevance,note
 Fairly Even,irrelevant,POS systems and contracts SaaS for SMBs
 Doodle Labs,irrelevant,mesh radio datalinks for UAVs/UGVs/AMRs
 Point One Navigation,irrelevant,RTK/GNSS positioning for AVs and robots
-Skyways,relevant,autonomous cargo drones for DoD
-AgZen,relevant,precision crop-spraying robotics with vision/AI
-Ambi Robotics,relevant,AI-powered warehouse sorting robots (Sim2Real)
-Medra,relevant,autonomous lab robots for drug discovery
 One Direct Health Network,irrelevant,at-home rehab medical devices
 ApolloTech MSI,irrelevant,radar/robotics/AI engineering services
 Lumotive,irrelevant,solid-state lidar beam-steering chips
 Formant,irrelevant,cloud platform for robot fleets and teleop
-TRIC Robotics,relevant,autonomous UV pest-control farm robots
-10Beauty,relevant,robotic manicure machines
 KorTerra,irrelevant,utility 811 ticket management software
-Civ Robotics,relevant,autonomous construction-layout survey robots
-Gabletek Robotics and Controls Solutions,relevant,industrial robotics/PLC system integrator
 Quartermaster AI,irrelevant,vessel-mounted maritime sensing/AI mast
 Lanshore LLC,irrelevant,sales performance and RPA consulting
-BotBuilt,relevant,robots that frame houses for builders
-Terranova,relevant,terraforming robots that lift flood-prone land
 cyber•Fund,irrelevant,crypto/AI/robotics VC fund
-Pickle Robot Company,relevant,truck-unload warehouse robots
-Gritt Robotics,relevant,physical AI for solar/construction sites
-Bedrock Ocean Exploration,relevant,autonomous underwater survey vehicles
-Gather AI,relevant,autonomous warehouse inventory drones
 Genesis AI,irrelevant,robotics foundation model with sim engine
-Icarus Robotics,relevant,free-flying dexterous robots for space
-Prime Robotics,relevant,warehouse AMRs and automation systems
 CurifyLabs,irrelevant,3D-printed personalized medicine compounding
-Contoro Robotics,relevant,AI trailer/container unloading robots
-"Albacore, Inc.",relevant,autonomous underwater defense submarines
-Periodic Labs,relevant,autonomous robotic labs for materials science
-General Robotics,relevant,tactical combat robots and remote weapon stations
-Dexmate,relevant,mobile humanoid with dexterous hands
 Rain,irrelevant,low-power AI chips for robots and edge devices
-Orchard Robotics,relevant,AI vision/robotics for orchard farming
 "Mota Group, Inc",irrelevant,consumer drones/wearables/mobile accessories
-Burro,relevant,autonomous ground robots for agriculture
-FW ACQUISITION INC,relevant,FlightWave defense UAS drone maker
 PowerLight Technologies,irrelevant,laser power-beaming for UAS charging
 AutoRoboto,irrelevant,hardware/software engineering consulting firm
 Matter Intelligence,irrelevant,hyperspectral remote-sensing satellites
-Reframe Systems,relevant,robotic microfactories for prefab housing
 Bimotal,irrelevant,e-bike conversion motor kits
-Robust.AI,relevant,collaborative mobile warehouse robot carts
 Foxglove,irrelevant,multimodal data/visualization platform for robots
-Watney Robotics Inc,relevant,autonomous robots for datacenter ops
-Remedy Robotics,relevant,remote endovascular surgical robot
-Sorting Robotics,relevant,cannabis production automation robots
 Skild AI,irrelevant,omni-bodied robotics foundation model
-Reflex Robotics,relevant,wheeled humanoid robots for logistics/manufacturing
-RoboForce,relevant,AI industrial robots for solar/manufacturing (Titan)
-Corvus Robotics,relevant,autonomous warehouse inventory drones
-watneyrobotics.io,relevant,autonomous robotics for datacenter operations
 Human Archive,irrelevant,multimodal training data for robotics/physical AI
-Mind Robotics,relevant,AI-powered industrial robots (Rivian spinoff)
-"Adaptek Systems, LLC",relevant,custom robotic automation/assembly systems
-Maven Robotics,relevant,general-purpose AI robots for industry
-Charge Robotics,relevant,robotic solar farm assembly factories
 FORT Robotics,irrelevant,safety controllers/remote control for robots
-Built Robotics,relevant,autonomous construction equipment kits
-Boxbot,relevant,robotic parcel sorting/handling systems
 Tycho.AI,irrelevant,autonomous UAV navigation software/hardware
 Yondu AI,irrelevant,embodied AI platform for warehouse robots
 Revel,irrelevant,humanoid robotics data/simulation infrastructure
-Swarmbotics AI,relevant,autonomous ground robot swarms for defense
-Perrone Robotics,relevant,autonomous vehicle software/retrofit kits
-Planted,relevant,robotic solar farm installation system
 Sieve,irrelevant,video AI APIs and multimodal data for AI labs
 Freeform,irrelevant,AI-driven metal 3D printing manufacturing
 Observable Space,irrelevant,space optical/telescope systems and lasercom
-Foundry Robotics,relevant,AI-driven modular robotic assembly cells
 Breaker,irrelevant,AI agents/autonomy software for robot fleets
-Multiply Labs,relevant,robotic pharma/cell therapy manufacturing
-Starpath,relevant,autonomous lunar mining/propellant rovers
-Ultra,relevant,general-purpose warehouse robots with teleop
-Urban Machine,relevant,robotic wood-waste reclaiming machine
 Numurus,irrelevant,open-source edge AI/ROS robotics software platform
 "OnPoint Surgical, Inc",irrelevant,AR guidance system for spine surgery
 Costa Coffee US,irrelevant,coffee chain US operations
 Giant.AI,unknown,humanoid factory robots; may be defunct
-Rizse,relevant,autonomous drones for aircraft inspection
-Arc Specialties,relevant,custom robotic welding systems integrator
-10x,relevant,general-purpose construction humanoid robots
 Freedom Robotics,irrelevant,cloud software for robot fleet management
 DDC-I,irrelevant,safety-critical avionics RTOS software
 einnosys,irrelevant,SECS/GEM semiconductor factory automation software
-Rover Robotics,relevant,UGV mobile robot platforms for R&D
 BinaryBridge,irrelevant,IT services/app development (not robotics)
 "OLogic, Inc.",irrelevant,robotics product design/engineering consultancy
 Nomadic AI,irrelevant,visual data platform for robotics/AV training
 Jibo,irrelevant,defunct social home robot company
 Phoenix Innovations LLC,irrelevant,reverse logistics IT/ITAD with some robotics
-Roboteam,relevant,tactical unmanned ground vehicles for defense
 Willow Garage,irrelevant,defunct robotics lab (creator of ROS)
 ServiceU Corporation,irrelevant,event management SW for churches/nonprofits
-Ghost Robotics,relevant,quadruped UGVs for defense (Vision 60)
 Bear Flag Robotics,irrelevant,autonomous tractors; acquired by John Deere
-"Four Growers, Inc.",relevant,robotic greenhouse tomato/cucumber harvester
 AI Automation Agency 360,irrelevant,AI workflow automation consulting agency
-PSA Systems,relevant,industrial robotics systems integrator
-Tortuga AgTech,relevant,strawberry/grape harvesting robots (acq 2025)
 Energid Technologies,irrelevant,Actin robot motion-control software (Teradyne)
 Word Systems,irrelevant,courtroom/law-enforcement recording systems
 SCI Fusion360,irrelevant,contract custom software development shop
@@ -108,7 +52,6 @@ SapientX,irrelevant,conversational voice AI platform
 SVT Robotics,irrelevant,SOFTBOT warehouse robot integration platform
 Black Sage Technologies,irrelevant,counter-UAS command and control software
 RISE Robotics,irrelevant,electric Beltdraulic linear actuators
-Capstone Technologies,relevant,AutoViri print-to-mail robotic automation
 Embedded Planet,irrelevant,IoT/embedded single-board computers
 Omni Consumer Products,irrelevant,movie-themed novelty consumer products
 "Theseus, Inc.",irrelevant,GPS-denied visual nav software for drones
@@ -119,68 +62,41 @@ Robotic Skies,irrelevant,global drone/UAS maintenance repair network
 Hortau,irrelevant,soil-tension precision irrigation sensors
 ARInspect,irrelevant,AR field-inspection software (acq Tyler Tech)
 Diib,irrelevant,SEO/website analytics SaaS
-Collaborative Robotics,relevant,wheeled mobile cobots for logistics
-Build With Robots,relevant,autonomous disinfecting mobile robots
 BeBop Sensors,irrelevant,smart-fabric force/motion sensors
-ViaBot,relevant,autonomous outdoor sweeping/security robots
-Bluefin Robotics,relevant,autonomous underwater vehicles (Gen Dynamics)
 Symbio Robotics,irrelevant,AI control software for industrial robots
 Hostirian,irrelevant,web hosting/colocation/managed IT services
 Toyota Ventures,irrelevant,corporate venture capital fund
 Develop Robots,unknown,no clear public business profile found
-Toggle,relevant,robotic rebar fabrication for construction
 Sproutel,irrelevant,interactive plush toys for child health
 Kaarta,irrelevant,SLAM-based mobile 3D LiDAR mapping
 Misty Robotics,irrelevant,social/education robot platform (Furhat)
-Vantage Robotics,relevant,Vesper ISR drones for defense/public safety
-"Weave Robotics, Inc.",relevant,Isaac home laundry-folding robot
 Upsite Technologies,irrelevant,data-center airflow/cooling products
-Construction Robotics,relevant,SAM bricklaying and MULE lift-assist robots
 Virtual Builder,unknown,no clear robotics profile found
 T-ROBOTICS,irrelevant,AI software for industrial robot programming
 "Dephy, Inc.",irrelevant,exoskeleton actuators and motor drivers
 Creator,irrelevant,burger-making restaurant concept
-Relay Robotics,relevant,autonomous hotel/hospital delivery robots
 WiBotic,irrelevant,wireless charging hardware for robots/drones
-Mobot,relevant,physical robots for mobile-app QA testing
 Perceptive Automata,irrelevant,pedestrian-intent perception software for AVs
 MOVIA Robotics,irrelevant,social robots for autism education therapy
 Ombu Labs,irrelevant,Ruby on Rails / AI consulting dev shop
 AMAXONIA,irrelevant,enterprise data management/automation consulting
-Bumblebee Spaces,relevant,ceiling-mounted robotic home furniture
 Proteus Motion,irrelevant,3D-resistance fitness/PT exercise machine
 The Catevo Group,irrelevant,marketing and PR agency
-"Harmonic Bionics, Inc.",relevant,upper-extremity rehabilitation robotic exoskeleton
-"CreateMe Technologies, Inc.",relevant,AI robotics for automated apparel manufacturing
 "Leadscope, Inc.",irrelevant,chemoinformatics software for drug discovery
-"Machina Labs, Inc",relevant,AI-driven robotic sheet-metal forming
 Eclipse Ventures,irrelevant,venture capital firm
 Van Robotics,irrelevant,desktop educational tutor robot (ABii)
 Strategic Data Systems,irrelevant,IT and cybersecurity services for DoD
-RoboTire,relevant,robotic automotive tire-changing system
 iHospital,irrelevant,Apple device repair shop
 Talentpair,irrelevant,AI tech recruiting platform
 Modbot,irrelevant,modular robotic actuators and joints
-Cyanbot,relevant,autonomous sidewalk delivery robots (Coco)
-Slip Robotics,relevant,automated truck loading/unloading robots
-Saturday Robotics,relevant,autonomous laundry robots
 Dorado Software,irrelevant,network management software
-Stratom Inc,relevant,autonomous ground vehicles and robotic refueling
 HUVRdata,irrelevant,inspection data management SaaS platform
-BIONIK Inc.,relevant,InMotion neuro-rehabilitation robots
 MassRobotics,irrelevant,non-profit robotics hub/incubator
-Pliant Energy Systems,relevant,amphibious marine robots with undulating fins
-Stellar Pizza,relevant,robotic pizza-making food trucks
 B-One,irrelevant,orthopedic implant manufacturer
 Olis Robotics,irrelevant,remote diagnostics and teleop for industrial robots
 Tesseract Ventures,irrelevant,robotic sensors and data visualization platforms
-Barrett Technology,relevant,WAM robotic arms and BarrettHand manipulators
 Digital Lightwave,irrelevant,optical telecom test and measurement equipment
-The Numina Group,relevant,warehouse automation with AMRs and WES software
-Formlogic,relevant,autonomous CNC precision manufacturing
-CRABI Robotics,relevant,autonomous marine hull-cleaning robots
 Savioke,irrelevant,Relay hotel/hospital delivery robots
-Peer Robotics,relevant,collaborative mobile robots (AMRs) for manufacturing
 VISTECH,irrelevant,custom CPQ and software development
 Stamm Technologies,irrelevant,managed IT services provider
 IQ Capital,irrelevant,deep-tech venture capital firm
@@ -189,86 +105,50 @@ Robolink,irrelevant,educational robotics and drone kits
 "InOrbit, Inc.",irrelevant,cloud robot fleet management platform
 Amalto Technologies,irrelevant,B2B e-invoicing software (acquired)
 The Efiia Group,irrelevant,cybersecurity consulting for federal agencies
-Techmetics Robotics,relevant,service AMRs for hospitality and healthcare
 Hebi Robotics,irrelevant,modular smart actuators for custom robots
-Rugged Robotics,relevant,autonomous floor-layout printing robot for construction
-Dexai Robotics,relevant,Alfred robotic sous-chef for food service
-TAILOS,relevant,autonomous commercial vacuuming robot (Rosie)
 Service Robotics & Technologies,irrelevant,IoT facility management software
-Skyline Robotics,relevant,Ozmo autonomous window-cleaning robot
 Trener Robotics,irrelevant,Physical AI software for industrial robots
 Nemedio,irrelevant,medical device regulatory/QMS compliance platform
 AviSight,irrelevant,industrial drone inspection services and software
 Amaryllo Inc.,irrelevant,cloud storage and HP-licensed services
-SuperDroid Robots,relevant,custom tactical/inspection robots
 Pubinno,irrelevant,AI/robotics smart draft beer taps
-Drone Aviation,relevant,tethered aerostats and drones
 ROYBI,irrelevant,AI educational robot toy for kids
-"Robin Autopilot, USA",relevant,robotic lawn mowing fleet RaaS
 Robomatter,irrelevant,STEM/robotics education curriculum
 Beluga Shave Co.,irrelevant,safety razors and shaving products
 SiLC Technologies,irrelevant,FMCW lidar chips for robots/AVs
-CleanRobotics,relevant,AI sorting recycling robot bins
-Silent Falcon,relevant,small UAS for inspection and ISR
 Discovery Robotics,irrelevant,autonomous floor cleaner; defunct
 "Intuitive Technologies, LLC",unknown,no clear robotics business found
 Cognitive Space,irrelevant,AI for satellite constellation ops
-Triton Medical Robotics,relevant,GI endoscopy surgical robot
-Ware,relevant,autonomous drones for warehouse inventory
 BeeHex,irrelevant,3D food printing and bakery robots
-Ava Robotics,relevant,autonomous telepresence robots
 Advanced Robotics for Manufacturing Institute,irrelevant,DoD-funded robotics consortium
 Verizon Robotics,irrelevant,AMR fleet software and connectivity
-Segway Robotics,relevant,delivery and service robot platforms
-Artly,relevant,AI robotic barista coffee company
-"Greenfield Robotics - Healthy Food, Healthy Planet",relevant,autonomous weeding farm robots
-ReconRobotics,relevant,throwable tactical micro-robots
-Advanced Construction Robotics,relevant,rebar tying and placing construction robots
 Securifi,irrelevant,consumer wifi router and smart home hub
 Iris Automation,irrelevant,onboard detect-and-avoid for drones
-Volley Automation,relevant,robotic automated parking systems
-Infinite Roboitcs,relevant,industrial robot integration and automation
-Eka Robotics,relevant,sim-to-real manipulation robotics AI
 XpertDox,irrelevant,AI medical coding for healthcare RCM
-Harvest Croo,relevant,autonomous strawberry harvesting robot
 Snag-A-Slip,irrelevant,online boat slip booking marketplace
-Verdant Robotics,relevant,precision ag spraying/weeding robots
 "Universal Logic, Inc.",irrelevant,Neocortex AI robot control software
-Trifo,relevant,AI home robot vacuums
-Purple Rhombus,relevant,manufactures attritable UAS drones
 PickNik Robotics,irrelevant,MoveIt Pro robotic arm software platform
 Generation NEXT,irrelevant,robotic frozen yogurt vending; deadpooled
-Grafton Sciences,relevant,physical AI research and engineering
-Hydronalix,relevant,unmanned surface vessels for rescue/defense
 SkySafe,irrelevant,drone detection and airspace forensics
-ARIX Technologies,relevant,pipe-inspection crawler robots
 Affluent,irrelevant,affiliate marketing analytics platform
 Neya Systems LLC,irrelevant,off-road autonomy software for UGVs
 Boost VC,irrelevant,venture capital firm (deep tech)
 CNBS Software,irrelevant,SAP/ERP integration and ecommerce software
 Dishcraft,irrelevant,robotic dishwashing system; mostly defunct
-Wings,relevant,autonomous food-service retail robotics
-Virtual Incision,relevant,miniaturized surgical robot MIRA
 "Airspace Defense, Inc",irrelevant,counter-drone airspace security platform
 Robo 3D,irrelevant,desktop 3D printer maker (acquired/defunct)
 DisruptOPS,irrelevant,cloud security posture management SaaS
 219 Design,irrelevant,engineering consultancy incl. surgical robotics
 Phantom Neuro,irrelevant,neural interface for prosthetics and robotics
-PreNav,relevant,precision drones for infrastructure inspection
 RemedyOne,irrelevant,pharmacy formulary/rebate optimization
 "DeepMap, Inc.",irrelevant,HD mapping for AVs (acquired by NVIDIA 2021)
 DeepMotion,irrelevant,AI motion capture for 3D animation/games
-Kane Robotics,relevant,cobot sanding/grinding/finishing systems
-XYZ Robotics Inc.,relevant,warehouse picking/manipulation robots
-Blendid,relevant,autonomous robotic smoothie kiosks
 Yahara Software,irrelevant,custom software dev consultancy
 drive.ai,irrelevant,defunct AV startup acquired by Apple 2019
 "Magenta Technologies, LLC",irrelevant,industrial robot/automation repair services
-K2 Kinetics,relevant,robotic packaging automation (acquired by JLS)
 HowToRobot,irrelevant,robot buyer-supplier marketplace/advisory
 Blue Belt Technologies,irrelevant,surgical robotics acquired by Smith+Nephew 2016
 SALIX,irrelevant,RPA/data services for back-office automation
-Treeswift,relevant,autonomous drone swarms for forestry
 Wonder Workshop,irrelevant,Dash/Dot educational coding robots for kids
 ReverseVision,irrelevant,reverse mortgage origination software
 Odyssey Marine Exploration,irrelevant,deep-sea ROV-based subsea mineral exploration
@@ -277,9 +157,6 @@ Victor 12,irrelevant,veteran-owned EdTech/training services firm
 iAffiliate Management,irrelevant,affiliate marketing agency for DTC brands
 PerfTech,irrelevant,in-browser ISP messaging/network hardware
 Diversified Robotic,irrelevant,RPA/Microsoft Azure consulting (software bots)
-"Verve, Inc.",relevant,wearable exosuit robotics for industrial workers
-Promobot Corp.,relevant,humanoid service robots for retail/hospitality
-Dusty Robotics,relevant,autonomous BIM layout robot for construction
 AirSelfie,irrelevant,consumer pocket selfie drone gadget
 "ISR Division Systems, LLC",irrelevant,installed-sales/service network operator
 ABAGY Robotic Systems,irrelevant,AI software for high-mix robotic welding
@@ -287,10 +164,5 @@ Altara,irrelevant,AI data platform for physical sciences R&D
 NDS Systems,irrelevant,ERP software for manufacturing/distribution
 Peerdash.com,irrelevant,secure enterprise collaboration SaaS
 Building Point Southeast LLC,irrelevant,construction tech/BIM reseller (Trimble)
-LabMinds Inc,relevant,lab automation robotics for solution prep
-Square Robot,relevant,autonomous submersible tank-inspection robots
-Wilder Systems Inc.,relevant,robotic automation for aircraft manufacturing
 VideoRay,irrelevant,underwater ROV manufacturer
-OhmniLabs,relevant,telepresence/healthcare robots (now Symbotic)
-Galen Robotics,relevant,ENT surgical assistant robot
 Abagy Robotics Systems,irrelevant,AI software for high-mix robotic welding
