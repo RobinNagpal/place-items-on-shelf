@@ -125,7 +125,7 @@ dissolution case later; other steps get their own subfolders under
 
 The world has an **overhead RGB camera** bolted on so it can produce
 a small dataset of the bench from above. The current implementation
-covers five of the six domain-randomisation axes:
+covers **all six** domain-randomisation axes:
 
 - **Step 1 — camera-pose variation:** `synthetic_data/move_camera.py`
   parks the same scene under five different camera viewpoints.
@@ -136,6 +136,11 @@ covers five of the six domain-randomisation axes:
   `synthetic_data/randomize_lighting.py` only changes the world's
   `<light name="sun">` per frame — direction, colour, intensity —
   via the `light_config` service.
+- **Step 4 — materials / textures (structured DR):**
+  `synthetic_data/randomize_materials.py` spawns coloured wraps
+  around each labelled object and a coloured mat on the bench, so
+  every frame the same shapes appear in different colours — the
+  detector is forced to learn shape rather than colour.
 - **Step 5 — distractor objects:**
   `synthetic_data/randomize_distractors.py` spawns 2-4 random
   unlabelled clutter items (pens, tape rolls, notebooks, ...) on
@@ -147,15 +152,14 @@ covers five of the six domain-randomisation axes:
   cycles through five common lab mats (white paper, black mat,
   blue lab mat, green cut mat, grey rubber).
 
-Materials / textures (axis #4) is still deferred.
-
 See [`synthetic_data/README.md`](synthetic_data/README.md) and the
 per-axis walkthroughs
 ([`README_object_pose.md`](synthetic_data/README_object_pose.md),
 [`README_lighting.md`](synthetic_data/README_lighting.md),
+[`README_materials.md`](synthetic_data/README_materials.md),
 [`README_distractors.md`](synthetic_data/README_distractors.md),
 [`README_background.md`](synthetic_data/README_background.md))
-for the two-terminal recipes. All five scripts use the same
+for the two-terminal recipes. All six scripts use the same
 gz-transport Python subscriber to receive frames — no ROS bridge,
 no `cv_bridge`.
 
@@ -168,15 +172,17 @@ This is the first concrete warm-up for
 02-dissolution-and-extraction/
 ├── README.md                  (this file)
 ├── ketchup_extraction.sdf     (the Gazebo world; overhead camera publishes frames)
-└── synthetic_data/            (Steps 1, 2, 3, 5, 6 — five of the six DR axes)
+└── synthetic_data/            (Steps 1-6 — all six DR axes)
     ├── README.md
     ├── README_object_pose.md
     ├── README_lighting.md
+    ├── README_materials.md
     ├── README_distractors.md
     ├── README_background.md
     ├── move_camera.py
     ├── randomize_objects.py
     ├── randomize_lighting.py
+    ├── randomize_materials.py
     ├── randomize_distractors.py
     └── randomize_background.py
 ```

@@ -119,11 +119,11 @@ Rule of thumb: vary 1-2 axes and the detector overfits; vary 5-6
 aggressively and it generalises to real photos it was never trained
 on. The exercise under
 [`gazebo_worlds/02-dissolution-and-extraction/synthetic_data/`](../../../gazebo_worlds/02-dissolution-and-extraction/synthetic_data/)
-currently implements axes #1 (camera pose), #2 (object pose),
-#3 (lighting), #5 (distractor objects) and #6 (background) as five
-separate warm-up scripts. Only axis #4 (materials / textures) is
-still missing. Production datasets need all six and will combine the
-axes per frame.
+now implements **all six** axes — #1 (camera pose), #2 (object pose),
+#3 (lighting), #4 (materials / textures), #5 (distractor objects)
+and #6 (background) — as six separate warm-up scripts, one per
+axis. A production dataset would combine them per frame rather than
+running them in isolation; that's the next iteration.
 
 ### 2. Photo-real rendering
 

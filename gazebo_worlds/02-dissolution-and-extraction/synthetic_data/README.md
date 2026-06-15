@@ -10,7 +10,7 @@ domain-randomisation axes from
 | 1 | Camera pose       | `move_camera.py`          | **Done** — this README |
 | 2 | Object pose       | `randomize_objects.py`    | **Done** — see [`README_object_pose.md`](README_object_pose.md) |
 | 3 | Lighting          | `randomize_lighting.py`   | **Done** — see [`README_lighting.md`](README_lighting.md) |
-| 4 | Materials         | —                         | not yet |
+| 4 | Materials         | `randomize_materials.py`  | **Done** — see [`README_materials.md`](README_materials.md) |
 | 5 | Distractors       | `randomize_distractors.py`| **Done** — see [`README_distractors.md`](README_distractors.md) |
 | 6 | Background        | `randomize_background.py` | **Done** — see [`README_background.md`](README_background.md) |
 
@@ -286,7 +286,7 @@ Short version:
 | 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS` (this script). |
 | 2 | Object pose       | **Yes** — see [`README_object_pose.md`](README_object_pose.md) and `randomize_objects.py`. |
 | 3 | Lighting          | **Yes** — see [`README_lighting.md`](README_lighting.md) and `randomize_lighting.py`. |
-| 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
+| 4 | Materials / textures | **Yes** — see [`README_materials.md`](README_materials.md) and `randomize_materials.py`. |
 | 5 | Distractor objects | **Yes** — see [`README_distractors.md`](README_distractors.md) and `randomize_distractors.py`. |
 | 6 | Background        | **Yes** — see [`README_background.md`](README_background.md) and `randomize_background.py`. |
 
@@ -308,11 +308,13 @@ synthetic_data/
 ├── README.md                  (this file — Step 1, camera-pose variation)
 ├── README_object_pose.md      (Step 2 — object-pose randomisation walkthrough)
 ├── README_lighting.md         (Step 3 — lighting randomisation walkthrough)
+├── README_materials.md        (Step 4 — materials / textures walkthrough)
 ├── README_distractors.md      (Step 5 — distractor-objects walkthrough)
 ├── README_background.md       (Step 6 — background-swap walkthrough)
 ├── move_camera.py             (subscribe + teleport camera + save PNGs)
 ├── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
 ├── randomize_lighting.py      (subscribe + reconfigure the sun light + save PNGs)
+├── randomize_materials.py     (spawn coloured bench mat + per-object wraps + save PNGs)
 ├── randomize_distractors.py   (spawn random clutter on the bench + save PNGs)
 └── randomize_background.py    (swap a coloured plane over the bench + save PNGs)
 ```
