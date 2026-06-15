@@ -107,6 +107,19 @@ OpenAI's 2017 DR paper) and production pipelines actually turn:
    texture, the wall pattern. Even pattern the *target* objects
    with random textures sometimes (so the model learns the
    *shape*, not the colour). Often called "structured DR".
+
+   For real textures (not just flat colours), Gazebo accepts PBR
+   maps inside `<material><pbr><metal>`: `<albedo_map>`,
+   `<normal_map>`, `<roughness_map>`, `<metalness_map>`. Drop a
+   folder of free PBR sets (e.g. from
+   [Polyhaven](https://polyhaven.com/textures) or
+   [ambientCG](https://ambientcg.com)) under
+   `gazebo_worlds/.../textures/`, export
+   `GZ_SIM_RESOURCE_PATH=$PWD/gazebo_worlds/...` so `file://`
+   paths resolve, and swap the script's `<diffuse>` line for an
+   `<albedo_map>file:///abs/path.png</albedo_map>`. The same
+   spawn-and-remove flow used for colour randomisation works for
+   texture randomisation — and uses no extra Gazebo plugin.
 5. **Distractor objects** — spawn 1-10 random clutter items (a pen,
    a tape roll, a clipboard, an unrelated bottle) at random poses
    in each frame so the model learns "not every cylindrical
@@ -119,8 +132,11 @@ Rule of thumb: vary 1-2 axes and the detector overfits; vary 5-6
 aggressively and it generalises to real photos it was never trained
 on. The exercise under
 [`gazebo_worlds/02-dissolution-and-extraction/synthetic_data/`](../../../gazebo_worlds/02-dissolution-and-extraction/synthetic_data/)
-currently implements only axis #1 (camera pose) on purpose, as the
-warm-up; production datasets need all six.
+now implements **all six** axes — #1 (camera pose), #2 (object pose),
+#3 (lighting), #4 (materials / textures), #5 (distractor objects)
+and #6 (background) — as six separate warm-up scripts, one per
+axis. A production dataset would combine them per frame rather than
+running them in isolation; that's the next iteration.
 
 ### 2. Photo-real rendering
 

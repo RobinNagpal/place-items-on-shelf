@@ -1,7 +1,26 @@
-# Synthetic data — Step 1: camera frames of the bench
+# Synthetic data — camera frames of the bench
 
-The simplest possible synthetic dataset for the dissolution / extraction
-world. Two pieces:
+This folder contains the synthetic-data scripts for the dissolution /
+extraction world. Each script implements one of the six
+domain-randomisation axes from
+[`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md).
+
+| # | Axis              | Script                    | Status |
+|---|-------------------|---------------------------|--------|
+| 1 | Camera pose       | `move_camera.py`          | **Done** — this README |
+| 2 | Object pose       | `randomize_objects.py`    | **Done** — see [`README_object_pose.md`](README_object_pose.md) |
+| 3 | Lighting          | `randomize_lighting.py`   | **Done** — see [`README_lighting.md`](README_lighting.md) |
+| 4 | Materials         | `randomize_materials.py`  | **Done** — see [`README_materials.md`](README_materials.md) |
+| 5 | Distractors       | `randomize_distractors.py`| **Done** — see [`README_distractors.md`](README_distractors.md) |
+| 6 | Background        | `randomize_background.py` | **Done** — see [`README_background.md`](README_background.md) |
+
+The rest of *this* file documents `move_camera.py` (axis #1). For the
+object-pose script (axis #2), see
+[`README_object_pose.md`](README_object_pose.md).
+
+## Step 1 — `move_camera.py` (camera-pose variation)
+
+Two pieces:
 
 1. **`ketchup_extraction.sdf`** — already has an `overhead_camera`
    model with a sensor that publishes RGB frames on the Gazebo
@@ -264,12 +283,12 @@ Short version:
 
 | # | Axis              | Done here?                                   |
 |---|-------------------|----------------------------------------------|
-| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS`. |
-| 2 | Object pose       | No — Step 2 will jitter `set_pose` on the beakers + bottle. |
-| 3 | Lighting          | No — Step 3 will vary `<light>` direction + intensity. |
-| 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
-| 5 | Distractor objects | No — would require spawning random clutter models. |
-| 6 | Background        | No — would require swapping the floor / walls / skybox. |
+| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS` (this script). |
+| 2 | Object pose       | **Yes** — see [`README_object_pose.md`](README_object_pose.md) and `randomize_objects.py`. |
+| 3 | Lighting          | **Yes** — see [`README_lighting.md`](README_lighting.md) and `randomize_lighting.py`. |
+| 4 | Materials / textures | **Yes** — see [`README_materials.md`](README_materials.md) and `randomize_materials.py`. |
+| 5 | Distractor objects | **Yes** — see [`README_distractors.md`](README_distractors.md) and `randomize_distractors.py`. |
+| 6 | Background        | **Yes** — see [`README_background.md`](README_background.md) and `randomize_background.py`. |
 
 A real production-quality YOLO training set varies all six. We are
 deliberately doing only #1 right now and shipping the labels for it
@@ -286,8 +305,18 @@ whether you have 5 PNGs (now) or 5000 (after Step 2).
 
 ```
 synthetic_data/
-├── README.md         (this file)
-└── move_camera.py    (subscribe + teleport + save PNGs)
+├── README.md                  (this file — Step 1, camera-pose variation)
+├── README_object_pose.md      (Step 2 — object-pose randomisation walkthrough)
+├── README_lighting.md         (Step 3 — lighting randomisation walkthrough)
+├── README_materials.md        (Step 4 — materials / textures walkthrough)
+├── README_distractors.md      (Step 5 — distractor-objects walkthrough)
+├── README_background.md       (Step 6 — background-swap walkthrough)
+├── move_camera.py             (subscribe + teleport camera + save PNGs)
+├── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
+├── randomize_lighting.py      (subscribe + reconfigure the sun light + save PNGs)
+├── randomize_materials.py     (spawn coloured bench mat + per-object wraps + save PNGs)
+├── randomize_distractors.py   (spawn random clutter on the bench + save PNGs)
+└── randomize_background.py    (swap a coloured plane over the bench + save PNGs)
 ```
 
 ## Related docs
