@@ -426,20 +426,18 @@
          three beakers (Y from -0.30 to -0.06) and the solvent
          bottle (Y = +0.25), plus the arm marker at the back.
 
-         How frames are captured:
-           - The sensor publishes RGB frames on the Gazebo Transport
-             topic `/overhead_camera/image_raw` (visible in
-             `gz topic -l` while the sim is running).
-           - The <save> element below makes Gazebo also dump every
-             rendered frame to disk as a PNG. The folder
-             `captured_frames/` is created next to wherever you ran
-             `gz sim` (i.e. the repo root, if you used the recipe
-             in synthetic_data/README.md).
+         The sensor publishes RGB frames on the Gazebo Transport
+         topic `/overhead_camera/image_raw`. The PNG-on-disk
+         capture is done by `synthetic_data/move_camera.py`, which
+         subscribes to that topic via the gz-transport Python
+         bindings. The earlier `<save>` element on this sensor was
+         removed — it parsed cleanly but did not actually fire on
+         the WSL gz-sim version the user is on (and silently
+         producing zero PNGs is the worst possible bug).
 
-         No ROS, no ros_gz_bridge, and no Python image subscriber
-         are needed for capture — Gazebo writes the dataset on its
-         own. See synthetic_data/README.md for the two-terminal
-         WSL recipe.
+         See synthetic_data/README.md for the two-terminal WSL
+         recipe and the apt-install line for the gz-transport
+         Python bindings.
          ============================================================ -->
     <model name="overhead_camera">
       <static>true</static>
@@ -461,10 +459,9 @@
         </visual>
         <sensor name="overhead_cam" type="camera">
           <always_on>1</always_on>
-          <!-- 2 Hz: enough to get a fresh frame after each
-               camera move without flooding the disk with PNGs.
-               Bump this back up if you also want a high-rate
-               live preview on the topic. -->
+          <!-- 2 Hz: enough that move_camera.py gets a fresh
+               post-teleport frame within its 2 s dwell, without
+               flooding the topic with frames nobody wants. -->
           <update_rate>2</update_rate>
           <topic>overhead_camera/image_raw</topic>
           <camera>
@@ -478,13 +475,6 @@
               <near>0.05</near>
               <far>3.0</far>
             </clip>
-            <!-- Auto-save every rendered frame to disk. Path is
-                 relative to the cwd of `gz sim`. Gazebo creates
-                 the folder on its own and writes sequential
-                 PNGs (1.png, 2.png, ...). -->
-            <save enabled="true">
-              <path>captured_frames</path>
-            </save>
           </camera>
         </sensor>
       </link>

@@ -1,42 +1,52 @@
 # Synthetic data — Step 1: camera frames of the bench
 
 The simplest possible synthetic dataset for the dissolution / extraction
-world. Just two things:
+world. Two pieces:
 
-1. **Place a camera.** Done already — `ketchup_extraction.sdf` has an
-   `overhead_camera` model that points straight down at the bench top.
-2. **Save the camera frames.** The camera sensor has
-   `<save enabled="true"><path>captured_frames</path></save>`, so
-   **Gazebo itself** writes every rendered frame to disk as a PNG.
-   No ROS, no `ros_gz_bridge`, no `cv_bridge`, no Python subscriber.
+1. **`ketchup_extraction.sdf`** — already has an `overhead_camera`
+   model with a sensor that publishes RGB frames on the Gazebo
+   Transport topic `/overhead_camera/image_raw`.
+2. **`move_camera.py`** — a single Python script that:
+   - **subscribes** to that topic via the gz-transport Python
+     bindings,
+   - **teleports** the camera through five preset viewpoints
+     (top + four obliques) using `gz service set_pose`,
+   - **saves** the latest frame to disk as a PNG after each pose.
 
-That's the whole capture loop. The optional `move_camera.py` script
-teleports the camera through five preset viewpoints (top + four
-obliques) so the dataset has more than one angle.
+NO ROS. NO `ros_gz_bridge`. NO `cv_bridge`. NO complicated QoS dance.
 
-## What changed vs. the previous attempt
+## Why this rewrite
 
-The earlier version of this folder tried to do too much at once:
-ROS 2 subscription + pose-info subscription + manual pinhole bbox
-projection + `gz service` jitter for both objects and camera + YOLO
-labels. It got stuck on QoS mismatches in the ROS bridge and was
-hard to recover from. The new version is the **first step only** —
-just images, no labels — using Gazebo's own `<save>` element instead
-of any ROS plumbing. Labels (Step 2) and lighting variation (Step 3)
-are planned follow-ups, listed at the bottom of this README.
+The previous version of this folder relied on the SDF `<save>`
+element to make Gazebo itself write PNGs to disk. That element parses
+cleanly but **does not actually fire** on every gz-sim build (in
+particular, not on the WSL build the user is on). Adding our own
+gz-transport subscriber both guarantees we get frames and gives a
+clear error when something is wrong, instead of silently writing
+nothing.
 
-## Requirements
+## Prerequisites — one-time install
 
-- **WSL2 Ubuntu 22.04 or 24.04** (or native Linux).
-- **Gazebo (`gz sim`)** — Garden, Harmonic, or newer. No ROS needed
-  for the capture itself.
-- **Python 3** (for the optional `move_camera.py`). Standard library
-  only — no `pip install` step.
+| Distro                       | Install line                                                                            |
+|------------------------------|-----------------------------------------------------------------------------------------|
+| Ubuntu 24.04 + Jazzy + Harmonic | `sudo apt install python3-gz-transport13 python3-gz-msgs10 python3-numpy python3-pil` |
+| Ubuntu 22.04 + Humble + Garden  | `sudo apt install python3-gz-transport12 python3-gz-msgs9 python3-numpy python3-pil`  |
 
-## Run it — one or two terminals
+To check which gz you are on:
 
-Both terminals must be in the repo root (so the relative
-`captured_frames/` path works as expected).
+```bash
+gz sim --version          # Harmonic = v8.x, Garden = v7.x
+apt-cache search 'gz-msgs[0-9]'
+apt-cache search 'gz-transport[0-9]'
+```
+
+The script tries transport13 first, then falls back to transport12,
+so the same code works on both. If neither package is installed it
+exits with the exact apt command to copy-paste.
+
+## Run it — two terminals
+
+Both terminals must be in the repo root.
 
 ### Terminal 1 — start Gazebo
 
@@ -45,164 +55,136 @@ cd ~/ros2_ws/src/place-items-on-shelf
 gz sim -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 ```
 
-The `-r` flag auto-plays sim time, so the camera starts rendering
-straight away. Frames appear in `./captured_frames/` immediately —
-one new PNG every ~0.5 s (the sensor's `<update_rate>` is 2 Hz).
+The `-r` flag auto-plays sim time. Confirm the camera topic is live:
 
-To stop, close the Gazebo window or press `Ctrl+C` in the terminal.
+```bash
+gz topic -l | grep image_raw
+# expect: /overhead_camera/image_raw
+gz topic -i -t /overhead_camera/image_raw
+# expect: ... Type: gz.msgs.Image ...
+```
 
-### Terminal 2 (optional) — cycle the camera through views
+### Terminal 2 — teleport the camera + save PNGs
 
 ```bash
 cd ~/ros2_ws/src/place-items-on-shelf
 python3 gazebo_worlds/02-dissolution-and-extraction/synthetic_data/move_camera.py
 ```
 
-Defaults: 2 s dwell per view, 5 views, one cycle then exit. With
-2 Hz capture that's ~4 PNGs per view, ~20 PNGs per cycle from five
-different angles.
+Defaults: 5 views, 2 s dwell each, 1 PNG per view, one cycle then
+exit. So one run produces 5 PNGs.
+
+Sample output:
+
+```
+gz-transport Python: Harmonic (transport13 + msgs10)
+subscribing to       /overhead_camera/image_raw
+saving PNGs to       /home/.../place-items-on-shelf/captured_frames/
+
+waiting for the first frame ...
+first frame received after 0.3 s (got 1 frames so far).
+[top]         pos=(+0.00, +0.00, +1.50)  rpy=(+0.00, +1.57, +0.00)  set_pose=OK
+[top]         -> /home/.../captured_frames/cycle00_top_0.png  (640x480)
+[oblique_+x]  pos=(+0.45, +0.00, +1.25)  rpy=(+0.00, +1.05, +0.00)  set_pose=OK
+[oblique_+x]  -> /home/.../captured_frames/cycle00_oblique_+x_0.png  (640x480)
+...
+
+done. saved 5 PNGs -> /home/.../captured_frames/
+```
 
 Useful flags:
 
 ```bash
-# Stay longer at each pose -> more frames per angle.
-python3 .../move_camera.py --dwell 5
+# Spend longer at each pose and save 3 PNGs per view -> 15 PNGs per cycle.
+python3 .../move_camera.py --dwell 4 --shots 3
 
-# Loop forever (Ctrl+C to stop). Use this if you want a bigger dataset.
+# Cycle forever; Ctrl+C to stop.
 python3 .../move_camera.py --loop
+
+# Save somewhere else.
+python3 .../move_camera.py --out /tmp/my_dataset
 ```
 
-### Headless WSL fallback (no GUI)
+## Where the images land
 
-If `gz sim` cannot open a GUI window on your WSL setup, run it
-headless:
-
-```bash
-gz sim -s -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
-```
-
-`-s` is "server only, no GUI", and `-r` still auto-plays. The
-camera sensor still renders and `<save>` still writes PNGs.
-
-## Where the images are stored — read this carefully
-
-Gazebo's `<save><path>captured_frames</path></save>` element uses a
-**path relative to the cwd of `gz sim`**, NOT relative to the SDF
-file and NOT relative to this script. That detail trips everyone up
-the first time.
-
-If you launched `gz sim` from the repo root, as in the recipe above:
-
-```bash
-cd ~/ros2_ws/src/place-items-on-shelf
-gz sim -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
-```
-
-then the images land at:
+By default: `./captured_frames/` relative to wherever you launched
+`move_camera.py`. Following the recipe above, that is:
 
 ```
 ~/ros2_ws/src/place-items-on-shelf/captured_frames/
-├── 1.png
-├── 2.png
-├── 3.png
-└── ...
+├── cycle00_top_0.png
+├── cycle00_oblique_+x_0.png
+├── cycle00_oblique_-x_0.png
+├── cycle00_oblique_+y_0.png
+└── cycle00_oblique_-y_0.png
 ```
 
-Filenames are auto-assigned by Gazebo — sequential integers starting
-at 1. Each PNG is 640 × 480 BGR.
-
-The `move_camera.py` script prints the *expected* path at the end of
-its run, and notes whether that folder exists yet — useful when you
-are not sure which shell launched `gz sim`. Sample tail:
-
-```
---- where to find your images ---
-`gz sim` writes PNGs to:  ./captured_frames/  (relative to the cwd of gz sim)
-If you launched gz sim from THIS shell's cwd (/home/.../place-items-on-shelf),
-  -> look in:  /home/.../place-items-on-shelf/captured_frames
-FOUND: /home/.../place-items-on-shelf/captured_frames exists with 14 PNG(s).
-  newest: 14.png  (52341 bytes)
-```
-
-If `move_camera.py` reports `does NOT exist from this shell`, see the
-Troubleshooting section below.
-
-Gazebo does NOT label the files with the camera pose, so if you want
-"this PNG was taken at view X" you need to look at the modified
-timestamps and match them against the print-out from
-`move_camera.py`. For Step 1 that mapping is good enough; the proper
-"label-per-frame" pipeline is deferred to Step 2.
-
-## What's next (the three-step plan)
-
-This folder implements **Step 1 only**: place a camera, save its
-frames, and optionally move the camera between captures.
-
-- **Step 1 — move the camera.** (this README) Different angles of
-  the same static scene. → ~20 PNGs per `--loop` cycle.
-- **Step 2 — move the objects.** Random jitter on the beakers and the
-  solvent bottle between captures, plus a per-frame YOLO / COCO label
-  derived from the world's pose-info topic. → labelled detection
-  dataset.
-- **Step 3 — change lighting.** Vary `<light>` direction and intensity
-  for domain randomisation. → a model trained on this data survives
-  the real lighting in a real lab.
-
-Step 2 reuses the `set_pose` pattern from `move_camera.py` — same
-`gz service` call, applied to the beakers and the bottle instead of
-(or in addition to) the camera. Step 3 edits the `<light>` block in
-the SDF before each cycle.
+The script prints the absolute path on every save, so there is no
+guessing — just copy the path it printed.
 
 ## Troubleshooting
 
-- **`captured_frames/` does not appear.** The `<save>` path is
-  relative to wherever you launched `gz sim`. Find it with:
+- **`ERROR: gz-transport Python bindings not found.`**
+  Run the apt-install line for your distro (table above). If apt
+  cannot find the package, you are on the other gz track — Garden
+  has `gz-transport12`, Harmonic has `gz-transport13`.
 
-  ```bash
-  find ~ -type d -name captured_frames 2>/dev/null
-  ```
+- **`WARNING: no frame in 5 s`** despite gz sim being open.
+  - Is the sim paused? Click ▶ in the GUI, or use `-r` on the CLI.
+  - Is the topic actually published? Confirm with:
+    ```bash
+    gz topic -l | grep image_raw
+    gz topic -e -t /overhead_camera/image_raw -n 1
+    ```
+    The second command prints one message — if it does, the topic
+    is live and the Python subscriber should match it.
+  - Are you on a gz version that does not match `transport12` or
+    `transport13`? Check `gz sim --version`.
 
-  Possible causes if `find` returns nothing:
-  1. **`gz sim` is paused.** Click ▶ in the GUI, or use `-r` on
-     the CLI. The sensor only renders (and only saves) while sim
-     time is advancing.
-  2. **No write permission in the cwd.** Re-launch `gz sim` from
-     `~` or from inside the repo.
-  3. **Your `gz sim` version does not implement the `<save>`
-     element.** Older Garden builds parsed it but did not act on
-     it. Check `gz sim --version`; Garden (gz-sensors 7.x+) and
-     Harmonic (gz-sensors 8.x+) both implement it. If yours is
-     older, upgrade or switch to a different capture method
-     (e.g. `rqt_image_view` recording, or extend `move_camera.py`
-     to subscribe to the image topic and save frames itself).
-  4. **`<always_on>1</always_on>` isn't being honoured.** Open the
-     "Image Display" plugin in Gazebo and pick
-     `overhead_camera/image_raw` — that forces the sensor to
-     render and write frames. Then `captured_frames/` should
-     start filling.
-- **`gz service` says "service call timed out".** The world's
-  `UserCommands` plugin is not loaded. The SDF in this repo
-  declares it explicitly (line ~498 of `ketchup_extraction.sdf`),
-  so check you are running the right SDF.
-- **PNGs all look identical.** Either the camera is not moving
-  (`move_camera.py` not running), or its `set_pose` calls all fail
-  silently. Re-run `move_camera.py` in the foreground and look for
-  `set_pose=FAIL` lines.
-- **`gz` command not found.** You did not source the Gazebo
-  environment. Modern gz sim does not need a source script if it
-  was installed via apt (`gz` lands in `/usr/bin/`); if you built
-  it from source, source the workspace's `install/setup.bash`.
+- **`set_pose=FAIL (is gz sim running?)`** on every line.
+  The world's `UserCommands` plugin is not loaded. The SDF in this
+  repo declares it explicitly (line ~498 of
+  `ketchup_extraction.sdf`), so check you are running the right
+  SDF file.
+
+- **PNGs all look identical even though the script reports moves.**
+  Either the camera is teleporting but not re-rendering (try
+  `--dwell 4` so the sensor has more time to publish a fresh frame),
+  or the camera is not actually being moved (re-run and check that
+  every line ends in `set_pose=OK`).
+
+- **Colours look wrong (BGR/RGB swap).**
+  The SDF declares `<format>R8G8B8</format>` and the script saves
+  with PIL `mode="RGB"`. If you swap to a BGR camera format, also
+  swap the `mode="RGB"` argument in `msg_to_png()`.
+
+## What's next (the three-step plan)
+
+This folder implements **Step 1 only**: place a camera, subscribe
+to its frames, move the camera between captures.
+
+- **Step 1 — move the camera.** (this README) Different angles of
+  the same static scene. → ~5 PNGs per default cycle, ~15 with
+  `--shots 3`.
+- **Step 2 — move the objects.** Random jitter on the beakers and the
+  solvent bottle between captures, plus a per-frame YOLO / COCO label
+  derived from the world's pose-info topic.
+- **Step 3 — change lighting.** Vary `<light>` direction and intensity
+  for domain randomisation.
+
+Step 2 reuses the `set_pose` pattern from `move_camera.py` —
+same `gz service` call, applied to the beakers and the bottle
+instead of (or in addition to) the camera. Step 3 edits the
+`<light>` block in the SDF, or calls `gz service` on the light
+entity, between cycles.
 
 ## File list
 
 ```
 synthetic_data/
 ├── README.md         (this file)
-└── move_camera.py    (optional: teleport the camera through preset views)
+└── move_camera.py    (subscribe + teleport + save PNGs)
 ```
-
-Capture itself is handled by the SDF — no Python required to take
-the first picture.
 
 ## Related docs
 
@@ -210,6 +192,5 @@ the first picture.
 - [`../../../docs/synthetic-data/`](../../../docs/synthetic-data/) —
   the customer-facing synthetic-data offering this implements.
 - [`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md)
-  — Feature 1, which this exercise is the simplest possible warm-up
-  for. The "labels at every pixel" half of that feature lands in
-  Step 2.
+  — Feature 1, the bigger version of what this exercise warms up.
+  Adds masks + labels on top of the raw frames produced here.
