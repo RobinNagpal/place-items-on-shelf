@@ -413,9 +413,12 @@
     <!-- ============================================================
          Overhead RGB camera for synthetic-data generation.
 
-         Pose: 0.5 m above the bench top (bench top is z = 0.900,
-         camera at z = 1.500), centred over the bench, pitched
-         +pi/2 so it looks straight down.
+         Default pose: 0.5 m above the bench top (bench top is at
+         z = 0.900, camera at z = 1.500), centred over the bench,
+         pitched +pi/2 so it looks straight down. The
+         `synthetic_data/move_camera.py` script teleports this
+         model to other preset poses at runtime to capture
+         different angles.
 
          At depth 0.6 m below the camera, the 60-degree horizontal
          FOV gives a visible Y-range of ~0.69 m and X-range of
@@ -423,15 +426,20 @@
          three beakers (Y from -0.30 to -0.06) and the solvent
          bottle (Y = +0.25), plus the arm marker at the back.
 
-         Frames publish on the Gazebo Transport topic
-         `/overhead_camera/image_raw` at 30 Hz. Bridge them into
-         ROS 2 with ros_gz_bridge — see
-         `synthetic_data/README.md` for the bridge command and the
-         dataset-generator script.
+         How frames are captured:
+           - The sensor publishes RGB frames on the Gazebo Transport
+             topic `/overhead_camera/image_raw` (visible in
+             `gz topic -l` while the sim is running).
+           - The <save> element below makes Gazebo also dump every
+             rendered frame to disk as a PNG. The folder
+             `captured_frames/` is created next to wherever you ran
+             `gz sim` (i.e. the repo root, if you used the recipe
+             in synthetic_data/README.md).
 
-         The frame size (640 x 480) and HFOV (60 deg) must stay in
-         sync with the constants in `synthetic_data/generate_dataset.py`.
-         If you change them here, change them there too.
+         No ROS, no ros_gz_bridge, and no Python image subscriber
+         are needed for capture — Gazebo writes the dataset on its
+         own. See synthetic_data/README.md for the two-terminal
+         WSL recipe.
          ============================================================ -->
     <model name="overhead_camera">
       <static>true</static>
@@ -453,7 +461,11 @@
         </visual>
         <sensor name="overhead_cam" type="camera">
           <always_on>1</always_on>
-          <update_rate>30</update_rate>
+          <!-- 2 Hz: enough to get a fresh frame after each
+               camera move without flooding the disk with PNGs.
+               Bump this back up if you also want a high-rate
+               live preview on the topic. -->
+          <update_rate>2</update_rate>
           <topic>overhead_camera/image_raw</topic>
           <camera>
             <horizontal_fov>1.0472</horizontal_fov>
@@ -466,6 +478,13 @@
               <near>0.05</near>
               <far>3.0</far>
             </clip>
+            <!-- Auto-save every rendered frame to disk. Path is
+                 relative to the cwd of `gz sim`. Gazebo creates
+                 the folder on its own and writes sequential
+                 PNGs (1.png, 2.png, ...). -->
+            <save enabled="true">
+              <path>captured_frames</path>
+            </save>
           </camera>
         </sensor>
       </link>

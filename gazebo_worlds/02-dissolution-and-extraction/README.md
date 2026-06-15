@@ -121,25 +121,30 @@ A `paracetamol_dissolution.sdf` sibling would cover the clean
 dissolution case later; other steps get their own subfolders under
 `gazebo_worlds/`.
 
-## Synthetic-data generator
+## Synthetic-data capture
 
-The world also has an **overhead RGB camera** bolted on so it can
-produce a YOLO-format dataset of the two object classes the arm
-needs to find here: `solvent_bottle` and `beaker`. See
-[`synthetic_data/README.md`](synthetic_data/README.md) for the
-three-terminal run recipe. This is the first concrete
-implementation of
-[`docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md`](../../docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md).
+The world has an **overhead RGB camera** bolted on so it can produce
+a small dataset of the bench from above. The current implementation
+is deliberately **Step 1 only** — place the camera, save its frames
+to disk, optionally move the camera between captures. No labels yet,
+no object jitter, no lighting variation. Those are Step 2 and Step 3,
+deferred to a follow-up.
+
+See [`synthetic_data/README.md`](synthetic_data/README.md) for the
+two-terminal WSL recipe. The capture itself is done by Gazebo's
+`<save>` element on the camera sensor — no ROS bridge, no Python
+subscriber, no `cv_bridge`.
+
+This is the first concrete warm-up for
+[`docs/synthetic-data/features/01-detection-images-and-masks.md`](../../docs/synthetic-data/features/01-detection-images-and-masks.md).
 
 ## File list
 
 ```
 02-dissolution-and-extraction/
 ├── README.md                  (this file)
-├── ketchup_extraction.sdf     (the Gazebo world, now with an overhead camera)
-└── synthetic_data/            (RGB + YOLO-box dataset generator)
+├── ketchup_extraction.sdf     (the Gazebo world; overhead camera auto-saves frames)
+└── synthetic_data/            (Step 1: capture frames at multiple camera angles)
     ├── README.md
-    ├── generate_dataset.py
-    ├── dataset.yaml
-    └── requirements.txt
+    └── move_camera.py
 ```
