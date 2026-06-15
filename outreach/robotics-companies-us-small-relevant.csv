@@ -1,129 +1,63 @@
 name,relevance,note,contact_name,position,email
-Skyways,relevant,autonomous cargo drones for DoD,Charles Acknin,CEO,
-AgZen,relevant,precision crop-spraying robotics with vision/AI,Vishnu Jayaprakash,Co-founder & CEO,vishnu@agzen.com
-Ambi Robotics,relevant,AI-powered warehouse sorting robots (Sim2Real),Jim Liefer,CEO,
-Medra,relevant,autonomous lab robots for drug discovery,Michelle Lee,CEO,tours@medra.ai
-TRIC Robotics,relevant,autonomous UV pest-control farm robots,Adam Stager,Founder & CEO,
-10Beauty,relevant,robotic manicure machines,Alex Shashou,Co-founder & CEO,
-Civ Robotics,relevant,autonomous construction-layout survey robots,Tom Yeshurun,Co-founder & CEO,
-Gabletek Robotics and Controls Solutions,relevant,industrial robotics/PLC system integrator,,,contactus@gabletek.com
-BotBuilt,relevant,robots that frame houses for builders,Brent Wadas,Co-founder & CEO,info@botbuilt.com
-Terranova,relevant,terraforming robots that lift flood-prone land,Laurence Allen,CEO,
-Pickle Robot Company,relevant,truck-unload warehouse robots,AJ Meyer,Founder & CEO,
-Gritt Robotics,relevant,physical AI for solar/construction sites,Puneet Puri,CEO,
-Bedrock Ocean Exploration,relevant,autonomous underwater survey vehicles,Matthew Tirman,CEO,
-Gather AI,relevant,autonomous warehouse inventory drones,Sankalp Arora,Co-founder & CEO,
-Icarus Robotics,relevant,free-flying dexterous robots for space,Ethan Barajas,CEO,
-Prime Robotics,relevant,warehouse AMRs and automation systems,Eric Rongley,CEO,
-Contoro Robotics,relevant,AI trailer/container unloading robots,Youngmok Yun,Co-founder & CEO,info@contoro.com
-"Albacore, Inc.",relevant,autonomous underwater defense submarines,John Huddleston,Co-founder,
-Periodic Labs,relevant,autonomous robotic labs for materials science,Liam Fedus,Co-founder,contact@periodic.com
-General Robotics,relevant,tactical combat robots and remote weapon stations,Shahar Gal,CEO,contact@general-robotics.com
-Dexmate,relevant,mobile humanoid with dexterous hands,Tao Chen,Co-founder & CEO,
-Orchard Robotics,relevant,AI vision/robotics for orchard farming,Charlie Wu,Co-founder & CEO,charlie@orchard-robotics.com
-Burro,relevant,autonomous ground robots for agriculture,Charlie Andersen,Co-founder & CEO,
-FW ACQUISITION INC,relevant,FlightWave defense UAS drone maker,Shawn Webb,President (FlightWave),
-Reframe Systems,relevant,robotic microfactories for prefab housing,Vikas Enti,Co-founder & CEO,
-Robust.AI,relevant,collaborative mobile warehouse robot carts,Anthony Jules,Co-founder & CEO,contact@robust.ai
-Watney Robotics Inc,relevant,autonomous robots for datacenter ops,Ryan Gannon,Co-founder & CEO,
-Remedy Robotics,relevant,remote endovascular surgical robot,David Bell,Co-founder & CEO,info@remedyrobotics.com
-Sorting Robotics,relevant,cannabis production automation robots,Nohtal Partansky,Co-founder & CEO,
-Reflex Robotics,relevant,wheeled humanoid robots for logistics/manufacturing,Ritesh Ragavender,Co-founder & CEO,
-RoboForce,relevant,AI industrial robots for solar/manufacturing (Titan),Leo Ma,Co-founder & CEO,
-Corvus Robotics,relevant,autonomous warehouse inventory drones,Jackie Wu,Co-founder & CEO,
-watneyrobotics.io,relevant,autonomous robotics for datacenter operations,Sean Cheong,CEO,
-Mind Robotics,relevant,AI-powered industrial robots (Rivian spinoff),RJ Scaringe,Chairman,
-"Adaptek Systems, LLC",relevant,custom robotic automation/assembly systems,Joe DePrisco,CEO,sales@adapteksystems.com
-Maven Robotics,relevant,general-purpose AI robots for industry,Hamza Derbas,CEO,
-Charge Robotics,relevant,robotic solar farm assembly factories,Banks Hunter,Co-founder & CEO,
-Built Robotics,relevant,autonomous construction equipment kits,Noah Ready-Campbell,Founder & CEO,
-Boxbot,relevant,robotic parcel sorting/handling systems,Austin Oehlerking,Co-founder & CEO,
-Swarmbotics AI,relevant,autonomous ground robot swarms for defense,Stephen Houghton,Co-founder & CEO,
-Perrone Robotics,relevant,autonomous vehicle software/retrofit kits,Paul Perrone,Founder & CEO,
-Planted,relevant,robotic solar farm installation system,Eric Brown,CEO,
-Foundry Robotics,relevant,AI-driven modular robotic assembly cells,Adarsh Kulkarni,Founder & CEO,
-Multiply Labs,relevant,robotic pharma/cell therapy manufacturing,Fred Parietti,Co-founder & CEO,
-Starpath,relevant,autonomous lunar mining/propellant rovers,Saurav Shroff,Co-founder & CEO,
-Ultra,relevant,general-purpose warehouse robots with teleop,Jon Miller Schwartz,Co-founder & CEO,founders@ultra.tech
-Urban Machine,relevant,robotic wood-waste reclaiming machine,Eric Law,Co-founder & CEO,eric@urbanmachine.build
-Rizse,relevant,autonomous drones for aircraft inspection,Colby Harvey,Founder & CEO,
-Arc Specialties,relevant,custom robotic welding systems integrator,Daniel Allford,Founder & President,dan@arcspecialties.com
-10x,relevant,general-purpose construction humanoid robots,Yogesh Ghaturle,Co-founder & CEO,yogesh@10xconstruction.ai
-Rover Robotics,relevant,UGV mobile robot platforms for R&D,Nick Velander,CEO,
-Roboteam,relevant,tactical unmanned ground vehicles for defense,Matan Shirvi,CEO,
-Ghost Robotics,relevant,quadruped UGVs for defense (Vision 60),Gavin Kenneally,Co-founder & CEO,
-"Four Growers, Inc.",relevant,robotic greenhouse tomato/cucumber harvester,Brandon Contino,Co-founder & CEO,
-PSA Systems,relevant,industrial robotics systems integrator,Michael McHale,CEO,
-Tortuga AgTech,relevant,strawberry/grape harvesting robots (acq 2025),Eric Adamson,Co-founder & CEO,
-Capstone Technologies,relevant,AutoViri print-to-mail robotic automation,Troy Power,Co-founder & CSO,
-Collaborative Robotics,relevant,wheeled mobile cobots for logistics,Brad Porter,Founder & CEO,
-Build With Robots,relevant,autonomous disinfecting mobile robots,Chris Ziomek,Founder & CEO,
-ViaBot,relevant,autonomous outdoor sweeping/security robots,Gregg Ratanaphanyarat,Co-founder & CEO,
-Bluefin Robotics,relevant,autonomous underwater vehicles (Gen Dynamics),Laura Hooks,VP & GM Maritime (GD Mission Systems),
-Toggle,relevant,robotic rebar fabrication for construction,Daniel Blank,Co-founder & CEO,
-Vantage Robotics,relevant,Vesper ISR drones for defense/public safety,Tobin Fisher,Co-founder & CEO,
-"Weave Robotics, Inc.",relevant,Isaac home laundry-folding robot,Evan Wineland,Co-founder & CEO,
-Construction Robotics,relevant,SAM bricklaying and MULE lift-assist robots,Scott Peters,Co-founder & CEO,
-Relay Robotics,relevant,autonomous hotel/hospital delivery robots,Wade Pfeiffer,CEO,
-Mobot,relevant,physical robots for mobile-app QA testing,Eden Full Goh,Founder & CEO,
-Bumblebee Spaces,relevant,ceiling-mounted robotic home furniture,Sankarshan Murthy,Founder & CEO,
-"Harmonic Bionics, Inc.",relevant,upper-extremity rehabilitation robotic exoskeleton,Christopher Prentice,CEO,info@harmonicbionics.com
-"CreateMe Technologies, Inc.",relevant,AI robotics for automated apparel manufacturing,Cam Myers,CEO,hello@createme.com
-"Machina Labs, Inc",relevant,AI-driven robotic sheet-metal forming,Edward Mehr,Co-founder & CEO,
-RoboTire,relevant,robotic automotive tire-changing system,Victor Darolfi,Founder & CEO,
-Cyanbot,relevant,autonomous sidewalk delivery robots (Coco),Zach Rash,Co-founder & CEO,
-Slip Robotics,relevant,automated truck loading/unloading robots,Christopher Smith,Co-founder & CEO,
-Saturday Robotics,relevant,autonomous laundry robots,Benjamin Bixby,President & CEO,
-Stratom Inc,relevant,autonomous ground vehicles and robotic refueling,Mark Gordon,President & CEO,
-BIONIK Inc.,relevant,InMotion neuro-rehabilitation robots,Richard Russo Jr.,CEO & CFO,rrusso@bioniklabs.com
-Pliant Energy Systems,relevant,amphibious marine robots with undulating fins,Benjamin Pietro Filardo,Founder & CEO,
-Stellar Pizza,relevant,robotic pizza-making food trucks,Benson Tsai,CEO,
-Barrett Technology,relevant,WAM robotic arms and BarrettHand manipulators,Bill Townsend,Founder & CEO,
-The Numina Group,relevant,warehouse automation with AMRs and WES software,Dan Hanrahan,Founder & CEO,dhanrahan@numinagroup.com
-Formlogic,relevant,autonomous CNC precision manufacturing,Paul Sutter,Founder & CEO,
-CRABI Robotics,relevant,autonomous marine hull-cleaning robots,Levi Gershon,CEO,inquiries@crabi-robotics.com
-Peer Robotics,relevant,collaborative mobile robots (AMRs) for manufacturing,Rishabh Agarwal,Co-founder & CEO,
-Techmetics Robotics,relevant,service AMRs for hospitality and healthcare,Mathan Muthupillai,CEO,sales@techmetics-group.com
-Rugged Robotics,relevant,autonomous floor-layout printing robot for construction,Derrick Morse,Co-founder & CEO,
-Dexai Robotics,relevant,Alfred robotic sous-chef for food service,David Johnson,Founder & CEO,info@dexai.com
-TAILOS,relevant,autonomous commercial vacuuming robot (Rosie),Micah Green,Founder & CEO,
-Skyline Robotics,relevant,Ozmo autonomous window-cleaning robot,Michael Brown,Chairman & CEO,contact@skylinerobotics.com
-SuperDroid Robots,relevant,custom tactical/inspection robots,Charlie Payne,Founder & CEO,
-Drone Aviation,relevant,tethered aerostats and drones,David Knight,CEO (parent COMSovereign),info@droneaviationcorp.com
-"Robin Autopilot, USA",relevant,robotic lawn mowing fleet RaaS,Logan Fahey,Founder & CEO,
-CleanRobotics,relevant,AI sorting recycling robot bins,Charles Yhap,Co-founder & CEO,
-Silent Falcon,relevant,small UAS for inspection and ISR,Grant Bishop,President & CEO,info@silentfalconuas.com
-Triton Medical Robotics,relevant,GI endoscopy surgical robot,Alex Tilson,CEO (parent Neptune Medical),
-Ware,relevant,autonomous drones for warehouse inventory,Ian Smith,Co-founder & CEO,
-Ava Robotics,relevant,autonomous telepresence robots,Youssef Saleh,Co-founder & CEO,
-Segway Robotics,relevant,delivery and service robot platforms,,,marketing@robotics.segway.com
-Artly,relevant,AI robotic barista coffee company,Meng Wang,Co-founder & CEO,info@artly.coffee
-"Greenfield Robotics - Healthy Food, Healthy Planet",relevant,autonomous weeding farm robots,Clint Brauer,Founder,
-ReconRobotics,relevant,throwable tactical micro-robots,,,
-Advanced Construction Robotics,relevant,rebar tying and placing construction robots,Danielle Proctor,CEO,
-Volley Automation,relevant,robotic automated parking systems,Sam Richardson,CEO,
-Infinite Roboitcs,relevant,industrial robot integration and automation,Dave Neville,Co-founder & President,
-Eka Robotics,relevant,sim-to-real manipulation robotics AI,Pulkit Agrawal,Co-founder & CEO,hello@ekarobotics.com
-Harvest Croo,relevant,autonomous strawberry harvesting robot,Joseph McGee,CEO,info@harvestcroo.com
-Verdant Robotics,relevant,precision ag spraying/weeding robots,Gabe Sibley,Founder & CEO,
-Trifo,relevant,AI home robot vacuums,Zhe Zhang,Founder & CEO,
-Purple Rhombus,relevant,manufactures attritable UAS drones,Mike Benitez,CEO,
-Grafton Sciences,relevant,physical AI research and engineering,Anubhav Dubey,CEO,
-Hydronalix,relevant,unmanned surface vessels for rescue/defense,Anthony Mulligan,Founder & CEO,
-ARIX Technologies,relevant,pipe-inspection crawler robots,Dianna Liu,Founder & President,dianna@arix-tech.com
-Wings,relevant,autonomous food-service retail robotics,Haitham Al-Beik,Founder (letsbutterfly Inc.),
-Virtual Incision,relevant,miniaturized surgical robot MIRA,Jim Alecxih,CEO,
-PreNav,relevant,precision drones for infrastructure inspection,Nathan Schuett,CEO,
-Kane Robotics,relevant,cobot sanding/grinding/finishing systems,John Spruce,CEO,
-XYZ Robotics Inc.,relevant,warehouse picking/manipulation robots,Jiaji Zhou,Co-founder & CEO,
-Blendid,relevant,autonomous robotic smoothie kiosks,Vipin Jain,Co-founder & CEO,
-K2 Kinetics,relevant,robotic packaging automation (acquired by JLS),,,Hello@K2Kinetics.com
-Treeswift,relevant,autonomous drone swarms for forestry,Steven Chen,CEO,
-"Verve, Inc.",relevant,wearable exosuit robotics for industrial workers,Ignacio Galiana,Co-founder & CTO,
-Promobot Corp.,relevant,humanoid service robots for retail/hospitality,,,sales@promo-bot.ai
-Dusty Robotics,relevant,autonomous BIM layout robot for construction,Tessa Lau,Co-founder & CEO,
-LabMinds Inc,relevant,lab automation robotics for solution prep,Jeff Caputo,CEO,jeff.caputo@labminds.com
-Square Robot,relevant,autonomous submersible tank-inspection robots,David Lamont,CEO,
-Wilder Systems Inc.,relevant,robotic automation for aircraft manufacturing,Will Wilder,Founder & CEO,
-OhmniLabs,relevant,telepresence/healthcare robots (now Symbotic),Thuc Vu,Co-founder & CEO,contact@ohmnilabs.com
-Galen Robotics,relevant,ENT surgical assistant robot,Bruce Lichorowic,CEO,
+AgZen,"Vision/AI precision spraying; needs labeled crop/weed perception data and field-cell sim for sprayer kinematics.",precision crop-spraying robotics with vision/AI,Vishnu Jayaprakash,Co-founder & CEO,vishnu@agzen.com
+Ambi Robotics,"Explicit Sim2Real warehouse-arm sorter; flagship customer profile for sim setup plus grasp-data synthesis.",AI-powered warehouse sorting robots (Sim2Real),Jim Liefer,CEO,
+Medra,"Arm-based autonomous lab for drug discovery; bench plus small-vessel manipulation is exactly the Simulation Setup sweet spot.",autonomous lab robots for drug discovery,Michelle Lee,CEO,tours@medra.ai
+10Beauty,"High-precision manicure arm with vision; benefits from contact-dynamics sim and synthetic finger/nail data.",robotic manicure machines,Alex Shashou,Co-founder & CEO,
+BotBuilt,"Gantry-arm framing robot for houses; sim de-risks stud-by-stud workflows before factory-floor bring-up.",robots that frame houses for builders,Brent Wadas,Co-founder & CEO,info@botbuilt.com
+Terranova,"Heavy land-lifting construction robots; physics-tuned sim cuts real-world iteration cost on terrain interaction.",terraforming robots that lift flood-prone land,Laurence Allen,CEO,
+Pickle Robot Company,"Truck-unload arm and perception; classic mobile-manipulation use case where sim plus grasp data move the needle.",truck-unload warehouse robots,AJ Meyer,Founder & CEO,
+Gritt Robotics,"Physical AI on solar/construction sites; needs sim plus perception data for outdoor manipulation policy training.",physical AI for solar/construction sites,Puneet Puri,CEO,
+Icarus Robotics,"Free-flying dexterous space robots; physics-tuned sim is critical since on-orbit testing is impossible.",free-flying dexterous robots for space,Ethan Barajas,CEO,
+Contoro Robotics,"AI trailer-unloading arm; sim plus grasp/segmentation data directly serve the perception-plus-manipulation loop.",AI trailer/container unloading robots,Youngmok Yun,Co-founder & CEO,info@contoro.com
+Periodic Labs,"Autonomous robotic materials-science lab; arm plus bench plus small-object handling matches the Simulation Setup pitch verbatim.",autonomous robotic labs for materials science,Liam Fedus,Co-founder,contact@periodic.com
+Dexmate,"Mobile humanoid with dexterous hands; humanoid policy training needs heavy sim plus behavior-cloning trajectories.",mobile humanoid with dexterous hands,Tao Chen,Co-founder & CEO,
+Orchard Robotics,"AI vision for orchard farming; fruit/tree segmentation and pose data are textbook synthetic-data use cases.",AI vision/robotics for orchard farming,Charlie Wu,Co-founder & CEO,charlie@orchard-robotics.com
+Reframe Systems,"Robotic prefab microfactories; arm-cell sim plus assembly-step grasp data save weeks of factory-floor debugging.",robotic microfactories for prefab housing,Vikas Enti,Co-founder & CEO,
+Remedy Robotics,"Endovascular surgical robot; sim plus force/pose synthetic data are needed since real-anatomy trials are scarce.",remote endovascular surgical robot,David Bell,Co-founder & CEO,info@remedyrobotics.com
+Sorting Robotics,"Cannabis arm-based sorting/processing; vision plus grasp labels on varied plant geometry are a clean synthetic-data fit.",cannabis production automation robots,Nohtal Partansky,Co-founder & CEO,
+Reflex Robotics,"Wheeled humanoid for logistics; full-body sim plus behavior-cloning trajectories are central to humanoid policy work.",wheeled humanoid robots for logistics/manufacturing,Ritesh Ragavender,Co-founder & CEO,
+RoboForce,"Industrial Titan arms for solar/manufacturing; sim setup speeds customer-site deployment and policy training.",AI industrial robots for solar/manufacturing (Titan),Leo Ma,Co-founder & CEO,
+Maven Robotics,"General-purpose AI industrial robots; sim plus synthetic data feed the foundation-model training pipeline.",general-purpose AI robots for industry,Hamza Derbas,CEO,
+Charge Robotics,"Robotic solar farm assembly arms; outdoor cell sim plus panel-handling grasp labels map straight to the offering.",robotic solar farm assembly factories,Banks Hunter,Co-founder & CEO,
+Built Robotics,"Autonomous construction equipment; heavy sim use for excavator policy training and synthetic terrain data.",autonomous construction equipment kits,Noah Ready-Campbell,Founder & CEO,
+Boxbot,"Parcel sorting arm plus vision; classic warehouse pick/place where sim plus grasp data are central.",robotic parcel sorting/handling systems,Austin Oehlerking,Co-founder & CEO,
+Planted,"Robotic solar farm installation arms; outdoor sim plus panel/cable manipulation data fit the offering directly.",robotic solar farm installation system,Eric Brown,CEO,
+Foundry Robotics,"Modular AI-driven assembly cells; bench-style arm setups match the Simulation Setup pitch exactly.",AI-driven modular robotic assembly cells,Adarsh Kulkarni,Founder & CEO,
+Multiply Labs,"Robotic pharma/cell-therapy manufacturing; arm plus small-vial bench sim and grasp data are a clean fit.",robotic pharma/cell therapy manufacturing,Fred Parietti,Co-founder & CEO,
+Starpath,"Lunar mining/propellant rovers; sim plus synthetic regolith perception data are mission-critical pre-launch.",autonomous lunar mining/propellant rovers,Saurav Shroff,Co-founder & CEO,
+Ultra,"Warehouse arm plus teleop; teleop-derived behavior-cloning trajectories are exactly what DoDAO supplies.",general-purpose warehouse robots with teleop,Jon Miller Schwartz,Co-founder & CEO,founders@ultra.tech
+Urban Machine,"Wood-waste reclaiming robot; vision-driven sorting plus arm extraction map to segmentation and grasp data.",robotic wood-waste reclaiming machine,Eric Law,Co-founder & CEO,eric@urbanmachine.build
+10x,"Construction humanoid robots; sim plus behavior cloning plus jobsite synthetic data are essential for humanoid policy training.",general-purpose construction humanoid robots,Yogesh Ghaturle,Co-founder & CEO,yogesh@10xconstruction.ai
+"Four Growers, Inc.","Greenhouse harvesting arm plus vision; sim of greenhouse plus tomato/cucumber segmentation are textbook needs.",robotic greenhouse tomato/cucumber harvester,Brandon Contino,Co-founder & CEO,
+Capstone Technologies,"Print-to-mail handling automation; envelope/document manipulation cells fit the bench-arm Simulation Setup pitch.",AutoViri print-to-mail robotic automation,Troy Power,Co-founder & CSO,
+Collaborative Robotics,"Wheeled cobot with manipulator; mobile-manipulation sim plus scene data are the offering sweet spot.",wheeled mobile cobots for logistics,Brad Porter,Founder & CEO,
+Toggle,"Robotic rebar fabrication arm; precise bending/placement sim plus force data save real-cell iteration cycles.",robotic rebar fabrication for construction,Daniel Blank,Co-founder & CEO,
+"Weave Robotics, Inc.","Home laundry-folding robot; cloth manipulation is canonically the hardest sim plus data problem in robotics.",Isaac home laundry-folding robot,Evan Wineland,Co-founder & CEO,
+Construction Robotics,"SAM bricklayer plus MULE; arm-on-site sim plus brick-pose/grasp data slot directly into the offering.",SAM bricklaying and MULE lift-assist robots,Scott Peters,Co-founder & CEO,
+"Harmonic Bionics, Inc.","Upper-extremity rehab exoskeleton; sim of patient-robot interaction plus force data fit the force-sensor synthesis offering.",upper-extremity rehabilitation robotic exoskeleton,Christopher Prentice,CEO,info@harmonicbionics.com
+"CreateMe Technologies, Inc.","AI robotics for apparel manufacturing; fabric handling plus vision are perfect synthetic-data plus sim customers.",AI robotics for automated apparel manufacturing,Cam Myers,CEO,hello@createme.com
+"Machina Labs, Inc","AI-driven sheet-metal forming arm; contact-rich physics sim plus force data are the exact offering.",AI-driven robotic sheet-metal forming,Edward Mehr,Co-founder & CEO,
+Slip Robotics,"Automated truck loading/unloading; mobile manipulation use case where sim plus grasp data accelerate deployment.",automated truck loading/unloading robots,Christopher Smith,Co-founder & CEO,
+Saturday Robotics,"Autonomous laundry robots; cloth handling needs heavy sim plus behavior cloning (like Weave).",autonomous laundry robots,Benjamin Bixby,President & CEO,
+Stratom Inc,"Autonomous robotic refueling; arm plus nozzle-insertion sim plus force data are a clean fit.",autonomous ground vehicles and robotic refueling,Mark Gordon,President & CEO,
+BIONIK Inc.,"Neuro-rehab arm robot; sim of patient-robot interaction plus force data fit the synthetic-sensor offering.",InMotion neuro-rehabilitation robots,Richard Russo Jr.,CEO & CFO,rrusso@bioniklabs.com
+Stellar Pizza,"Pizza-making arm plus vision; food handling cell sim plus ingredient segmentation are direct customer needs.",robotic pizza-making food trucks,Benson Tsai,CEO,
+Formlogic,"Autonomous CNC precision manufacturing; sim of CNC plus arm tending and part-pose data fit the offering.",autonomous CNC precision manufacturing,Paul Sutter,Founder & CEO,
+Dexai Robotics,"Alfred sous-chef arm plus vision; kitchen-cell sim plus ingredient segmentation are textbook customers.",Alfred robotic sous-chef for food service,David Johnson,Founder & CEO,info@dexai.com
+Skyline Robotics,"Window-cleaning Ozmo arm; outdoor cell sim plus facade segmentation save expensive real-world iteration.",Ozmo autonomous window-cleaning robot,Michael Brown,Chairman & CEO,contact@skylinerobotics.com
+CleanRobotics,"AI sorting recycling arm plus vision; segmentation plus grasp data on cluttered waste streams are central.",AI sorting recycling robot bins,Charles Yhap,Co-founder & CEO,
+Triton Medical Robotics,"GI endoscopy surgical robot; force plus perception sim is critical since cadaver/clinical iteration is slow.",GI endoscopy surgical robot,Alex Tilson,CEO (parent Neptune Medical),
+Artly,"Barista arm plus vision; kitchen-cell sim and ingredient handling are direct fits.",AI robotic barista coffee company,Meng Wang,Co-founder & CEO,info@artly.coffee
+"Greenfield Robotics - Healthy Food, Healthy Planet","Autonomous weeding farm robots; vision-based weed discrimination is a clean synthetic-data use case.",autonomous weeding farm robots,Clint Brauer,Founder,
+Advanced Construction Robotics,"Rebar tying/placing arm; rebar-pose perception plus grasp-force data are clean synthetic-data fits.",rebar tying and placing construction robots,Danielle Proctor,CEO,
+Eka Robotics,"Sim-to-real manipulation AI; literally building what DoDAO's offering supports.",sim-to-real manipulation robotics AI,Pulkit Agrawal,Co-founder & CEO,hello@ekarobotics.com
+Harvest Croo,"Strawberry harvesting arm; vision plus delicate-fruit grasp data are a textbook customer.",autonomous strawberry harvesting robot,Joseph McGee,CEO,info@harvestcroo.com
+Verdant Robotics,"Precision ag spraying/weeding with vision; synthetic crop/weed perception data map directly to the offering.",precision ag spraying/weeding robots,Gabe Sibley,Founder & CEO,
+Wings,"Food-service retail robotics; cell sim plus ingredient/utensil manipulation data fit cleanly.",autonomous food-service retail robotics,Haitham Al-Beik,Founder (letsbutterfly Inc.),
+Virtual Incision,"MIRA miniaturized surgical robot; sim plus force/perception data accelerate FDA-relevant testing.",miniaturized surgical robot MIRA,Jim Alecxih,CEO,
+Kane Robotics,"Cobot finishing arms (sand/grind/polish); contact-rich force sim plus synthetic surface-defect data fit.",cobot sanding/grinding/finishing systems,John Spruce,CEO,
+XYZ Robotics Inc.,"Warehouse picking/manipulation; classic arm plus vision use case for sim plus grasp data.",warehouse picking/manipulation robots,Jiaji Zhou,Co-founder & CEO,
+Blendid,"Smoothie kiosk arm; small-cell sim plus ingredient handling are direct customer use cases.",autonomous robotic smoothie kiosks,Vipin Jain,Co-founder & CEO,
+LabMinds Inc,"Lab automation arm for solution prep; bench plus small-vessel handling fits the Simulation Setup pitch.",lab automation robotics for solution prep,Jeff Caputo,CEO,jeff.caputo@labminds.com
+Wilder Systems Inc.,"Robotic aircraft manufacturing arms; large-cell sim plus heavy industrial grasp data fit the offering.",robotic automation for aircraft manufacturing,Will Wilder,Founder & CEO,
+Galen Robotics,"ENT surgical assistant arm; constrained anatomical sim plus force data fit the surgical-robot pattern.",ENT surgical assistant robot,Bruce Lichorowic,CEO,
