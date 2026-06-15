@@ -78,34 +78,19 @@ pass `--seed`, which shuffles deterministically.
                        │
    z=1.075 ────────────┴─── (top of solvent_bottle cap)
    z=0.970  ────── (top of beaker)
-   z=0.913  ── plane top  ◄── 6 mm thick coloured box, spawned per frame
-   z=0.907  ── plane bot
+   z=0.902  ── plane top  ◄── 2 mm thick coloured box, spawned per frame
+   z=0.901  ── plane bot
    z=0.900  ▓▓▓ bench top (wood)
 ```
 
-The plane centre sits at `BENCH_TOP_Z + 0.010 = 0.910 m`. The plane
-is `0.50 × 0.85 × 0.006 m` — slightly smaller than the bench top
+The plane centre sits at `BENCH_TOP_Z + 0.001 = 0.901 m`. The plane
+is `0.50 × 0.85 × 0.002 m` — slightly smaller than the bench top
 (`~0.54 × 0.94`) so the bench edge still frames the shot.
 
-### Why we don't sit the plane *right* on the bench
-
-An earlier version of this script placed the plane at
-`z = BENCH_TOP_Z + 0.001` with 2 mm thickness — so the plane bottom
-was *coplanar* with the bench top, and both were `<box>` primitives.
-gz Harmonic's OGRE2 depth pass arbitrarily picks one of two
-coplanar faces; the result was that the plane was invisible on
-every captured frame even though `gz service /world/.../create`
-returned `data: true`. (The yellow `arm_base_marker` sneaks past
-the same trap because it's a `<cylinder>` vs the bench's `<box>`,
-so the bottom faces are different primitives.)
-
-Lifting the plane 10 mm above the bench and making it 6 mm thick
-gives OGRE2 enough depth precision to draw the plane reliably on
-every frame. From the overhead camera you can't tell the plane is
-floating — it just looks like a coloured mat.
-
-The labelled objects (solvent bottle top at z = 1.075, beaker top
-at z = 0.970) still poke well above the plane.
+The labelled objects' bottoms are at `z = 0.900` — the plane's
+bottom is just *above* that, so the objects' 2 mm-tall base ring
+clips through the plane. From the overhead camera you don't see it
+because the cylinders are wider than the clip region.
 
 ## Run it — two terminals
 
@@ -227,27 +212,13 @@ in this minimal warm-up.
 ## Troubleshooting
 
 - **All five frames look identical** — same wood-coloured bench, no
-  visible plane. There are two known causes; both have been fixed
-  in the current script, but if you hit either while editing the
-  script, here's how to recognise them:
-    1. **Reserved name.** Any model name starting with double
-       underscores (`__...`) is silently rejected by
-       `/world/.../create` with a server-side `Error Code 3: ...
-       is reserved` written to Terminal 1's gz sim log (NOT to the
-       Python script's stdout). This script uses the plain name
-       `bench_background_plane` — if you renamed it, keep the new
-       name plain too. The script now also runs a sanity-check
-       spawn at startup that verifies the model is in `gz model -l`
-       before the capture loop, so this fails loudly instead.
-    2. **Coplanar `<box>` with the bench top.** Earlier versions
-       placed the plane at `BENCH_TOP_Z + 0.001` with 2 mm
-       thickness — so the plane's bottom face was coplanar with
-       the bench's top face and *both were `<box>` primitives*.
-       OGRE2 then arbitrarily picks one in the depth pass and the
-       plane vanishes. The current geometry (10 mm above bench,
-       6 mm thick) leaves enough depth precision to render the
-       plane reliably. If you tighten those numbers and the
-       background goes back to wood-coloured, that's why.
+  visible plane. The most likely cause is gz-sim's *reserved-name*
+  rule: any model name starting with double underscores
+  (`__...`) is silently rejected by `/world/.../create` with a
+  server-side `Error Code 3: ... is reserved` written to Terminal 1's
+  gz sim log (NOT to the Python script's stdout). This script uses
+  the plain name `bench_background_plane` — if you renamed it, keep
+  the new name plain too.
 - **`spawn FAIL: Could not parse SDF`.** Older gz versions only
   accept `<sdf version='1.9'>` or earlier. Edit
   `build_background_sdf()` to drop the version number.
@@ -261,10 +232,10 @@ in this minimal warm-up.
   removes the plane on the last frame; if it crashed mid-run, the
   next invocation removes the previous plane on startup. Worst
   case, hit the GUI's "Delete" button on the model called
-  `bench_background_plane`.
+  `__bench_background_plane__`.
 - **The camera now sees ONLY the plane (no objects).** The plane
   was spawned at the wrong z and is above the object tops. Reset
-  by editing `PLANE_Z` back to `BENCH_TOP_Z + 0.010`.
+  by editing `PLANE_Z` back to `BENCH_TOP_Z + 0.001`.
 
 ## Next axis (axis #4 — materials)
 

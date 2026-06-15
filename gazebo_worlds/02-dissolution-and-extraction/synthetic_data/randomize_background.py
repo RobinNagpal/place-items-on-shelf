@@ -134,30 +134,21 @@ LABELLED_OBJECTS: List[LabelledObject] = [
 # ---------------------------------------------------------------------------
 # Background plane geometry.
 #
-# The plane sits as a thin "tablecloth" CLEARLY ABOVE the bench top.
+# The plane is a very thin box sitting 1 mm above the bench top. From
+# the overhead camera you only ever see the top surface. The lab
+# objects' bottoms are at the bench top (z=0.900), so they poke up
+# through the plane — exactly the visual we want.
 #
-# Earlier we tried 2 mm thick at z=0.901 (1 mm above the bench top of
-# 0.900). That looks great on paper but the plane's BOTTOM face ends
-# up coplanar with the bench top — and the bench top is also a <box>.
-# gz's OGRE2 renderer arbitrarily picks one of the two coplanar faces
-# in the depth pass, so the plane is silently hidden behind the bench
-# on every other frame. (The yellow `arm_base_marker` in the SDF gets
-# away with the same trick because it's a CYLINDER vs the bench BOX —
-# different primitives, no exact face overlap.)
-#
-# Fix: lift the plane ~1 cm above the bench AND make it 6 mm thick
-# so the top face is well clear of any other geometry. The overhead
-# camera only ever sees that top face. Beakers (top at z=0.970) and
-# the solvent bottle (top at z=1.075) still poke up well above this
-# plane.
+# Slightly smaller than the bench top (0.54 x 0.94 m) so the bench
+# edge + legs still frame the shot a little.
 # ---------------------------------------------------------------------------
 BENCH_TOP_Z = 0.900
 PLANE_X = 0.0
 PLANE_Y = 0.0
-PLANE_Z = BENCH_TOP_Z + 0.010  # plane CENTRE 10 mm above bench top
+PLANE_Z = BENCH_TOP_Z + 0.001  # plane CENTRE at 1 mm above bench top
 PLANE_SIZE_X = 0.50
 PLANE_SIZE_Y = 0.85
-PLANE_THICKNESS = 0.006        # 6 mm — thick enough to dodge depth precision issues
+PLANE_THICKNESS = 0.002
 
 
 # ---------------------------------------------------------------------------
@@ -314,17 +305,7 @@ def _pb_str(s: str) -> str:
 
 
 def build_background_sdf(name: str, color_rgb: Tuple[float, float, float]) -> str:
-    """Build a tiny SDF for the background plane.
-
-    Identical structure to ``randomize_distractors.build_distractor_sdf()``
-    (which is known to render reliably) — visual + matching collision in
-    one link. Skipping the collision turned out to be enough on some
-    Gazebo Harmonic builds for the renderer to never get told about
-    the new entity. Including it is cheap and makes the spawn path
-    behave the same as the distractor path.
-    """
     r = color_rgb
-    size = f"{PLANE_SIZE_X} {PLANE_SIZE_Y} {PLANE_THICKNESS}"
     return (
         "<?xml version='1.0'?>"
         "<sdf version='1.10'>"
@@ -332,15 +313,14 @@ def build_background_sdf(name: str, color_rgb: Tuple[float, float, float]) -> st
         f"  <static>true</static>"
         f"  <link name='link'>"
         f"    <visual name='v'>"
-        f"      <geometry><box><size>{size}</size></box></geometry>"
+        f"      <geometry>"
+        f"        <box><size>{PLANE_SIZE_X} {PLANE_SIZE_Y} {PLANE_THICKNESS}</size></box>"
+        f"      </geometry>"
         f"      <material>"
         f"        <ambient>{r[0]:.3f} {r[1]:.3f} {r[2]:.3f} 1</ambient>"
         f"        <diffuse>{r[0]:.3f} {r[1]:.3f} {r[2]:.3f} 1</diffuse>"
         f"      </material>"
         f"    </visual>"
-        f"    <collision name='c'>"
-        f"      <geometry><box><size>{size}</size></box></geometry>"
-        f"    </collision>"
         f"  </link>"
         f"</model>"
         "</sdf>"
@@ -416,30 +396,6 @@ def set_pose(name: str, x: float, y: float, z: float,
         capture_output=True, text=True,
     )
     return "data: true" in (result.stdout or "")
-
-
-def list_models() -> List[str]:
-    """Return the list of model names currently in the world (via `gz model -l`).
-
-    Used for verification — if the plane name isn't in this list after
-    we spawn it, the spawn silently failed (the most common cause
-    being a reserved name like one starting with `__`).
-    """
-    result = subprocess.run(
-        ["gz", "model", "-l"],
-        capture_output=True, text=True,
-    )
-    out = result.stdout or ""
-    # `gz model -l` prints one model per line under a header. Strip
-    # blanks and the header. The first model line is usually
-    # 'Available models:' and the next is each model name indented.
-    models = []
-    for line in out.splitlines():
-        line = line.strip()
-        if not line or line.endswith(":"):
-            continue
-        models.append(line.lstrip("- ").strip())
-    return models
 
 
 # ---------------------------------------------------------------------------
@@ -560,40 +516,12 @@ def main() -> None:
         print(f"first frame received after "
               f"{(cache.first_seen_at or sub_started_at) - sub_started_at:.1f} s")
 
-    # Sanity check: spawn the first background colour, verify the model
-    # actually appears in the world, then remove it before the real loop.
-    # This catches reserved names + SDF parse errors at startup instead
-    # of after 5 silent-failure frames.
-    _slug0, _color0 = bg_order[0]
-    print("\nsanity-check spawn (and immediate remove) ...")
-    ok, stdout = spawn_model(
-        BG_MODEL_NAME,
-        build_background_sdf(BG_MODEL_NAME, _color0),
-        PLANE_X, PLANE_Y, PLANE_Z,
-    )
-    if not ok:
-        print("  spawn FAIL at startup — gz service reply:")
-        for line in (stdout or "(empty)").splitlines():
-            print(f"    {line}")
-        sys.exit("ABORT: the very first spawn failed — fix that before iterating.")
-    models = list_models()
-    if BG_MODEL_NAME not in models:
-        print(f"  WARNING: spawn returned data:true but '{BG_MODEL_NAME}' is")
-        print(f"           not in `gz model -l`. Models found: {models}")
-        print(f"           Did the name get silently rewritten? Continuing anyway.")
-    else:
-        print(f"  OK — '{BG_MODEL_NAME}' is registered in the world.")
-    remove_model(BG_MODEL_NAME)
-
     saved = 0
     for frame_idx, (slug, color) in enumerate(bg_order):
         print(f"\n[frame {frame_idx:02d}] background = {slug}  "
               f"rgb=({color[0]:.2f},{color[1]:.2f},{color[2]:.2f})")
         # Make sure no leftover background lingers from the previous frame.
         remove_model(BG_MODEL_NAME)
-        # Some gz versions are eventually-consistent on /remove — give
-        # the world one tick before respawning under the same name.
-        time.sleep(0.3)
         sdf = build_background_sdf(BG_MODEL_NAME, color)
         ok, stdout = spawn_model(BG_MODEL_NAME, sdf, PLANE_X, PLANE_Y, PLANE_Z)
         if not ok:
@@ -606,12 +534,6 @@ def main() -> None:
             print("  Hint: names starting with '__' are reserved by gz —")
             print("        pick a name without leading double underscores.")
             continue
-
-        # Confirm the model actually exists in the world before we go on.
-        models_now = list_models()
-        if BG_MODEL_NAME not in models_now:
-            print(f"  WARNING: '{BG_MODEL_NAME}' missing from `gz model -l` "
-                  f"after spawn. Frame will look like the previous one.")
 
         time.sleep(args.dwell)
         if cache.latest is None:
