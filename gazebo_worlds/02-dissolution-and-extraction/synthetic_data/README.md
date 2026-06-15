@@ -1,7 +1,26 @@
-# Synthetic data — Step 1: camera frames of the bench
+# Synthetic data — camera frames of the bench
 
-The simplest possible synthetic dataset for the dissolution / extraction
-world. Two pieces:
+This folder contains the synthetic-data scripts for the dissolution /
+extraction world. Each script implements one of the six
+domain-randomisation axes from
+[`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md).
+
+| # | Axis              | Script                    | Status |
+|---|-------------------|---------------------------|--------|
+| 1 | Camera pose       | `move_camera.py`          | **Done** — this README |
+| 2 | Object pose       | `randomize_objects.py`    | **Done** — see [`README_object_pose.md`](README_object_pose.md) |
+| 3 | Lighting          | —                         | not yet |
+| 4 | Materials         | —                         | not yet |
+| 5 | Distractors       | —                         | not yet |
+| 6 | Background        | —                         | not yet |
+
+The rest of *this* file documents `move_camera.py` (axis #1). For the
+object-pose script (axis #2), see
+[`README_object_pose.md`](README_object_pose.md).
+
+## Step 1 — `move_camera.py` (camera-pose variation)
+
+Two pieces:
 
 1. **`ketchup_extraction.sdf`** — already has an `overhead_camera`
    model with a sensor that publishes RGB frames on the Gazebo
@@ -264,9 +283,9 @@ Short version:
 
 | # | Axis              | Done here?                                   |
 |---|-------------------|----------------------------------------------|
-| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS`. |
-| 2 | Object pose       | No — Step 2 will jitter `set_pose` on the beakers + bottle. |
-| 3 | Lighting          | No — Step 3 will vary `<light>` direction + intensity. |
+| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS` (this script). |
+| 2 | Object pose       | **Yes** — see [`README_object_pose.md`](README_object_pose.md) and `randomize_objects.py`. |
+| 3 | Lighting          | No — would vary `<light>` direction + intensity. |
 | 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
 | 5 | Distractor objects | No — would require spawning random clutter models. |
 | 6 | Background        | No — would require swapping the floor / walls / skybox. |
@@ -286,8 +305,10 @@ whether you have 5 PNGs (now) or 5000 (after Step 2).
 
 ```
 synthetic_data/
-├── README.md         (this file)
-└── move_camera.py    (subscribe + teleport + save PNGs)
+├── README.md                  (this file — Step 1, camera-pose variation)
+├── README_object_pose.md      (Step 2 — object-pose randomisation walkthrough)
+├── move_camera.py             (subscribe + teleport camera + save PNGs)
+└── randomize_objects.py       (subscribe + teleport every labelled object + save PNGs)
 ```
 
 ## Related docs
