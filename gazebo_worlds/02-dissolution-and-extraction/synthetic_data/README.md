@@ -1,328 +1,300 @@
-# Synthetic RGB + YOLO-box dataset — Step 2 dissolution / extraction
+# Synthetic data — Step 1: camera frames of the bench
 
-Produces a small **RGB + YOLO-box** dataset from the
-`ketchup_extraction.sdf` world. Two classes:
+The simplest possible synthetic dataset for the dissolution / extraction
+world. Two pieces:
 
-| id | class            | what it is in the scene                                |
-|----|------------------|--------------------------------------------------------|
-| 0  | `solvent_bottle` | The 500 mL water / mild-acid bottle on the bench left  |
-| 1  | `beaker`         | Any of the three Pyrex 100 mL beakers on the right     |
+1. **`ketchup_extraction.sdf`** — already has an `overhead_camera`
+   model with a sensor that publishes RGB frames on the Gazebo
+   Transport topic `/overhead_camera/image_raw`.
+2. **`move_camera.py`** — a single Python script that:
+   - **subscribes** to that topic via the gz-transport Python
+     bindings,
+   - **teleports** the camera through five preset positions
+     (top + front + back + left + right) using `gz service set_pose`,
+   - **aims** each camera at a fixed `LOOK_AT_TARGET` on the bench
+     (so the scene is always centred — the orientation is computed
+     from the position, never hand-written),
+   - **saves** the latest frame to disk as a PNG after each pose,
+   - **also writes a YOLO label `.txt`** next to each PNG, by
+     projecting the solvent bottle's known world-space bounding
+     box through a pinhole camera model with the same intrinsics
+     as the SDF camera. Single class for now
+     (`solvent_bottle`, class id 0) — multi-class is a few extra
+     lines in `LABELED_OBJECTS`,
+   - **also saves a debug overlay PNG** under `<out>/overlays/`
+     with the bbox drawn in green directly on the image, so you
+     can eyeball-check that the labels actually wrap the object.
+     Pass `--no-overlay` to skip these once you trust the math.
 
-This is the implementation of
-[`docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md`](../../../docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md)
-for the easiest world in the set — no vials, no fine-grained
-dexterous targets, just two object types the arm needs to find
-before it can pick a beaker or pour solvent.
+NO ROS. NO `ros_gz_bridge`. NO `cv_bridge`. NO complicated QoS dance.
+NO manual labelling either: the labels come straight from the
+simulator's ground-truth geometry.
 
-## How it works (one paragraph)
+## Why this rewrite
 
-The world's SDF now has an **overhead RGB camera** at 0.5 m above
-the bench top, looking straight down, publishing 640 × 480 frames
-at 30 Hz on the Gazebo Transport topic
-`/overhead_camera/image_raw`. Gazebo also publishes the **true 3D
-pose** of every model on
-`/world/ketchup_extraction_cell/pose/info`. The `ros_gz_bridge`
-parameter bridge forwards both topics into ROS 2.
-`generate_dataset.py` then subscribes to both: every second it
-saves the current frame to `images/frame_<N>.jpg`, projects each
-tracked object's 3D bounding box into the image with a pinhole
-camera model, and writes one YOLO line per box to
-`labels/frame_<N>.txt`. No manual labelling — Gazebo provides the
-ground truth for free.
+The previous version of this folder relied on the SDF `<save>`
+element to make Gazebo itself write PNGs to disk. That element parses
+cleanly but **does not actually fire** on every gz-sim build (in
+particular, not on the WSL build the user is on). Adding our own
+gz-transport subscriber both guarantees we get frames and gives a
+clear error when something is wrong, instead of silently writing
+nothing.
 
-## Requirements
+## Prerequisites — one-time install
 
-- **WSL2 Ubuntu 22.04 or 24.04** (or native Ubuntu).
-  - Windows 11 with WSLg shows GUI windows out of the box.
-  - On Windows 10 WSL2 without an X server the `gz sim` GUI will
-    not open, but `gz sim -s -r` (headless server, auto-run) still
-    publishes camera frames. See "Headless WSL fallback" below.
-- **ROS 2 Humble** (Ubuntu 22.04) **or Jazzy** (Ubuntu 24.04). Either
-  works — the script uses APIs that are stable across both. Install
-  the matching desktop meta-package: `ros-humble-desktop` or
-  `ros-jazzy-desktop`.
-- **Gazebo** — `gz sim`. Humble pairs with Garden, Jazzy with
-  Harmonic. Both expose the same plugin and topic names this world
-  uses.
-- `ros-$ROS_DISTRO-ros-gz-bridge` for the topic bridge.
-- Python packages: see the install paths below — `pip install` is
-  blocked on Ubuntu 24.04.
+| Distro                       | Install line                                                                            |
+|------------------------------|-----------------------------------------------------------------------------------------|
+| Ubuntu 24.04 + Jazzy + Harmonic | `sudo apt install python3-gz-transport13 python3-gz-msgs10 python3-numpy python3-pil` |
+| Ubuntu 22.04 + Humble + Garden  | `sudo apt install python3-gz-transport12 python3-gz-msgs9 python3-numpy python3-pil`  |
 
-## Run it — three terminals
-
-Source ROS 2 at the top of every new terminal. Substitute your
-distro (`humble` or `jazzy`):
+To check which gz you are on:
 
 ```bash
-source /opt/ros/$ROS_DISTRO/setup.bash
-# or, explicitly:
-source /opt/ros/jazzy/setup.bash
+gz sim --version          # Harmonic = v8.x, Garden = v7.x
+apt-cache search 'gz-msgs[0-9]'
+apt-cache search 'gz-transport[0-9]'
 ```
 
-### Terminal 1 — start the simulator
+The script tries transport13 first, then falls back to transport12,
+so the same code works on both. If neither package is installed it
+exits with the exact apt command to copy-paste.
 
-```bash
-cd ~/ros2_ws/src/place-items-on-shelf
-gz sim gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
-```
+## Run it — two terminals
 
-Click the **play** button (▶) at the bottom-left of the Gazebo
-window to start sim time. The camera does not publish frames
-while sim is paused.
+Both terminals must be in the repo root.
 
-### Terminal 2 — bridge gz topics into ROS 2
-
-```bash
-ros2 run ros_gz_bridge parameter_bridge \
-    /overhead_camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image \
-    /world/ketchup_extraction_cell/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V
-```
-
-Leave this terminal running. Sanity-check the topics with:
-
-```bash
-ros2 topic list                                # both topics should be present
-ros2 topic hz /overhead_camera/image_raw       # ~30 Hz
-ros2 topic hz /world/ketchup_extraction_cell/pose/info   # ~250 Hz
-```
-
-### Terminal 3 — install deps + run the generator
-
-Ubuntu 24.04 ships Python 3.12 with **PEP 668** turned on, which
-blocks `pip install` into the system Python. Pick **one** of these
-three install paths:
-
-```bash
-# Path A — recommended. Use apt; no pip needed at all.
-sudo apt install -y python3-opencv python3-numpy
-
-# Path B — venv that still sees the system ROS 2 packages
-# (rclpy, cv_bridge, sensor_msgs). Use this if you want to keep
-# python3-opencv off the system.
-cd ~/ros2_ws/src/place-items-on-shelf/gazebo_worlds/02-dissolution-and-extraction/synthetic_data
-python3 -m venv --system-site-packages .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Path C — override PEP 668. Only do this if you know what you're
-# doing; it mixes apt-managed and pip-managed packages.
-pip install --break-system-packages -r requirements.txt
-```
-
-Then run the generator:
-
-```bash
-cd ~/ros2_ws/src/place-items-on-shelf/gazebo_worlds/02-dissolution-and-extraction/synthetic_data
-
-# Recommended: --jitter so the frames are not all identical.
-python3 generate_dataset.py --out ./synthetic_dataset --num-frames 50 --jitter
-```
-
-`--jitter` teleports every tracked object (beakers, solvent bottle)
-and the camera to small random offsets before each save, using
-`gz service /world/.../set_pose`. Defaults:
-
-- objects: ±20 mm in X/Y, ±20° yaw
-- camera: ±50 mm in X/Y (Z and the straight-down pitch stay fixed)
-
-Drop `--jitter` to capture the canonical scene only (useful for a
-quick sanity check that the bridge is working).
-
-After ~50 seconds the script exits. You now have:
-
-```
-synthetic_dataset/
-├── images/
-│   ├── frame_0000.jpg
-│   ├── frame_0001.jpg
-│   └── ...
-└── labels/
-    ├── frame_0000.txt
-    ├── frame_0001.txt
-    └── ...
-```
-
-Each `.txt` looks like (one line per visible model):
-
-```
-0 0.667 0.167 0.111 0.292      # solvent_bottle
-1 0.084 0.700 0.077 0.117      # beaker_1
-1 0.252 0.700 0.077 0.117      # beaker_2
-1 0.420 0.700 0.077 0.117      # beaker_3
-```
-
-## Sanity-check one frame
-
-Verify the boxes line up with the objects by drawing them onto the
-first frame:
-
-```bash
-python3 - <<'EOF'
-import cv2
-img = cv2.imread("synthetic_dataset/images/frame_0000.jpg")
-H, W = img.shape[:2]
-NAMES = {"0": "solvent_bottle", "1": "beaker"}
-with open("synthetic_dataset/labels/frame_0000.txt") as f:
-    for line in f:
-        cls, cx, cy, w, h = line.split()
-        cx, cy, w, h = float(cx)*W, float(cy)*H, float(w)*W, float(h)*H
-        x1, y1 = int(cx - w/2), int(cy - h/2)
-        x2, y2 = int(cx + w/2), int(cy + h/2)
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(img, NAMES[cls], (x1, y1 - 4),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-cv2.imwrite("frame_0000_annotated.jpg", img)
-print("wrote frame_0000_annotated.jpg")
-EOF
-```
-
-Open `frame_0000_annotated.jpg`. The green boxes should sit
-tightly around the solvent bottle and the three beakers.
-
-## Headless WSL fallback
-
-If Gazebo's GUI does not open on your WSL setup, run the
-simulator in headless mode and let it auto-play sim time:
-
-```bash
-gz sim -s -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
-```
-
-Terminals 2 and 3 stay exactly the same. The camera still
-renders frames using OGRE2 in software / headless mode.
-
-## Adding more variety
-
-`--jitter` already shuffles object X/Y/yaw and camera X/Y. To go
-further:
-
-1. **Wider object jitter.** Edit `OBJ_JITTER_XY`, `OBJ_JITTER_YAW`,
-   `CAM_JITTER_XY` at the top of `generate_dataset.py`. Anything
-   above ±40 mm risks beakers falling off the bench — bump the
-   bench size in the SDF if you want larger jitter.
-2. **Tilted camera angles.** The current camera always looks
-   straight down so the pinhole projection stays a one-liner.
-   To capture oblique views, replace `project_point` with
-   `cv2.projectPoints` and a proper extrinsic matrix, then jitter
-   the camera's roll / pitch / yaw in addition to its X / Y.
-   Left as a follow-up.
-3. **Lighting and material randomisation.** Vary the `<light>`
-   direction and intensity, swap material textures between
-   captures. Done by editing the SDF before each `gz sim` run, or
-   by calling `gz service` on the light entity.
-
-## Verifying the camera is publishing
-
-The camera shows up in the world as a small dark-grey **5 cm cube
-floating 0.6 m above the bench**. That cube is just a marker — a
-Gazebo `<sensor>` on its own renders nothing in the GUI, so without
-the cube the camera would be invisible. The sensor publishes frames
-whether the marker is there or not.
-
-To check frames are actually flowing:
-
-```bash
-# rate should be ~30 Hz once gz sim is playing
-ros2 topic hz /overhead_camera/image_raw
-
-# live preview of what the camera sees (apt: ros-humble-rqt-image-view)
-ros2 run rqt_image_view rqt_image_view /overhead_camera/image_raw
-```
-
-## Debugging the "waiting for first image / poses..." loop
-
-If you see this even though `ros2 topic list` shows both topics,
-work the list below top-to-bottom. Stop as soon as one step
-recovers messages.
+### Terminal 1 — start Gazebo
 
 ```bash
 cd ~/ros2_ws/src/place-items-on-shelf
-
-# 1. Make sure you actually have the QoS fix.
-git log --oneline -3
-# The top commit should be the QoS fix. If it is older, pull:
-git pull origin synthetic-data-ketchup-task
-
-# 2. Confirm the file has the BEST_EFFORT QoS line.
-grep qos_profile_sensor_data \
-    gazebo_worlds/02-dissolution-and-extraction/synthetic_data/generate_dataset.py
-# Should print 3 lines (one import + two `create_subscription` calls).
-
-# 3. Run the standalone subscription probe. It does NOTHING except
-# subscribe to the same two topics and print one line per message.
-source /opt/ros/$ROS_DISTRO/setup.bash
-cd gazebo_worlds/02-dissolution-and-extraction/synthetic_data
-python3 test_subscribe.py
-# Expect:
-#   [image]  640x480 bgr8  (#1)
-#   [poses]  6 transforms (beaker_1, beaker_2, ...)  (#1)
-# If nothing prints within 10 s, the issue is the bridge / DDS, not
-# the dataset script.
-
-# 4. Confirm what the bridge advertises and force a BEST_EFFORT echo.
-ros2 topic info /overhead_camera/image_raw -v
-ros2 topic info /world/ketchup_extraction_cell/pose/info -v
-ros2 topic echo /overhead_camera/image_raw --qos-reliability best_effort --once
-ros2 topic echo /world/ketchup_extraction_cell/pose/info --qos-reliability best_effort --once
-# If echo --once hangs, the publisher is not sending. Click ▶ in
-# gz sim, or relaunch with `gz sim -r ...` so it auto-runs.
-
-# 5. DDS daemon hiccup — common after a long session.
-ros2 daemon stop && ros2 daemon start
-
-# 6. Last-resort fallback — switch DDS vendor. Set this in EVERY
-# terminal (gz sim, ros_gz_bridge, generator) BEFORE running.
-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-# Re-source ROS 2, then re-run all three terminals.
+gz sim -r gazebo_worlds/02-dissolution-and-extraction/ketchup_extraction.sdf
 ```
 
-The `generate_dataset.py` "waiting" message now also prints how
-many image messages and how many pose messages it has actually
-received, so you can tell at a glance whether one side is fine
-and the other is broken, or whether both are broken.
+The `-r` flag auto-plays sim time. Confirm the camera topic is live:
+
+```bash
+gz topic -l | grep image_raw
+# expect: /overhead_camera/image_raw
+gz topic -i -t /overhead_camera/image_raw
+# expect: ... Type: gz.msgs.Image ...
+```
+
+### Terminal 2 — teleport the camera + save PNGs
+
+```bash
+cd ~/ros2_ws/src/place-items-on-shelf
+python3 gazebo_worlds/02-dissolution-and-extraction/synthetic_data/move_camera.py
+```
+
+Defaults: 5 views, 2 s dwell each, 1 PNG per view, one cycle then
+exit. So one run produces 5 PNGs.
+
+Sample output:
+
+```
+gz-transport Python: Harmonic (transport13 + msgs10)
+subscribing to       /overhead_camera/image_raw
+saving PNGs to       /home/.../place-items-on-shelf/captured_frames/
+YOLO classes file    /home/.../captured_frames/classes.txt  (1 class(es))
+image intrinsics     640x480  hfov=60deg  fx=554.3
+bbox overlays to     /home/.../captured_frames/overlays/  (disable with --no-overlay)
+
+waiting for the first frame ...
+first frame received after 0.3 s (got 1 frames so far).
+[top]       pos=(+0.05,+0.00,+1.50)  -> aim at (0.05, 0.0, 0.94)  pitch=+90deg  yaw=+0deg   set_pose=OK
+[top]       -> /home/.../captured_frames/cycle00_top_0.png  (640x480)  labels=1 -> cycle00_top_0.txt  overlay=1 -> overlays/cycle00_top_0_bbox.png
+[front_+x]  pos=(+0.60,+0.00,+1.40)  -> aim at (0.05, 0.0, 0.94)  pitch=+40deg  yaw=+180deg set_pose=OK
+[front_+x]  -> /home/.../captured_frames/cycle00_front_+x_0.png  (640x480)  labels=1 -> cycle00_front_+x_0.txt  overlay=1 -> overlays/cycle00_front_+x_0_bbox.png
+...
+
+done. saved 5 PNGs -> /home/.../captured_frames/
+```
+
+Useful flags:
+
+```bash
+# Spend longer at each pose and save 3 PNGs per view -> 15 PNGs per cycle.
+python3 .../move_camera.py --dwell 4 --shots 3
+
+# Cycle forever; Ctrl+C to stop.
+python3 .../move_camera.py --loop
+
+# Save somewhere else.
+python3 .../move_camera.py --out /tmp/my_dataset
+
+# Production-mode capture: no overlays in the output dir.
+# (The trainer ignores .txt files in subdirs, but skipping overlays
+#  saves disk + skips the PIL draw step.)
+python3 .../move_camera.py --no-overlay
+```
+
+## Where the images and labels land
+
+By default: `./captured_frames/` relative to wherever you launched
+`move_camera.py`. Following the recipe above, that is:
+
+```
+~/ros2_ws/src/place-items-on-shelf/captured_frames/
+├── classes.txt                    # one class name per line, ordered by class id
+├── cycle00_top_0.png              # the image
+├── cycle00_top_0.txt              # the YOLO label for that image
+├── cycle00_front_+x_0.png
+├── cycle00_front_+x_0.txt
+├── cycle00_back_-x_0.png
+├── cycle00_back_-x_0.txt
+├── cycle00_left_+y_0.png
+├── cycle00_left_+y_0.txt
+├── cycle00_right_-y_0.png
+├── cycle00_right_-y_0.txt
+└── overlays/                      # bbox-annotated copies for visual QA only
+    ├── cycle00_top_0_bbox.png     #   - green rectangle = ground-truth bbox
+    ├── cycle00_front_+x_0_bbox.png#   - text label = "<class_name> (<class_id>)"
+    ├── cycle00_back_-x_0_bbox.png #   - in a subfolder so the YOLO trainer
+    ├── cycle00_left_+y_0_bbox.png #     doesn't pick them up as extra images
+    └── cycle00_right_-y_0_bbox.png
+```
+
+The `overlays/` subfolder is meant for **you**, not for training. Open
+any `_bbox.png` and you should see the green rectangle hugging the
+target object. If the rectangle is in the wrong place, the labels
+in the sibling `.txt` are wrong — fix the projection math, not the
+overlay. Pass `--no-overlay` to skip generating these once you trust
+the math.
+
+The script prints the absolute path on every save, so there is no
+guessing — just copy the path it printed.
+
+### YOLO label format (what's inside the `.txt`)
+
+Each `.txt` is the standard Ultralytics YOLO format — one detection per line:
+
+```
+<class_id> <x_center_norm> <y_center_norm> <width_norm> <height_norm>
+```
+
+All four numbers are normalised to `[0, 1]` (so the dataset is
+resolution-independent). For our single-class setup `<class_id>` is
+always `0` and the class name is in `classes.txt`. Example contents:
+
+```
+0 0.100270 0.367055 0.200544 0.236877
+```
+
+An empty `.txt` is valid YOLO too — it means "no objects of any
+labelled class are visible in this frame." The script writes an
+empty file (rather than skipping it) so the image/label pairing
+stays 1:1 even if the bottle moves off-screen later.
+
+### How the labels are computed
+
+There is **no neural network and no labelling tool**. The bbox is
+pure geometry:
+
+1. The solvent bottle's tight axis-aligned bbox in world coords is
+   hard-coded in `LABELED_OBJECTS` (derived once from its SDF
+   geometry: body Ø85×150 mm + cap Ø50×25 mm at world pose
+   (0.10, 0.25, 0.975)).
+2. For each viewpoint we transform the bbox's 8 corners into the
+   camera's body frame using the same RPY we just teleported to.
+3. We re-map body → optical (Gazebo's body +X is forward; the
+   pinhole equation expects +Z = forward) and project with the
+   pinhole formula `u = fx·X/Z + cx`, `v = fy·Y/Z + cy`. The
+   intrinsics are derived from the SDF's `<horizontal_fov>1.0472</horizontal_fov>`
+   and `640×480` image size.
+4. Take the axis-aligned bbox of the 8 projected pixels, clamp to
+   the image, normalise. Done.
+
+This works only because the bottle is rigid and we know its 3D
+geometry exactly. When Step 2 starts moving objects randomly, the
+bbox center will change every frame — we'll read each object's
+current pose from the world's pose-info topic instead of hard-coding
+it in `LABELED_OBJECTS`.
 
 ## Troubleshooting
-- **Gazebo window opens blank, no objects.** Old version of this
-  SDF added one `<plugin>` tag and broke Gazebo's auto-loaded
-  default plugins. The current SDF declares all four required
-  plugins (Physics, UserCommands, SceneBroadcaster, Sensors)
-  explicitly, so pull the latest world file.
-- **`pip install` fails with `externally-managed-environment`.**
-  Ubuntu 24.04's PEP 668 lock. Use one of the three install paths
-  above — `sudo apt install python3-opencv python3-numpy` is the
-  simplest.
-- **No visible camera in the GUI.** The camera is the small dark
-  cube floating 0.6 m above the bench centre. If you do not see
-  it, pull the latest SDF — earlier versions had a sensor with no
-  visual.
-- **`/overhead_camera/image_raw` exists but `ros2 topic hz` shows
-  0 Hz.** Sim is paused. Click ▶ in the Gazebo GUI, or relaunch
-  with `gz sim -r ...` to auto-run.
-- **`gz service set_pose` calls hang or print "service call
-  timed out".** The UserCommands plugin is not loaded. Same
-  fix — pull the latest SDF.
-- **Boxes look offset from the objects in the annotated frame.**
-  The camera intrinsics in `generate_dataset.py` (IMG_W, IMG_H,
-  HFOV, NOMINAL_CAM) are out of sync with the `<sensor type="camera">`
-  tag in the SDF. Keep them aligned.
+
+- **`ERROR: gz-transport Python bindings not found.`**
+  Run the apt-install line for your distro (table above). If apt
+  cannot find the package, you are on the other gz track — Garden
+  has `gz-transport12`, Harmonic has `gz-transport13`.
+
+- **`WARNING: no frame in 5 s`** despite gz sim being open.
+  - Is the sim paused? Click ▶ in the GUI, or use `-r` on the CLI.
+  - Is the topic actually published? Confirm with:
+    ```bash
+    gz topic -l | grep image_raw
+    gz topic -e -t /overhead_camera/image_raw -n 1
+    ```
+    The second command prints one message — if it does, the topic
+    is live and the Python subscriber should match it.
+  - Are you on a gz version that does not match `transport12` or
+    `transport13`? Check `gz sim --version`.
+
+- **`set_pose=FAIL (is gz sim running?)`** on every line.
+  The world's `UserCommands` plugin is not loaded. The SDF in this
+  repo declares it explicitly (line ~498 of
+  `ketchup_extraction.sdf`), so check you are running the right
+  SDF file.
+
+- **PNGs all look identical even though the script reports moves.**
+  Either the camera is teleporting but not re-rendering (try
+  `--dwell 4` so the sensor has more time to publish a fresh frame),
+  or the camera is not actually being moved (re-run and check that
+  every line ends in `set_pose=OK`).
+
+- **Oblique frames are blank / show nothing but the floor.**
+  The camera is moving but facing the wrong way. The script now
+  computes pitch+yaw with `look_at()` aimed at `LOOK_AT_TARGET`,
+  so if you have moved the bench objects somewhere new, edit
+  `LOOK_AT_TARGET` at the top of `move_camera.py` to point at the
+  new cluster.
+
+- **Colours look wrong (BGR/RGB swap).**
+  The SDF declares `<format>R8G8B8</format>` and the script saves
+  with PIL `mode="RGB"`. If you swap to a BGR camera format, also
+  swap the `mode="RGB"` argument in `msg_to_png()`.
+
+## What's next — domain randomisation, the 6 axes
+
+This folder currently implements **only one** of the six
+randomisation axes used in production synthetic-data pipelines:
+**camera-pose variation**. The full list — and where we stand on
+each — is documented in
+[`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md).
+Short version:
+
+| # | Axis              | Done here?                                   |
+|---|-------------------|----------------------------------------------|
+| 1 | Camera pose       | **Yes** — 5 viewpoints from `CAMERA_POSITIONS`. |
+| 2 | Object pose       | No — Step 2 will jitter `set_pose` on the beakers + bottle. |
+| 3 | Lighting          | No — Step 3 will vary `<light>` direction + intensity. |
+| 4 | Materials / textures | No — would require swapping `<material>` blocks per frame. |
+| 5 | Distractor objects | No — would require spawning random clutter models. |
+| 6 | Background        | No — would require swapping the floor / walls / skybox. |
+
+A real production-quality YOLO training set varies all six. We are
+deliberately doing only #1 right now and shipping the labels for it
+so the geometry / projection / file-format plumbing is in place
+before we layer on the rest. When we move to NVIDIA Isaac Sim
+Replicator, these same six axes become one-line Replicator
+randomisers each.
+
+The labels emitted by **this** script already match the format the
+later steps will produce — so the same training command will work
+whether you have 5 PNGs (now) or 5000 (after Step 2).
 
 ## File list
 
 ```
 synthetic_data/
-├── README.md            (this file)
-├── generate_dataset.py  (the ROS 2 node — main entry point)
-├── test_subscribe.py    (minimal probe for debugging subscriptions)
-├── dataset.yaml         (Ultralytics YOLO config)
-└── requirements.txt     (extra Python deps)
+├── README.md         (this file)
+└── move_camera.py    (subscribe + teleport + save PNGs)
 ```
 
 ## Related docs
 
-- [`docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md`](../../../docs/hplc-autosamplers/synthetic-data/types/01-rgb-boxes.md)
-  — the "what / when / who / how" spec this implements.
-- [`exercises/03-tiny-yolo/`](../../../exercises/03-tiny-yolo/) —
-  the YOLO trainer that this dataset feeds into.
-- [`exercises/05-score-detections-vs-gazebo/detection_scorer.py`](../../../exercises/05-score-detections-vs-gazebo/detection_scorer.py)
-  — same pinhole-projection math, scoring direction instead of
-  labelling direction.
+- [`../README.md`](../README.md) — what this Gazebo world represents.
+- [`../../../docs/synthetic-data/`](../../../docs/synthetic-data/) —
+  the customer-facing synthetic-data offering this implements.
+- [`../../../docs/synthetic-data/features/01-detection-images-and-masks.md`](../../../docs/synthetic-data/features/01-detection-images-and-masks.md)
+  — Feature 1, the bigger version of what this exercise warms up.
+  Adds masks + labels on top of the raw frames produced here.

@@ -512,6 +512,44 @@ them.
     `(source_slot, dest_slot)` pairs and hands them to the hardcoded
     pick-place script from item 21.
 
+## F. Synthetic data — generating labelled training data in sim
+
+How the team produces the data the items in section B and E train on,
+without paying a human labeller. Tied to the
+[`../docs/synthetic-data/`](../docs/synthetic-data/) offering — each
+item below implements one feature from that catalogue.
+
+- [x] **27. Synthetic detection dataset (images + masks + labels)** — see [`../exercises/27-synthetic-detection-dataset/`](../exercises/27-synthetic-detection-dataset/)
+  - **Background (plain English):** Real-world detection datasets are
+    slow and expensive because someone has to draw a box around every
+    object in every image by hand. Synthetic data flips that — a
+    program *draws the scene itself*, so the simulator already knows
+    where every object is. We dump those ground-truth boxes and
+    per-pixel masks in the format the customer's training code
+    already reads (YOLO labels, COCO JSON, per-instance PNG masks).
+    This is **Feature 1** of the synthetic-data offering described in
+    [`../docs/synthetic-data/features/01-detection-images-and-masks.md`](../docs/synthetic-data/features/01-detection-images-and-masks.md).
+  - **Goal:** Procedurally render an overhead view of the HPLC
+    autosampler rack — vials in random slots, random cap colours,
+    random rack jitter, random distractors, randomised lighting and
+    Gaussian sensor noise. For each frame, write YOLO labels, COCO
+    JSON entries, and one PNG mask per object.
+  - **Why it matters:** Every later perception model (items 3, 4, 5,
+    7) trains on labelled images. Producing those labels in sim is
+    1000× cheaper and 100× faster than paying a labeller. It is also
+    the core product DoDAO sells to robotics customers.
+  - **Done when:** `python generate.py --n 100 && python verify.py`
+    finishes in under a minute, produces a complete COCO + YOLO +
+    masks dataset, and every YOLO bounding box has IoU ≥ 0.95
+    against its corresponding instance mask (i.e. the labels
+    actually match the pixels).
+  - **Time:** 3–6 hours.
+  - **Autosampler tie-in:** the dataset *is* an HPLC autosampler
+    rack: 6×9 grid, 14 mm slot spacing, 12 mm vials, the same
+    cap-colour palette referenced in exercises 3 and 13. Drop it
+    into `yolo train data=output/dataset.yaml` to bootstrap the
+    vial detector for the autosampler.
+
 ## How to use this list
 
 - Treat each item as an **independent exercise**. Pick the skill you
