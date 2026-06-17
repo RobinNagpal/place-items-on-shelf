@@ -1,0 +1,16 @@
+name,relevance,note,contact_name,position,email
+Agility Robotics,"Bipedal humanoid for warehouse logistics; full-body humanoid sim plus behavior-cloning trajectories are central to policy training.",Digit bipedal humanoid for warehouse logistics,Peggy Johnson,CEO,
+NEURA Robotics,"Cognitive cobots plus 4NE-1 humanoid; humanoid plus cobot sim and synthetic perception data fit the offering directly.",cognitive cobots and 4NE-1 humanoid,David Reger,Founder & CEO,
+Dyna Robotics,"Foundation models for affordable stationary arms; sim plus synthetic-data training pipelines map straight to the offering.",robotic foundation models for stationary arms,Lindon Gao,Co-founder & CEO,
+FieldAI,"Risk-aware embodied-AI brains for unstructured outdoor sites; outdoor sim plus synthetic perception data accelerate field deployment.",Field Foundation Models for outdoor mobile robots,Ali Agha,Founder & CEO,
+Mind Robotics,"Foundation models plus arms for factory automation; arm-cell sim plus production behavior cloning are the offering sweet spot.",Rivian spin-out industrial AI robots,RJ Scaringe,Founder & Executive Chair,
+The Bot Company,"Wheeled home robot with arm and grippers; household-cell sim plus natural-language task data fit the synthetic-data offering.",wheeled home tidying robot with arm,Kyle Vogt,Co-founder & CEO,
+Sunday Robotics,"Memo home robot trained on Skill Capture Glove demos; behavior-cloning trajectories plus household sim are direct fits.",Memo household chores robot,Tony Zhao,Co-founder & CEO,tonyzihaozhao@gmail.com
+Genesis AI,"Universal robotics foundation model plus open-source Genesis physics engine; their stack overlaps the sim-data offering directly.",GENE foundation model and Eno dexterous robot,Zhou Xian,Co-founder & CEO,zhouxian.sq@gmail.com
+Flexion,"Hardware-agnostic humanoid brain with sim-to-real RL; their core need is exactly the sim plus behavior-cloning data DoDAO supplies.",sim-to-real humanoid autonomy software stack,Nikita Rudin,Co-founder & CEO,
+mimic robotics,"Dexterous humanoid hands trained on human demos; contact-rich sim plus behavior-cloning data fit the offering exactly.",dexterous humanoid hands for retrofitting arms,Stefan Weirich,Co-founder & CEO,
+Tacta Systems,"Tactile hardware plus AI for dexterous manipulation; contact-rich physics sim plus synthetic tactile data fit the offering.",dextrous intelligence tactile nervous system,Andreas Bibl,Co-founder & CEO,
+Persona AI,"Industrial humanoids for shipbuilding/heavy manufacturing; rugged outdoor cell sim plus welding-task behavior cloning fit directly.",rugged industrial humanoids for shipyards,Nic Radford,Co-founder & CEO,
+Fourier Intelligence,"GR-series humanoids plus rehab robotics; humanoid sim plus rehab-interaction force data are direct fits.",GR-series humanoids and rehab robotics,Alex Gu,Founder & CEO,
+Galbot,"Wheeled dual-arm robots running unmanned stores; retail-cell sim plus VLA training data fit the offering directly.",wheeled dual-arm Galbot G1 for retail and logistics,He Wang,Founder & CTO,hewang@pku.edu.cn
+Wandercraft,"Walking exoskeletons plus Calvin-40 humanoid; physical-AI sim plus locomotion behavior-cloning data fit the offering.",self-balancing exoskeletons and Calvin-40 humanoid,Matthieu Masselin,Co-founder & CEO,
