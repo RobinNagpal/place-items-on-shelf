@@ -29,31 +29,31 @@ Ultra,"Warehouse arm plus teleop; teleop-derived behavior-cloning trajectories a
 Urban Machine,"Wood-waste reclaiming robot; vision-driven sorting plus arm extraction map to segmentation and grasp data.",robotic wood-waste reclaiming machine,Eric Law,Co-founder & CEO,eric@urbanmachine.build
 10x,"Construction humanoid robots; sim plus behavior cloning plus jobsite synthetic data are essential for humanoid policy training.",general-purpose construction humanoid robots,Yogesh Ghaturle,Co-founder & CEO,yogesh@10xconstruction.ai
 "Four Growers, Inc.","Greenhouse harvesting arm plus vision; sim of greenhouse plus tomato/cucumber segmentation are textbook needs.",robotic greenhouse tomato/cucumber harvester,Brandon Contino,Co-founder & CEO,
-Capstone Technologies,"Print-to-mail handling automation; envelope/document manipulation cells fit the bench-arm Simulation Setup pitch.",AutoViri print-to-mail robotic automation,Troy Power,Co-founder & CSO,
-Collaborative Robotics,"Wheeled cobot with manipulator; mobile-manipulation sim plus scene data are the offering sweet spot.",wheeled mobile cobots for logistics,Brad Porter,Founder & CEO,
-Toggle,"Robotic rebar fabrication arm; precise bending/placement sim plus force data save real-cell iteration cycles.",robotic rebar fabrication for construction,Daniel Blank,Co-founder & CEO,
+Capstone Technologies,"Print-to-mail handling automation; envelope/document manipulation cells fit the bench-arm Simulation Setup pitch.",AutoViri print-to-mail robotic automation,Troy Power,Co-founder & CSO,tpower@captechno.com
+Collaborative Robotics,"Wheeled cobot with manipulator; mobile-manipulation sim plus scene data are the offering sweet spot.",wheeled mobile cobots for logistics,Brad Porter,Founder & CEO,bp@co.bot
+Toggle,"Robotic rebar fabrication arm; precise bending/placement sim plus force data save real-cell iteration cycles.",robotic rebar fabrication for construction,Daniel Blank,Co-founder & CEO,dan@toggle.is
 "Weave Robotics, Inc.","Home laundry-folding robot; cloth manipulation is canonically the hardest sim plus data problem in robotics.",Isaac home laundry-folding robot,Evan Wineland,Co-founder & CEO,
-Construction Robotics,"SAM bricklayer plus MULE; arm-on-site sim plus brick-pose/grasp data slot directly into the offering.",SAM bricklaying and MULE lift-assist robots,Scott Peters,Co-founder & CEO,
-"Harmonic Bionics, Inc.","Upper-extremity rehab exoskeleton; sim of patient-robot interaction plus force data fit the force-sensor synthesis offering.",upper-extremity rehabilitation robotic exoskeleton,Christopher Prentice,CEO,info@harmonicbionics.com
-"CreateMe Technologies, Inc.","AI robotics for apparel manufacturing; fabric handling plus vision are perfect synthetic-data plus sim customers.",AI robotics for automated apparel manufacturing,Cam Myers,CEO,hello@createme.com
-"Machina Labs, Inc","AI-driven sheet-metal forming arm; contact-rich physics sim plus force data are the exact offering.",AI-driven robotic sheet-metal forming,Edward Mehr,Co-founder & CEO,
+Construction Robotics,"SAM bricklayer plus MULE; arm-on-site sim plus brick-pose/grasp data slot directly into the offering.",SAM bricklaying and MULE lift-assist robots,Scott Peters,Co-founder & CEO,speters@construction-robotics.com
+"Harmonic Bionics, Inc.","Upper-extremity rehab exoskeleton; sim of patient-robot interaction plus force data fit the force-sensor synthesis offering.",upper-extremity rehabilitation robotic exoskeleton,Christopher Prentice,CEO,
+"CreateMe Technologies, Inc.","AI robotics for apparel manufacturing; fabric handling plus vision are perfect synthetic-data plus sim customers.",AI robotics for automated apparel manufacturing,Cam Myers,CEO,
+"Machina Labs, Inc","AI-driven sheet-metal forming arm; contact-rich physics sim plus force data are the exact offering.",AI-driven robotic sheet-metal forming,Edward Mehr,Co-founder & CEO,edward.mehr@machinalabs.ai
 Slip Robotics,"Automated truck loading/unloading; mobile manipulation use case where sim plus grasp data accelerate deployment.",automated truck loading/unloading robots,Christopher Smith,Co-founder & CEO,
 Saturday Robotics,"Autonomous laundry robots; cloth handling needs heavy sim plus behavior cloning (like Weave).",autonomous laundry robots,Benjamin Bixby,President & CEO,
 Stratom Inc,"Autonomous robotic refueling; arm plus nozzle-insertion sim plus force data are a clean fit.",autonomous ground vehicles and robotic refueling,Mark Gordon,President & CEO,
 BIONIK Inc.,"Neuro-rehab arm robot; sim of patient-robot interaction plus force data fit the synthetic-sensor offering.",InMotion neuro-rehabilitation robots,Richard Russo Jr.,CEO & CFO,rrusso@bioniklabs.com
 Stellar Pizza,"Pizza-making arm plus vision; food handling cell sim plus ingredient segmentation are direct customer needs.",robotic pizza-making food trucks,Benson Tsai,CEO,
-Formlogic,"Autonomous CNC precision manufacturing; sim of CNC plus arm tending and part-pose data fit the offering.",autonomous CNC precision manufacturing,Paul Sutter,Founder & CEO,
-Dexai Robotics,"Alfred sous-chef arm plus vision; kitchen-cell sim plus ingredient segmentation are textbook customers.",Alfred robotic sous-chef for food service,David Johnson,Founder & CEO,info@dexai.com
-Skyline Robotics,"Window-cleaning Ozmo arm; outdoor cell sim plus facade segmentation save expensive real-world iteration.",Ozmo autonomous window-cleaning robot,Michael Brown,Chairman & CEO,contact@skylinerobotics.com
-CleanRobotics,"AI sorting recycling arm plus vision; segmentation plus grasp data on cluttered waste streams are central.",AI sorting recycling robot bins,Charles Yhap,Co-founder & CEO,
-Triton Medical Robotics,"GI endoscopy surgical robot; force plus perception sim is critical since cadaver/clinical iteration is slow.",GI endoscopy surgical robot,Alex Tilson,CEO (parent Neptune Medical),
-Artly,"Barista arm plus vision; kitchen-cell sim and ingredient handling are direct fits.",AI robotic barista coffee company,Meng Wang,Co-founder & CEO,info@artly.coffee
-"Greenfield Robotics - Healthy Food, Healthy Planet","Autonomous weeding farm robots; vision-based weed discrimination is a clean synthetic-data use case.",autonomous weeding farm robots,Clint Brauer,Founder,
-Advanced Construction Robotics,"Rebar tying/placing arm; rebar-pose perception plus grasp-force data are clean synthetic-data fits.",rebar tying and placing construction robots,Danielle Proctor,CEO,
-Eka Robotics,"Sim-to-real manipulation AI; literally building what DoDAO's offering supports.",sim-to-real manipulation robotics AI,Pulkit Agrawal,Co-founder & CEO,hello@ekarobotics.com
-Harvest Croo,"Strawberry harvesting arm; vision plus delicate-fruit grasp data are a textbook customer.",autonomous strawberry harvesting robot,Joseph McGee,CEO,info@harvestcroo.com
-Verdant Robotics,"Precision ag spraying/weeding with vision; synthetic crop/weed perception data map directly to the offering.",precision ag spraying/weeding robots,Gabe Sibley,Founder & CEO,
-Wings,"Food-service retail robotics; cell sim plus ingredient/utensil manipulation data fit cleanly.",autonomous food-service retail robotics,Haitham Al-Beik,Founder (letsbutterfly Inc.),
+Formlogic,"Autonomous CNC precision manufacturing; sim of CNC plus arm tending and part-pose data fit the offering.",autonomous CNC precision manufacturing,Paul Sutter,Founder & CEO,paul@formlogic.com
+Dexai Robotics,"Alfred sous-chef arm plus vision; kitchen-cell sim plus ingredient segmentation are textbook customers.",Alfred robotic sous-chef for food service,David Johnson,Founder & CEO,
+Skyline Robotics,"Window-cleaning Ozmo arm; outdoor cell sim plus facade segmentation save expensive real-world iteration.",Ozmo autonomous window-cleaning robot,Michael Brown,Chairman & CEO,
+CleanRobotics,"AI sorting recycling arm plus vision; segmentation plus grasp data on cluttered waste streams are central.",AI sorting recycling robot bins,Charles Yhap,Co-founder & CEO,cayhap@cleanrobotics.com
+Triton Medical Robotics,"GI endoscopy surgical robot; force plus perception sim is critical since cadaver/clinical iteration is slow.",GI endoscopy surgical robot,Alex Tilson,CEO (parent Neptune Medical),alex@neptunemedical.com
+Artly,"Barista arm plus vision; kitchen-cell sim and ingredient handling are direct fits.",AI robotic barista coffee company,Meng Wang,Co-founder & CEO,
+"Greenfield Robotics - Healthy Food, Healthy Planet","Autonomous weeding farm robots; vision-based weed discrimination is a clean synthetic-data use case.",autonomous weeding farm robots,Clint Brauer,Founder,clint.brauer@greenfieldrobotics.com
+Advanced Construction Robotics,"Rebar tying/placing arm; rebar-pose perception plus grasp-force data are clean synthetic-data fits.",rebar tying and placing construction robots,Danielle Proctor,CEO,dproctor@constructionrobots.com
+Eka Robotics,"Sim-to-real manipulation AI; literally building what DoDAO's offering supports.",sim-to-real manipulation robotics AI,Pulkit Agrawal,Co-founder & CEO,
+Harvest Croo,"Strawberry harvesting arm; vision plus delicate-fruit grasp data are a textbook customer.",autonomous strawberry harvesting robot,Joseph McGee,CEO,
+Verdant Robotics,"Precision ag spraying/weeding with vision; synthetic crop/weed perception data map directly to the offering.",precision ag spraying/weeding robots,Gabe Sibley,Founder & CEO,gabe@verdantrobotics.com
+Wings,"Food-service retail robotics; cell sim plus ingredient/utensil manipulation data fit cleanly.",autonomous food-service retail robotics,Haitham Al-Beik,Founder (letsbutterfly Inc.),albeik@letsbutterfly.com
 Virtual Incision,"MIRA miniaturized surgical robot; sim plus force/perception data accelerate FDA-relevant testing.",miniaturized surgical robot MIRA,Jim Alecxih,CEO,
 Kane Robotics,"Cobot finishing arms (sand/grind/polish); contact-rich force sim plus synthetic surface-defect data fit.",cobot sanding/grinding/finishing systems,John Spruce,CEO,
 XYZ Robotics Inc.,"Warehouse picking/manipulation; classic arm plus vision use case for sim plus grasp data.",warehouse picking/manipulation robots,Jiaji Zhou,Co-founder & CEO,
