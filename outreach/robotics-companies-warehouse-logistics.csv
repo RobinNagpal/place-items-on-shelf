@@ -1,0 +1,18 @@
+name,relevance,note,contact_name,position,email
+Dexterity,"Physical AI for warehouse arms (sorting, truck loading, palletizing); sim plus grasp data fit the offering directly.",physical-AI warehouse arms for parcel sorting and truck loading,Samir Menon,Founder & CEO,
+Nimble Robotics,"Generalist warehouse superhumanoid for picking/packing/sorting; humanoid sim plus behavior-cloning trajectories are central.",generalist warehouse superhumanoid for fulfillment,Simon Kalouche,Founder & CEO,simon@nimble.ai
+Mytra,"3D-matrix pallet/case storage-and-retrieval robots; warehouse-grid sim plus AI-orchestration data fit the offering.",3D matrix pallet/case storage-and-retrieval robots,Chris Walti,Co-founder & CEO,
+Sereact,"Zero-shot picking software (PickGPT/Cortex) for warehouse arms; sim plus synthetic-vision data feed their VLM training loop.",PickGPT/Cortex zero-shot warehouse picking software,Ralf Gulde,Co-founder & CEO,
+Bright Machines,"Software-defined microfactories for electronics assembly; arm-cell sim plus computer-vision data fit the assembly-cell pitch.",software-defined microfactories for electronics assembly,Chris Stori,CEO,
+RobCo,"Modular industrial robot kits with physical-AI stack for SMEs; cell sim plus task-specific data fit the offering.",modular industrial robot kits with physical-AI stack,Roman Hölzl,Co-founder & CEO,
+Standard Bots,"AI-native cobot arms (RO1/RO3-Max) trained by demonstration; behavior-cloning data plus arm-cell sim are direct fits.",AI-native cobot arms learning from demonstration,Evan Beard,Co-founder & CEO,
+Pickle Robot,"Autonomous truck/container unloading arm; classic mobile-manipulation sim plus grasp data are central.",autonomous truck and container unloading arms,AJ Meyer,Founder & CEO,
+Dexory,"Tall AMR scanning warehouse racking for inventory; warehouse sim plus synthetic perception data fit the offering.",tall AMR for warehouse inventory and digital twins,Andrei Danescu,Co-founder & CEO,
+Nomagic,"AI pick-and-place arms for e-commerce/apparel fulfillment; arm sim plus grasp data on varied SKUs are textbook needs.",AI pick-and-place arms for e-commerce fulfillment,Kacper Nowicki,Co-founder & CEO,
+Vecna Robotics,"Autonomous forklifts and pallet AMRs with orchestration software; sim plus behavior-cloning data fit forklift policy training.",autonomous forklifts and pallet-mover AMRs,Karl Iagnemma,CEO,
+Third Wave Automation,"Autonomous high-reach forklifts with shared-autonomy fallback; sim plus teleop-derived trajectories fit the offering directly.",autonomous high-reach forklifts with shared autonomy,Arshan Poursohi,Co-founder & CEO,
+Slip Robotics,"SlipBots that auto-load/unload trailers in ~5 min; mobile-manipulation sim plus grasp data fit the dock workflow.",SlipBot autonomous trailer load/unload robots,Christopher Smith,Co-founder & CEO,
+Gather AI,"Autonomous drones plus cameras for warehouse inventory; warehouse sim plus synthetic-vision data fit the offering.",autonomous warehouse inventory drones,Sankalp Arora,Co-founder & CEO,
+Brightpick,"Autopicker mobile arms for warehouse aisles; mobile-manipulation sim plus grasp data are central.",Autopicker mobile picking robots,Jan Žižka,Co-founder & CEO,
+Contoro Robotics,"AI trailer/container unloading arm with teleop fallback; grasp data plus teleop-derived behavior cloning fit directly.",AI trailer and container unloading robots,Youngmok Yun,Co-founder & CEO,
+Anyware Robotics,"Pixmo mobile manipulator (AMR + cobot arm) for container unloading; mobile-manipulation sim plus grasp data fit the offering.",Pixmo mobile-manipulator container unloading robot,Thomas Tang,Co-founder & CEO,
