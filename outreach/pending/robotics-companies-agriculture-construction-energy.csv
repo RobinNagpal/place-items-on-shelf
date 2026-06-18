@@ -1,16 +1,241 @@
-name,relevance,note,contact_name,position,email
-Carbon Robotics,LaserWeeder pairs vision with 30 CO2 lasers for per-plant weed kill; crop/weed segmentation labels and field-cell sim for laser targeting are exactly the synthetic-data fit.,tractor-pulled vision-plus-laser weeding robot,Paul Mikesell,Founder & CEO,pmikesell@carbonrobotics.com
-Ecorobotix,ARA per-plant precision sprayer scans and treats plant-by-plant; crop/weed segmentation data and outdoor row-crop sim cut field iteration cost.,ultra-high-precision per-plant sprayer,Dominique Mégret,CEO,dominique.megret@ecorobotix.com
-Bonsai Robotics,Vision autonomy for OEM orchard equipment in GPS-denied dust; synthetic dust/foliage scenes and orchard-cell sim fit the offering directly.,vision-based physical-AI autonomy kits for orchard equipment,Tyler Niday,Co-founder & CEO,tyler@bonsairobotics.com
-Agtonomy,Software-defined autonomy for tractors and land-maintenance vehicles in vineyards/orchards; outdoor row-crop sim plus synthetic perception data feed policy training.,autonomy platform for OEM agricultural and grounds equipment,Tim Bucher,Co-founder & CEO,tim.bucher@agtonomy.com
-Bedrock Robotics,Operator-less earthmoving via sensor/AI retrofits on excavators; heavy-equipment sim plus synthetic terrain/dig data shorten real-world iteration.,AI sensor retrofit kits for excavators and heavy construction equipment,Boris Sofman,Co-founder & CEO,boris@bedrockrobotics.com
-Charge Robotics,Field factories assemble and place solar trackers on utility-scale sites; outdoor cell sim plus panel-handling grasp labels map straight to the offering.,portable robotic field factories for solar farm assembly,Banks Hunter,Co-founder & CEO,banks@chargerobotics.com
-Infravision,Heavy-lift drones plus the TX ground system string and reconductor power lines; cable/tower sim plus synthetic perception data accelerate outdoor deployment.,drone-and-ground robot system for power line reconductoring,Cameron Van Der Berg,Co-founder & CEO,cameron@infravision.com.au
-Xpanner,X1 Kit retrofits construction equipment into autonomous fleets; jobsite sim and synthetic terrain/perception data feed the kit's policy training.,retrofit autonomy kit for construction equipment,Henri Lee,Co-founder & CEO,hello@xpanner.com
-All3,Mantis legged robot assembles building structures on active sites; legged-locomotion sim plus assembly behavior-cloning trajectories are central to bring-up.,AI architecture platform plus Mantis legged construction robot,Rodion Shishkov,Co-founder & CEO,info@all3.com
-AgriPass Robotics,Autonomous mechanical weeders cut herbicide use; crop/weed perception data and field-cell sim are the obvious synthetic-data fit.,autonomous mechanical weeding robots,Liron Yanay,CEO,liron.yanay@agripass.co
-Tevel Aerobotics Technologies,Tethered flying robots pick tree fruit around the clock; orchard sim plus ripeness/fruit-pose synthetic labels train detection and gripper policies.,tethered flying autonomous fruit-picking robots,Yaniv Maor,Founder & CEO,yaniv@tevel-tech.com
-FarmDroid,Solar-powered field robot that seeds and mechanically weeds row crops; per-seed positioning needs labelled crop perception data and row-crop sim.,solar-powered seeding and weeding field robot,Kristian Vest Warming,CEO,info@farmdroid.com
-Naïo Technologies,"Autonomous weeders (Oz, Ted, Orio) for vegetables and vineyards; crop/weed segmentation and vineyard-row sim are textbook synthetic-data fits.",autonomous vegetable and vineyard weeding robots,Antoine Monville,CEO,antoine@naio-technologies.com
-TRIC Robotics,Tractor-sized robots treat strawberry fields with UV-C overnight; outdoor cell sim plus pest/canopy perception data accelerate field deployment.,autonomous UV-C strawberry-treatment robots,Adam Stager,Founder & CEO,adam@tricrobotics.com
-AirForestry,"Heavy-lift drones thin forests by gripping, cutting, and extracting trees; forest sim plus tree-pose and gripper-contact synthetic data are essential pre-flight.",heavy-lift autonomous forest-thinning drones,Caroline Walerud,Founder & CEO,caroline.walerud@airforestry.com
+name,relevance,note,contact_name,position,email,subject,email_body
+Carbon Robotics,LaserWeeder pairs vision with 30 CO2 lasers for per-plant weed kill; crop/weed segmentation labels and field-cell sim for laser targeting are exactly the synthetic-data fit.,tractor-pulled vision-plus-laser weeding robot,Paul Mikesell,Founder & CEO,pmikesell@carbonrobotics.com,Simulation and synthetic data for Carbon Robotics,"Hi Paul,
+
+I am writing from DoDAO. I came across Carbon Robotics and the LaserWeeder — vision plus lasers for per-plant weed kill.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean crop/weed segmentation labels and a field-cell sim for laser targeting.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Ecorobotix,ARA per-plant precision sprayer scans and treats plant-by-plant; crop/weed segmentation data and outdoor row-crop sim cut field iteration cost.,ultra-high-precision per-plant sprayer,Dominique Mégret,CEO,dominique.megret@ecorobotix.com,Simulation and synthetic data for Ecorobotix,"Hi Dominique,
+
+I am writing from DoDAO. I came across Ecorobotix and ARA, the per-plant precision sprayer that scans and treats plant-by-plant.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean crop/weed segmentation data and an outdoor row-crop sim.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Bonsai Robotics,Vision autonomy for OEM orchard equipment in GPS-denied dust; synthetic dust/foliage scenes and orchard-cell sim fit the offering directly.,vision-based physical-AI autonomy kits for orchard equipment,Tyler Niday,Co-founder & CEO,tyler@bonsairobotics.com,Simulation and synthetic data for Bonsai Robotics,"Hi Tyler,
+
+I am writing from DoDAO. I came across Bonsai Robotics and the vision autonomy kits you build for OEM orchard equipment in GPS-denied dust.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean synthetic dust and foliage scenes and an orchard-cell sim.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Agtonomy,Software-defined autonomy for tractors and land-maintenance vehicles in vineyards/orchards; outdoor row-crop sim plus synthetic perception data feed policy training.,autonomy platform for OEM agricultural and grounds equipment,Tim Bucher,Co-founder & CEO,tim.bucher@agtonomy.com,Simulation and synthetic data for Agtonomy,"Hi Tim,
+
+I am writing from DoDAO. I came across Agtonomy and the software-defined autonomy platform for vineyard and orchard equipment.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an outdoor row-crop sim and synthetic perception data for policy training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Bedrock Robotics,Operator-less earthmoving via sensor/AI retrofits on excavators; heavy-equipment sim plus synthetic terrain/dig data shorten real-world iteration.,AI sensor retrofit kits for excavators and heavy construction equipment,Boris Sofman,Co-founder & CEO,boris@bedrockrobotics.com,Simulation and synthetic data for Bedrock Robotics,"Hi Boris,
+
+I am writing from DoDAO. I came across Bedrock Robotics and the AI sensor retrofit kits that turn excavators into operator-less earthmovers.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a heavy-equipment sim and synthetic terrain and dig data.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Charge Robotics,Field factories assemble and place solar trackers on utility-scale sites; outdoor cell sim plus panel-handling grasp labels map straight to the offering.,portable robotic field factories for solar farm assembly,Banks Hunter,Co-founder & CEO,banks@chargerobotics.com,Simulation and synthetic data for Charge Robotics,"Hi Banks,
+
+I am writing from DoDAO. I came across Charge Robotics and the portable field factories that assemble and place solar trackers on-site.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an outdoor cell sim and panel-handling grasp labels.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Infravision,Heavy-lift drones plus the TX ground system string and reconductor power lines; cable/tower sim plus synthetic perception data accelerate outdoor deployment.,drone-and-ground robot system for power line reconductoring,Cameron Van Der Berg,Co-founder & CEO,cameron@infravision.com.au,Simulation and synthetic data for Infravision,"Hi Cameron,
+
+I am writing from DoDAO. I came across Infravision and the heavy-lift drones and TX ground system you use to string and reconductor power lines.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a cable and tower sim and synthetic perception data.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Xpanner,X1 Kit retrofits construction equipment into autonomous fleets; jobsite sim and synthetic terrain/perception data feed the kit's policy training.,retrofit autonomy kit for construction equipment,Henri Lee,Co-founder & CEO,hello@xpanner.com,Simulation and synthetic data for Xpanner,"Hi Henri,
+
+I am writing from DoDAO. I came across Xpanner and the X1 Kit that retrofits construction equipment into autonomous fleets.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a jobsite sim and synthetic terrain and perception data.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+All3,Mantis legged robot assembles building structures on active sites; legged-locomotion sim plus assembly behavior-cloning trajectories are central to bring-up.,AI architecture platform plus Mantis legged construction robot,Rodion Shishkov,Co-founder & CEO,info@all3.com,Simulation and synthetic data for All3,"Hi Rodion,
+
+I am writing from DoDAO. I came across All3 and Mantis, the legged robot assembling building structures on active sites.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a legged-locomotion sim and assembly behavior-cloning trajectories.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+AgriPass Robotics,Autonomous mechanical weeders cut herbicide use; crop/weed perception data and field-cell sim are the obvious synthetic-data fit.,autonomous mechanical weeding robots,Liron Yanay,CEO,liron.yanay@agripass.co,Simulation and synthetic data for AgriPass Robotics,"Hi Liron,
+
+I am writing from DoDAO. I came across AgriPass Robotics and the autonomous mechanical weeders you build to cut herbicide use.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean crop and weed perception data and a field-cell sim.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Tevel Aerobotics Technologies,Tethered flying robots pick tree fruit around the clock; orchard sim plus ripeness/fruit-pose synthetic labels train detection and gripper policies.,tethered flying autonomous fruit-picking robots,Yaniv Maor,Founder & CEO,yaniv@tevel-tech.com,Simulation and synthetic data for Tevel Aerobotics Technologies,"Hi Yaniv,
+
+I am writing from DoDAO. I came across Tevel Aerobotics Technologies and the tethered flying robots that pick tree fruit around the clock.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an orchard sim and ripeness and fruit-pose synthetic labels.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+FarmDroid,Solar-powered field robot that seeds and mechanically weeds row crops; per-seed positioning needs labelled crop perception data and row-crop sim.,solar-powered seeding and weeding field robot,Kristian Vest Warming,CEO,info@farmdroid.com,Simulation and synthetic data for FarmDroid,"Hi Kristian,
+
+I am writing from DoDAO. I came across FarmDroid and the solar-powered field robot that seeds and mechanically weeds row crops.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean labelled crop perception data and a row-crop sim.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Naïo Technologies,"Autonomous weeders (Oz, Ted, Orio) for vegetables and vineyards; crop/weed segmentation and vineyard-row sim are textbook synthetic-data fits.",autonomous vegetable and vineyard weeding robots,Antoine Monville,CEO,antoine@naio-technologies.com,Simulation and synthetic data for Naïo Technologies,"Hi Antoine,
+
+I am writing from DoDAO. I came across Naïo Technologies and the Oz, Ted, and Orio autonomous weeders for vegetables and vineyards.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean crop and weed segmentation data and a vineyard-row sim.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+TRIC Robotics,Tractor-sized robots treat strawberry fields with UV-C overnight; outdoor cell sim plus pest/canopy perception data accelerate field deployment.,autonomous UV-C strawberry-treatment robots,Adam Stager,Founder & CEO,adam@tricrobotics.com,Simulation and synthetic data for TRIC Robotics,"Hi Adam,
+
+I am writing from DoDAO. I came across TRIC Robotics and the tractor-sized robots that treat strawberry fields with UV-C overnight.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an outdoor cell sim and pest and canopy perception data.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+AirForestry,"Heavy-lift drones thin forests by gripping, cutting, and extracting trees; forest sim plus tree-pose and gripper-contact synthetic data are essential pre-flight.",heavy-lift autonomous forest-thinning drones,Caroline Walerud,Founder & CEO,caroline.walerud@airforestry.com,Simulation and synthetic data for AirForestry,"Hi Caroline,
+
+I am writing from DoDAO. I came across AirForestry and the heavy-lift drones that grip, cut, and extract trees to thin forests.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a forest sim and tree-pose and gripper-contact synthetic data.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
