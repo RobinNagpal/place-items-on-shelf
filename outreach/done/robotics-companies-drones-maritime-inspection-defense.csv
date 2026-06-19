@@ -1,0 +1,289 @@
+name,relevance,note,contact_name,position,email,subject,email_body
+Skydio,Vision-based GPS-denied quadcopter autonomy for public safety and inspection; aerial sim plus synthetic obstacle/scene data train the perception loop.,autonomous quadcopters and drone-in-a-box stations,Adam Bry,Co-founder & CEO,adam@skydio.com,Simulation and synthetic data for Skydio,"Hi Adam,
+
+I am writing from DoDAO. I came across Skydio and the autonomous quadcopters and drone-in-a-box stations you build for public safety and inspection.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an aerial sim and synthetic obstacle and scene data for the perception loop.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+BRINC Drones,911-response and indoor-capable public-safety drones; aerial sim plus synthetic indoor and breach scenes feed perception and policy training.,911-response and public-safety drones plus drone-in-a-box stations,Blake Resnick,Founder & CEO,blake@brincdrones.com,Simulation and synthetic data for BRINC Drones,"Hi Blake,
+
+I am writing from DoDAO. I came across BRINC Drones and the 911-response, indoor-capable public-safety drones and drone-in-a-box stations you build.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an aerial sim and synthetic indoor and breach scenes for perception and policy training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Quantum Systems,eVTOL fixed-wing ISR drones for NATO militaries and Ukraine; long-endurance flight sim plus synthetic terrain/target data are central to mission training.,eVTOL fixed-wing reconnaissance and surveillance drones,Florian Seibel,Co-founder & Co-CEO,Florian.Seibel@quantum-systems.com,Simulation and synthetic data for Quantum Systems,"Hi Florian,
+
+I am writing from DoDAO. I came across Quantum Systems and the eVTOL fixed-wing ISR drones you build for NATO militaries and Ukraine.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a long-endurance flight sim and synthetic terrain and target data for mission training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Tekever,Medium-endurance maritime ISR drones over the ocean; sea-state sim plus synthetic maritime-target imagery train detection at range.,autonomous maritime surveillance and ISR drones,Ricardo Mendes,Co-founder & CEO,ricardo.mendes@tekever.com,Simulation and synthetic data for Tekever,"Hi Ricardo,
+
+I am writing from DoDAO. I came across Tekever and the medium-endurance maritime ISR drones you fly over the ocean.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a sea-state sim and synthetic maritime-target imagery for detection at range.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Saildrone,Long-endurance uncrewed surface vessels for maritime domain awareness; ocean sim plus synthetic vessel/buoy imagery feed perception training.,wind- and solar-powered uncrewed surface vessels,Richard Jenkins,Founder & CEO,richard@saildrone.com,Simulation and synthetic data for Saildrone,"Hi Richard,
+
+I am writing from DoDAO. I came across Saildrone and the wind- and solar-powered uncrewed surface vessels you operate for maritime domain awareness.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an ocean sim and synthetic vessel and buoy imagery for perception training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+HavocAI,Autonomous surface drone boats run in swarms for navies; multi-agent maritime sim plus synthetic coordination data feed the swarm autonomy stack.,autonomous surface vessel swarms for naval missions,Paul Lwin,Co-founder & CEO,paul.lwin@havocai.com,Simulation and synthetic data for HavocAI,"Hi Paul,
+
+I am writing from DoDAO. I came across HavocAI and the autonomous surface drone boats you run in swarms for navies.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a multi-agent maritime sim and synthetic coordination data for the swarm autonomy stack.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Blue Water Autonomy,Full-size unmanned autonomous ocean-going ships; long-voyage sim plus synthetic maritime data are critical pre-deployment.,full-size unmanned autonomous ocean-going ships,Rylan Hamilton,Co-founder & CEO,rylanhamilton@gmail.com,Simulation and synthetic data for Blue Water Autonomy,"Hi Rylan,
+
+I am writing from DoDAO. I came across Blue Water Autonomy and the full-size unmanned autonomous ocean-going ships you are building.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a long-voyage sim and synthetic maritime data for pre-deployment validation.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Gecko Robotics,"Climbing, flying, and swimming inspection robots feeding the Cantilever AI platform; physics-tuned contact sim plus synthetic defect imagery accelerate field deployment.","wall-climbing, flying, and swimming infrastructure-inspection robots",Jake Loosararian,Co-founder & CEO,jake.loosararian@geckorobotics.com,Simulation and synthetic data for Gecko Robotics,"Hi Jake,
+
+I am writing from DoDAO. I came across Gecko Robotics and the wall-climbing, flying, and swimming inspection robots feeding the Cantilever AI platform.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a physics-tuned contact sim and synthetic defect imagery for field deployment.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+ANYbotics,ANYmal quadruped patrols refineries and plants including explosive atmospheres; legged-locomotion sim plus synthetic industrial-scene data feed policy training.,ANYmal four-legged industrial inspection robot,Péter Fankhauser,Co-founder & CEO,pfankhauser@anybotics.com,Simulation and synthetic data for ANYbotics,"Hi Péter,
+
+I am writing from DoDAO. I came across ANYbotics and ANYmal, the four-legged inspection robot patrolling refineries and plants including explosive atmospheres.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a legged-locomotion sim and synthetic industrial-scene data for policy training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Voliro,Tilt-rotor drones perform contact ultrasonic testing on infrastructure; aerial-contact sim plus synthetic defect/ultrasonic data are essential for the touch-the-asset behaviour.,tilt-rotor contact drones for non-destructive infrastructure testing,Timo Müller,Co-founder & CEO,timo.mueller@voliro.com,Simulation and synthetic data for Voliro,"Hi Timo,
+
+I am writing from DoDAO. I came across Voliro and the tilt-rotor drones that perform contact ultrasonic testing on infrastructure.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an aerial-contact sim and synthetic defect and ultrasonic data for the touch-the-asset behaviour.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Aerones,"Climbing robots inspect, clean, and repair turbine blades; tower-cell sim plus synthetic blade-defect imagery feed AI inspection.","wind-turbine climbing inspection, cleaning, and repair robots",Dainis Kruze,Co-founder & CEO,dainis.kruze@aerones.com,Simulation and synthetic data for Aerones,"Hi Dainis,
+
+I am writing from DoDAO. I came across Aerones and the climbing robots that inspect, clean, and repair wind-turbine blades.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a tower-cell sim and synthetic blade-defect imagery for AI inspection.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Square Robot,Submersible robots inspect in-service fuel and chemical tanks while full; submerged sim plus synthetic tank-floor imagery train inspection during live operations.,submersible in-service tank-floor inspection robots,David Lamont,CEO,davidtlamont@aol.com,Simulation and synthetic data for Square Robot,"Hi David,
+
+I am writing from DoDAO. I came across Square Robot and the submersible robots that inspect in-service fuel and chemical tanks while full.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a submerged sim and synthetic tank-floor imagery for inspection during live operations.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Forterra,AutoDrive retrofit turns tactical and terminal vehicles uncrewed; off-road sim plus synthetic terrain/route data feed retrofit autonomy training.,retrofit autonomous driving system for military and industrial ground vehicles,Josh Araujo,CEO,josharaujo@gmail.com,Simulation and synthetic data for Forterra,"Hi Josh,
+
+I am writing from DoDAO. I came across Forterra and AutoDrive, the retrofit kit that turns tactical and terminal vehicles uncrewed.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an off-road sim and synthetic terrain and route data for retrofit autonomy training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Overland AI,DARPA-RACER-derived off-road autonomy plus ULTRA UGV; off-road sim plus synthetic terrain/obstacle data are central to contested-logistics missions.,off-road ground autonomy software and ULTRA UGV,Byron Boots,Co-founder & CEO,bboots@cs.washington.edu,Simulation and synthetic data for Overland AI,"Hi Byron,
+
+I am writing from DoDAO. I came across Overland AI and the DARPA-RACER-derived off-road autonomy plus the ULTRA UGV.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an off-road sim and synthetic terrain and obstacle data for contested-logistics missions.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+ARX Robotics,"Modular Gereon UGVs for logistics, casevac, and recon; off-road sim plus synthetic battlefield data feed the Mithra autonomy stack.",modular unmanned ground vehicles and battlefield autonomy software,Marc Wietfeld,Co-founder & CEO,marc.wietfeld@arx-robotics.com,Simulation and synthetic data for ARX Robotics,"Hi Marc,
+
+I am writing from DoDAO. I came across ARX Robotics and the modular Gereon UGVs for logistics, casevac, and recon, plus the Mithra autonomy stack.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an off-road sim and synthetic battlefield data for the Mithra stack.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Scout AI,Fury vision-language-action model for defense robots in comms- and GPS-denied environments; foundation-model sim plus synthetic multimodal data feed training directly.,vision-language-action foundation model for defense ground and aerial robots,Colby Adcock,Co-founder & CEO,colby@scoutco.ai,Simulation and synthetic data for Scout AI,"Hi Colby,
+
+I am writing from DoDAO. I came across Scout AI and Fury, the vision-language-action model for defense robots in comms- and GPS-denied environments.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a foundation-model sim and synthetic multimodal data for training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Fortem Technologies,Net-gun counter-UAS interceptor paired with radar and command software; aerial-engagement sim plus synthetic intercept scenarios accelerate interceptor training.,autonomous counter-UAS interceptor drone with net guns,Jon Gruen,CEO,jgruen@fortemtech.com,Simulation and synthetic data for Fortem Technologies,"Hi Jon,
+
+I am writing from DoDAO. I came across Fortem Technologies and the net-gun counter-UAS interceptor paired with your radar and command software.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an aerial-engagement sim and synthetic intercept scenarios for interceptor training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Asylon Robotics,Patrol drones and DroneDog Spot under one Guardian stack; mixed indoor/outdoor sim plus synthetic patrol scenes feed the autonomy.,robotic security-as-a-service with patrol drones and DroneDog quadruped,Damon Henry,Co-founder & CEO,dhenry@asylonrobotics.com,Simulation and synthetic data for Asylon Robotics,"Hi Damon,
+
+I am writing from DoDAO. I came across Asylon Robotics and the patrol drones plus DroneDog Spot you run under one Guardian stack.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a mixed indoor/outdoor sim and synthetic patrol scenes for the autonomy.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
