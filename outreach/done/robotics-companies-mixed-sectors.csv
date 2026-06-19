@@ -1,0 +1,104 @@
+name,relevance,note,contact_name,position,email,subject,email_body
+Monarch Tractor,MK-V driver-optional autonomous electric tractor plus WingspanAI; vineyard/orchard sim plus synthetic row-crop data feed the autonomy and analytics stack.,electric autonomous tractor and farm management platform,Praveen Penmetsa,Founder & CEO,ppenmetsa@monarchtractor.com,Simulation and synthetic data for Monarch Tractor,"Hi Praveen,
+
+I am writing from DoDAO. I came across Monarch Tractor and the MK-V driver-optional autonomous electric tractor plus the WingspanAI platform.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a vineyard and orchard sim and synthetic row-crop data for the autonomy and analytics stack.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Burro,"Outdoor mobile robots tow, haul, mow, and patrol in nurseries, vineyards, and orchards; outdoor sim plus synthetic terrain and obstacle data feed multi-task autonomy.",autonomous outdoor mobile robots (Augean Robotics) for agriculture and grounds,Charlie Andersen,Founder & CEO,charlie@burro.ai,Simulation and synthetic data for Burro,"Hi Charlie,
+
+I am writing from DoDAO. I came across Burro and the outdoor mobile robots that tow, haul, mow, and patrol in nurseries, vineyards, and orchards.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an outdoor sim and synthetic terrain and obstacle data for the multi-task autonomy.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Cartken,Camera-only autonomous delivery and industrial transport robots; mixed indoor/outdoor sim plus synthetic perception data feed the camera-only stack.,camera-based autonomous delivery and industrial material-transport robots,Christian Bersch,Co-founder & CEO,christian@cartken.com,Simulation and synthetic data for Cartken,"Hi Christian,
+
+I am writing from DoDAO. I came across Cartken and the camera-only autonomous delivery and industrial transport robots you build.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a mixed indoor/outdoor sim and synthetic perception data for the camera-only stack.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Ati Motors,Sherpa factory AMRs with a self-driving-car-style autonomy stack; factory-floor sim plus synthetic pallet and aisle data feed perception and policy training.,"autonomous mobile robots (tugs, pallet movers) for manufacturers",Saurabh Chandra,Founder & CEO,saurabh@atimotors.com,Simulation and synthetic data for Ati Motors,"Hi Saurabh,
+
+I am writing from DoDAO. I came across Ati Motors and Sherpa, the factory AMRs running a self-driving-car-style autonomy stack.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a factory-floor sim and synthetic pallet and aisle data for perception and policy training.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Matic,Camera-only home vacuum/mop running on-device networks; home-room sim plus synthetic floor and clutter imagery feed the perception stack.,camera-only consumer home vacuum and mop robot,Navneet Dalal,Co-founder & CEO,,,
+Outrider,"Autonomous electric yard trucks hitch, move, and disconnect trailers; yard sim plus synthetic trailer and glad-hand data feed manipulation and driving policies.",autonomous electric yard trucks for distribution yards,Andrew Smith,Founder & CEO,,,
+Corvus Robotics,Infrastructure-free indoor drones scan warehouse barcodes including lights-out; warehouse-aisle sim plus synthetic barcode and scene data feed the autonomy.,autonomous infrastructure-free indoor inventory drones,Jackie Wu,Co-founder & CEO,jackie@corvus-robotics.com,Simulation and synthetic data for Corvus Robotics,"Hi Jackie,
+
+I am writing from DoDAO. I came across Corvus Robotics and the infrastructure-free indoor drones you fly to scan warehouse barcodes, including lights-out.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean a warehouse-aisle sim and synthetic barcode and scene data for the autonomy.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Four Growers,GR-100 detects ripeness and harvests greenhouse tomatoes and cucumbers; greenhouse sim plus synthetic crop-ripeness data feed perception and policy training.,AI-powered greenhouse harvesting robot,Brandon Contino,Co-founder & CEO,done,,
+Neros,Low-cost FPV recon/strike drones with a China-free supply chain; aerial sim plus synthetic recon and strike scenarios are central to mass-trained pilots and policies.,low-cost FPV reconnaissance and strike drones for defense,Soren Monroe-Anderson,Co-founder & CEO,soren@neros.tech,Simulation and synthetic data for Neros,"Hi Soren,
+
+I am writing from DoDAO. I came across Neros and the low-cost FPV recon and strike drones you build with a China-free supply chain.
+
+We help robotics teams with two things that precede training and testing on hardware:
+
+- A clean simulation world for your robot — robot model, workspace, sensors, parts, lighting, and physics, built in Gazebo or Isaac Sim.
+- Labelled synthetic data for your models — images, masks, depth, pose, demonstration trajectories, and edge cases, shipped in the format your team already uses.
+
+For your stack that would likely mean an aerial sim and synthetic recon and strike scenarios for mass-trained pilots and policies.
+
+You can see an overview of our services <a href=""https://dodao.io/robotics/poster.pdf"">here</a>.
+
+Thanks,
+Ryan Smith
+DoDAO"
+Deep Robotics,Industrial quadrupeds for inspection plus the DR02 all-weather humanoid; legged-locomotion sim plus synthetic site data feed policy training across forms.,industrial quadruped robots and DR02 humanoid,Zhu Qiuguo,Founder & CEO,,,
+LimX Dynamics,Modular humanoid and bipedal robots aimed at logistics and industrial tasks; full-body humanoid sim plus behavior-cloning trajectories are central to policy training.,modular humanoid and bipedal robots for logistics and industry,Zhang Wei,Founder & CEO,,,
+Booster Robotics,Low-cost humanoids sold as developer platforms (RoboCup AdultSize 2025 champion stack); humanoid sim plus open behavior-cloning data feed the researcher community.,low-cost humanoid robot development platforms,Cheng Hao,Founder & CEO,,,
+EngineAI,RL-trained dynamic-gait humanoids and bipeds at mass-production scale; legged sim plus large synthetic locomotion datasets are central to RL policy training.,agile RL-trained humanoid and bipedal robots,Zhao Tongyang,Founder & CEO,,,
