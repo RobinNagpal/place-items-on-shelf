@@ -6,8 +6,12 @@
 # Region the Isaac Sim instance runs in.
 aws_region = "us-east-1"
 
-# From EC2 -> Instances -> isaac-sim-dev.
-instance_id = "i-REPLACE_ME"
+# Let Terraform create the instance. Requires the Marketplace subscription to
+# be accepted once first - see instance.tf.
+create_instance = true
+
+# Only needed when create_instance = false (you launched the box by hand).
+# instance_id = "i-REPLACE_ME"
 
 # From EC2 -> Security Groups -> isaac-sim-sg.
 security_group_id = "sg-REPLACE_ME"
@@ -17,6 +21,15 @@ security_group_id = "sg-REPLACE_ME"
 # developer_user_name       = "isaac-sim-dev"
 # create_console_access     = true
 # create_access_key         = true
+
+# instance_type             = "g6e.xlarge"
+# root_volume_size          = 512
+# key_pair_name             = "isaac-sim-key"
+# subnet_id                 = ""   # auto-picks a public subnet in the SG's VPC
+# root_volume_encrypted     = true
+# ami_id                    = ""   # pin an exact AMI instead of searching.
+#                                  # us-east-1 known-good: ami-04c0e6d2f07bbddc7
+# ami_name_filter           = "OV-Template-aws-ubuntu-isaac_sim-*"
 
 # max_runtime_hours         = 2
 # curfew_hour               = 15                  # 3 PM

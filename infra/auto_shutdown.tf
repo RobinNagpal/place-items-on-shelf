@@ -117,11 +117,18 @@ resource "aws_lambda_function" "auto_shutdown" {
 
   environment {
     variables = {
-      INSTANCE_ID       = var.instance_id
+      INSTANCE_ID       = local.instance_id
       MAX_RUNTIME_HOURS = tostring(var.max_runtime_hours)
       CURFEW_HOUR       = tostring(var.curfew_hour)
       TIMEZONE          = var.curfew_timezone
       DRY_RUN           = var.auto_shutdown_dry_run ? "true" : "false"
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.create_instance || var.instance_id != ""
+      error_message = "Set create_instance = true, or paste a real instance_id into terraform.tfvars. With create_instance = false and an empty instance_id the auto-shutdown would watch nothing."
     }
   }
 
@@ -135,10 +142,12 @@ resource "aws_lambda_function" "auto_shutdown" {
 # ---------------------------------------------------------------------------
 # The schedule
 #
-# rate(1 hour) means the checker runs 24 times a day. Because it is a periodic
-# check and not a timer, a shutdown lands somewhere inside the hour after a
-# limit is crossed - an instance started at 09:10 is stopped at the 12:00 run,
-# not exactly at 11:10. Shorten check_schedule_expression if that matters.
+# cron(0 * * * ? *) runs the checker at the top of every hour, 24 times a day.
+# Because it is a periodic check and not a timer, a shutdown lands somewhere
+# inside the hour after a limit is crossed - an instance started at 09:10 is
+# stopped at the 12:00 run, not exactly at 11:10. Shorten
+# check_schedule_expression if that matters. Use cron() rather than rate():
+# rate() counts from when the rule was created, so it drifts off the clock.
 # ---------------------------------------------------------------------------
 
 resource "aws_cloudwatch_event_rule" "auto_shutdown" {

@@ -1,24 +1,51 @@
 # `infra/` — Terraform for the Isaac Sim AWS setup
 
-Terraform code that does the two "account owner" jobs described in
+Terraform code that does the three "account owner" jobs described in
 [`../isaac-sim-aws-setup.md`](../isaac-sim-aws-setup.md):
 
-1. **Creates the developer's IAM user** with permissions scoped to exactly one
-   EC2 instance and one security group — nothing else in the account.
-2. **Creates an auto-shutdown guard rail** so a forgotten Isaac Sim instance
+1. **Creates the EC2 instance** from the Isaac Sim Marketplace AMI, so the
+   instance ID never has to be copied by hand.
+2. **Creates the developer's IAM user** with permissions scoped to exactly that
+   one EC2 instance and one security group — nothing else in the account.
+3. **Creates an auto-shutdown guard rail** so a forgotten Isaac Sim instance
    cannot run up a bill. A `g6e.xlarge` costs about **$1.86/hour**, so one
    weekend left running is roughly **$130**.
 
 The manager runs this once. The developer never runs it.
 
+## The one manual step
+
+Terraform cannot click **"Subscribe / Accept Terms"** on the AWS Marketplace —
+accepting a Marketplace agreement is a legal and billing action that AWS does
+not expose through the API. So, once per account, the manager must:
+
+> AWS Console → Marketplace → search **"NVIDIA Isaac Sim"** →
+> **NVIDIA Isaac Sim Development Workstation (Linux)** → Subscribe → Accept Terms
+
+Skip it and `terraform apply` fails with **`OptInRequired`**. After that single
+click, everything else is code.
+
 ## What it does NOT do
 
-It does **not** create the EC2 instance, the security group, or the key pair.
-The Isaac Sim AMI comes from the AWS Marketplace and needs a manual
-"Subscribe / Accept Terms" click that Terraform cannot perform. So the manager
-launches the instance by hand — following the **Pre-flight** and **Launch the
-instance** sections of the setup guide — and then pastes the resulting instance
-ID and security group ID into `terraform.tfvars`.
+It does **not** create the security group or the key pair — make `isaac-sim-sg`
+and `isaac-sim-key` in the console first (the **Pre-flight** section of the
+setup guide), then paste the security group ID into `terraform.tfvars`.
+
+It also does not raise your **vCPU quota**. A brand-new account often has a
+limit of **0** for G-type instances, which makes the launch fail with
+`VcpuLimitExceeded`. Check Service Quotas → EC2 → *"Running On-Demand G and VT
+instances"* before applying; approval can take up to two days.
+
+## Two modes
+
+| `create_instance` | Who launches the instance | When to use it |
+|---|---|---|
+| `true` (default) | Terraform | Normal case. No IDs to copy, and `terraform destroy` cleans up. |
+| `false` | You, by hand in the console | An instance already exists. Paste its ID into `instance_id`. |
+
+Either way, the instance ID flows into **one** place (`local.instance_id`) which
+feeds both the developer's IAM policy and the auto-shutdown Lambda — so the
+permissions and the cost guard rail can never drift apart from the real machine.
 
 ## The shutdown rules
 
@@ -79,6 +106,7 @@ start, reboot, terminate, or touch any other instance in the account.
 | `providers.tf` | AWS provider config and default tags |
 | `variables.tf` | Every input, with defaults and descriptions |
 | `locals.tf` | ARNs built from the instance / security group IDs |
+| `instance.tf` | The EC2 instance and the Marketplace AMI lookup |
 | `iam_user.tf` | The developer IAM user and its four scoped policies |
 | `auto_shutdown.tf` | Lambda, its IAM role, log group, and the EventBridge schedule |
 | `outputs.tf` | Credentials and sign-in URL to hand to the developer |
@@ -110,14 +138,15 @@ IAM users (the account owner / an admin).
 ```bash
 cd infra
 
-# 1. Fill in the two IDs from the instance you launched by hand.
+# 1. Fill in the security group ID (and instance_id only if you set
+#    create_instance = false).
 cp terraform.tfvars.example terraform.tfvars
 $EDITOR terraform.tfvars
 
 # 2. Download providers.
 terraform init
 
-# 3. Read the plan carefully - it creates an IAM user.
+# 3. Read the plan carefully - it creates an IAM user and a GPU instance.
 terraform plan
 
 # 4. Apply.

@@ -15,21 +15,41 @@ variable "project_name" {
 }
 
 # ---------------------------------------------------------------------------
-# Existing resources this project points at
+# The Isaac Sim instance
 #
-# The instance and the security group are NOT created here. The Isaac Sim AMI
-# comes from the AWS Marketplace and needs a manual subscription click, so the
-# manager launches the instance by hand (see ../isaac-sim-aws-setup.md) and then
-# pastes the two IDs below.
+# Terraform can create the instance for you (create_instance = true, the
+# default), or point at one you launched by hand (create_instance = false plus
+# an instance_id). Either way the security group is NOT created here - make
+# isaac-sim-sg in the console first and paste its ID below.
+#
+# Creating the instance still needs ONE manual step beforehand: accepting the
+# Marketplace subscription for the Isaac Sim AMI. See instance.tf.
 # ---------------------------------------------------------------------------
 
+variable "create_instance" {
+  description = <<-EOT
+    Let Terraform create the Isaac Sim EC2 instance (recommended).
+
+    true  - Terraform launches the instance from the Marketplace AMI and wires
+            its real ID into the IAM policy and the auto-shutdown Lambda by
+            itself. You must accept the Marketplace subscription first (one
+            click, once per account) or the launch fails with OptInRequired.
+    false - You launched the instance by hand; paste its ID into instance_id
+            below.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "instance_id" {
-  description = "EC2 instance ID of the Isaac Sim workstation, e.g. i-0abc123def4567890."
+  description = "Only used when create_instance = false. EC2 instance ID of the hand-launched Isaac Sim workstation, e.g. i-0abc123def4567890."
   type        = string
+  default     = ""
 
   validation {
-    condition     = can(regex("^i-[0-9a-f]{8,17}$", var.instance_id))
-    error_message = "instance_id must look like i-0abc123def4567890."
+    # Empty is allowed because create_instance = true supplies the ID instead.
+    condition     = var.instance_id == "" || can(regex("^i-[0-9a-f]{8,17}$", var.instance_id))
+    error_message = "instance_id must be empty (when create_instance = true) or look like i-0abc123def4567890."
   }
 }
 
@@ -114,4 +134,62 @@ variable "log_retention_days" {
   description = "How long to keep the checker's CloudWatch logs. Short is fine and cheap."
   type        = number
   default     = 14
+}
+
+# ---------------------------------------------------------------------------
+# The instance Terraform creates (only when create_instance = true)
+# ---------------------------------------------------------------------------
+
+variable "ami_id" {
+  description = "Pin an exact AMI ID. Leave empty to auto-find the newest Marketplace AMI matching ami_name_filter."
+  type        = string
+  default     = ""
+}
+
+variable "ami_name_filter" {
+  description = <<-EOT
+    Name pattern used to find the Isaac Sim Marketplace AMI when ami_id is empty.
+
+    NVIDIA publishes these as "OV-Template" (OV = Omniverse) images, e.g.
+      OV-Template-aws-ubuntu-isaac_sim-20260624T103823-...-prod-l4r5drddssotm
+
+    The "ubuntu" in the pattern matters: there is a matching windows- image and
+    we do not want it. Re-check the current name with:
+      aws ec2 describe-images --owners aws-marketplace \
+        --filters "Name=name,Values=*isaac_sim*" \
+        --query 'reverse(sort_by(Images,&CreationDate))[:5].[ImageId,Name]' \
+        --output table
+  EOT
+  type        = string
+  default     = "OV-Template-aws-ubuntu-isaac_sim-*"
+}
+
+variable "instance_type" {
+  description = "GPU instance type. g6e.xlarge is the cheapest the Isaac Sim AMI accepts (L40S 48 GB, ~$1.86/hour)."
+  type        = string
+  default     = "g6e.xlarge"
+}
+
+variable "root_volume_size" {
+  description = "Root disk in GiB. 512 is the Isaac Sim AMI minimum."
+  type        = number
+  default     = 512
+}
+
+variable "root_volume_encrypted" {
+  description = "Encrypt the root disk. Set false only if the Marketplace AMI refuses to launch encrypted."
+  type        = bool
+  default     = true
+}
+
+variable "subnet_id" {
+  description = "Subnet to launch into. Leave empty to auto-pick a public subnet in whatever VPC the security group belongs to. Set it explicitly if that VPC has several public subnets and you care which one."
+  type        = string
+  default     = ""
+}
+
+variable "key_pair_name" {
+  description = "Name of an existing EC2 key pair for SSH. Create it in the console first (EC2 -> Key Pairs)."
+  type        = string
+  default     = "isaac-sim-key"
 }
