@@ -52,8 +52,16 @@ resource "aws_launch_template" "isaac_sim" {
     ebs {
       volume_size           = var.root_volume_size_gb
       volume_type           = "gp3"
+      encrypted             = true
       delete_on_termination = true
     }
+  }
+
+  # Require IMDSv2. Blocks the SSRF-style attacks that can read instance
+  # credentials through the metadata endpoint.
+  metadata_options {
+    http_tokens   = "required"
+    http_endpoint = "enabled"
   }
 
   # The Purpose tag is what makes an instance "the Isaac Sim instance". The IAM
