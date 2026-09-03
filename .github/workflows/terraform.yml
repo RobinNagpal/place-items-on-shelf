@@ -1,0 +1,86 @@
+# Terraform for infra/.
+#
+#   Pull request touching infra/  ->  fmt + validate + Lambda syntax check.
+#                                     No AWS access, so anyone's PR is safe.
+#   Push to main touching infra/  ->  plan, then apply. Runs as the
+#   (or "Run workflow" by hand)       isaac-sim-github-deploy IAM role, which
+#                                     AWS only hands out to this repo's main
+#                                     branch. Nothing else can apply.
+
+name: terraform
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # needed to get the OIDC token AWS trusts
+
+# Never run two applies at once. A second push waits for the first to finish.
+concurrency:
+  group: terraform-infra
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "0"
+  TERRAFORM_VERSION: "1.9.8"
+
+defaults:
+  run:
+    working-directory: infra
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Format check
+        run: terraform fmt -check -recursive -diff
+
+      - name: Validate
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Lambda syntax check
+        run: python3 -m py_compile lambda/*.py
+
+  apply:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::729763663166:role/isaac-sim-github-deploy
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Init
+        run: terraform init
+
+      - name: Plan
+        run: terraform plan -out=tfplan
+
+      - name: Apply
+        run: terraform apply tfplan

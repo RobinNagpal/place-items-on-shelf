@@ -19,12 +19,24 @@ the Marketplace (see [`../isaac-sim-aws-setup.md`](../isaac-sim-aws-setup.md)).
 Terraform can still create everything before that click; only the first launch
 needs the subscription in place.
 
-## Run it
+## How changes get applied
+
+Nobody runs `terraform apply` by hand day to day. GitHub Actions does it:
+
+1. Open a pull request that touches `infra/`. The `terraform` workflow runs
+   `fmt`, `validate`, and a Lambda syntax check. No AWS access.
+2. The repo owner reviews and merges. Only they can merge to `main`.
+3. On merge, the workflow assumes the `isaac-sim-github-deploy` role via
+   OIDC (no stored AWS keys) and runs `plan` then `apply`.
+
+`terraform.tfvars` is committed on purpose. It holds the AMI ID and user
+names, nothing secret. Edit it in a PR to add a developer.
+
+To apply from your laptop instead (owner only, needs the admin profile):
 
 ```bash
 cd infra
-cp terraform.tfvars.example terraform.tfvars   # fill in ami_id, admin_user_names
-terraform init
+terraform init      # reads state from S3
 terraform plan
 terraform apply
 ```
@@ -108,10 +120,11 @@ aws logs tail /aws/lambda/isaac-sim-auto-shutdown --follow
 terraform destroy
 ```
 
-This removes the user, group, policies, template, and both Lambdas. It does
+This removes the users, group, policies, template, and both Lambdas. It does
 **not** terminate the instance, because operators create that outside
 Terraform. Terminate it by hand first (it is the one tagged
-`Purpose = isaac-sim`).
+`Purpose = isaac-sim`). The state bucket and deploy role in `bootstrap/`
+stay unless you destroy that too.
 
 ## Files
 
@@ -126,7 +139,11 @@ Terraform. Terminate it by hand first (it is the one tagged
 | `auto_shutdown.tf`, `lambda/auto_shutdown.py` | Stop-on-limit Lambda |
 | `lambda_package.tf`, `lambda/common.py` | Shared zip and tag lookup |
 | `outputs.tf` | Credentials and the launch command |
+| `bootstrap/` | One-time: S3 state bucket, lock table, GitHub deploy role |
+| `../.github/workflows/terraform.yml` | The check-on-PR, apply-on-merge workflow |
 
-`terraform.tfstate` holds every developer's password, secret key and the SSH private key in
-plaintext. It is gitignored. Move it to an encrypted S3 backend before more
-than one person runs this.
+State holds every developer's password, secret key and the SSH private key
+in plaintext. It lives in the encrypted, versioned, private S3 bucket that
+`bootstrap/` creates, never on disk or in git. Only the account admin and the
+GitHub deploy role can read it. `bootstrap/main.tf` explains the one-time
+setup for a fresh account.

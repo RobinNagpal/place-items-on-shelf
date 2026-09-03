@@ -3,8 +3,8 @@
 *.tfstate.*
 .terraform/
 
-# Real variable values, including account-specific IDs.
-terraform.tfvars
+# terraform.tfvars IS committed: it holds only the AMI ID and user names, and
+# the GitHub Actions apply needs it. Never put a secret in it.
 *.auto.tfvars
 
 # Zipped Lambda source, rebuilt on every plan.
