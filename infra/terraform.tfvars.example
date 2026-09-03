@@ -1,0 +1,30 @@
+# Copy this file to terraform.tfvars and fill in the two IDs.
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# terraform.tfvars is gitignored, so your account details stay out of the repo.
+
+# Region the Isaac Sim instance runs in.
+aws_region = "us-east-1"
+
+# From EC2 -> Instances -> isaac-sim-dev.
+instance_id = "i-REPLACE_ME"
+
+# From EC2 -> Security Groups -> isaac-sim-sg.
+security_group_id = "sg-REPLACE_ME"
+
+# --- Optional overrides. Defaults are shown; delete the lines you don't change.
+
+# developer_user_name       = "isaac-sim-dev"
+# create_console_access     = true
+# create_access_key         = true
+
+# max_runtime_hours         = 2
+# curfew_hour               = 15                  # 3 PM
+# curfew_timezone           = "America/New_York"  # US Eastern, DST-aware
+# check_schedule_expression = "cron(0 * * * ? *)"
+
+# Set true for the first day to watch the logs without anything being stopped.
+# auto_shutdown_dry_run     = false
+
+# Set false to pause the schedule without destroying it.
+# auto_shutdown_enabled     = true

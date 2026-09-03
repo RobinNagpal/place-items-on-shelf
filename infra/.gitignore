@@ -1,0 +1,19 @@
+# Terraform state holds the IAM password and secret key in plaintext. Never commit it.
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Real variable values, including account-specific IDs.
+terraform.tfvars
+*.auto.tfvars
+
+# Zipped Lambda source, rebuilt on every plan.
+build/
+
+# Saved plan files.
+*.tfplan
+crash.log
+
+# Python bytecode from local syntax checks.
+__pycache__/
+*.pyc
