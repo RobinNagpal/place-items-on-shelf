@@ -14,7 +14,7 @@ running, stop it when idle.
 
 | State | Per hour | Per month if left this way |
 |---|---|---|
-| **Running** (`g6e.xlarge`, L40S 48 GB) | ~$1.86 | ~$1,340 |
+| **Running** (`g6.2xlarge`, L4 24 GB) | ~$0.98 | ~$700 |
 | **Stopped** (disk only, 512 GB gp3) | ~$0.06 | ~$40 |
 
 Realistic budget: **~$15–20/day** of active work + ~$40/month standby.
@@ -27,8 +27,8 @@ Stop the instance whenever you walk away.
 2. **AWS region** — pick **us-east-1** or **us-west-2** (lowest GPU price)
    and stay in it.
 3. **vCPU quota** — AWS console → Service Quotas → EC2 → search
-   *"Running On-Demand G and VT instances"* → request **8** (covers
-   `g6e.xlarge` with headroom). Approval can take hours to 2 days. Submit
+   *"Running On-Demand G and VT instances"* → request **16** (a
+   `g6.2xlarge` needs 8, so this leaves headroom). Approval can take hours to 2 days. Submit
    this first.
 4. **Key pair** — EC2 → Key Pairs → Create:
    - Name: `isaac-sim-key`, Type: **RSA**, Format: **.pem**.
@@ -46,9 +46,9 @@ Stop the instance whenever you walk away.
    from EC2 Console.
 2. On the launch wizard:
    - **Name**: `isaac-sim-dev`
-   - **Instance type**: `g6e.xlarge` (cheapest the AMI accepts; same L40S
-     GPU as the larger `g6e` sizes, just less RAM). NVIDIA's docs suggest
-     `g6e.4xlarge` for heavier workloads — start small, scale later.
+   - **Instance type**: `g6.2xlarge` (L4 24 GB GPU, 8 vCPU, 32 GB RAM —
+     enough for this project at about half the price of `g6e.xlarge`).
+     Move up to `g6e.xlarge` (L40S 48 GB) if scenes get heavy.
    - **Key pair**: `isaac-sim-key`
    - **Network → Firewall**: select existing → `isaac-sim-sg`
    - **Storage**: **512 GiB** gp3 (AMI minimum)
@@ -100,24 +100,30 @@ the account and you're an **IAM user**, the work splits up:
 
 ### What your manager does (once)
 
-1. Creates the IAM user for you with **console + programmatic access**.
-2. Attaches a policy that lets you operate the Isaac Sim instance. The
-   minimum useful set:
-   - `AmazonEC2ReadOnlyAccess` — see instances and statuses.
-   - `ec2:StartInstances`, `ec2:StopInstances`, `ec2:RebootInstances`
-     scoped to the Isaac Sim instance's ARN (so you can't touch other
-     instances).
-   - `ec2:AuthorizeSecurityGroupIngress`, `ec2:RevokeSecurityGroupIngress`
-     scoped to `isaac-sim-sg` (so you can update your home IP yourself).
-3. Does all the **Pre-flight** + **Launch the instance** steps above
-   (quota, key pair, security group, AMI, launch).
-4. Sends you:
+The Terraform in [`infra/`](infra/README.md) does most of this. In short:
+
+1. Requests the vCPU quota and subscribes to the Isaac Sim AMI in the
+   Marketplace (the two things Terraform cannot click).
+2. Runs `terraform apply`. That creates:
+   - Your IAM user, with console + programmatic access.
+   - The `isaac-sim-sg` security group and the `isaac-sim-key` key pair.
+   - A **launch template** that pins the AMI, `g6.2xlarge`, the key pair,
+     the security group and the disk. It is the only way you can create
+     the instance.
+   - An **operators group** containing you and the manager's own user.
+     Members can launch from the template and start / stop / reboot /
+     terminate instances tagged `Purpose = isaac-sim`, and edit
+     `isaac-sim-sg` to refresh their home IP. Nothing else.
+   - A **single-instance guard**: if a second Isaac Sim instance is ever
+     launched, it is terminated within seconds. There is only ever one.
+   - An **auto-shutdown**: the instance is stopped after 2 hours of
+     uptime or after 3 PM Eastern, whichever comes first.
+3. Sends you:
    - The `.pem` key file (over a secure channel — never email plaintext).
-   - The instance ID and the security group ID.
-   - The Linux `ubuntu` password they set with `sudo passwd ubuntu`
-     (or tells you to set one on your first SSH).
+   - The launch template ID (or the ready-made `aws ec2 run-instances`
+     command from `terraform output launch_command`).
    - The AWS Console sign-in URL for the account (looks like
-     `https://<account-alias>.signin.aws.amazon.com/console`).
+     `https://<account-id>.signin.aws.amazon.com/console`).
 
 ### What you do as the IAM user
 
@@ -131,11 +137,24 @@ the account and you're an **IAM user**, the work splits up:
      coffee shop wifi, etc.). If your manager hasn't granted the
      `ec2:...SecurityGroupIngress` permissions, you'll have to ping them
      each time — get the permissions instead.
-4. Start the instance (Instance state → Start).
-5. Connect via SSH and NICE DCV the same way as the single-user flow
-   above.
-6. **Stop the instance** when done. This is the most important habit on a
-   shared account — a forgotten `g6e.xlarge` costs ~$45/day.
+4. **Create the instance** if it does not exist yet. Either run the
+   command your manager gave you:
+   ```bash
+   aws ec2 run-instances --region us-east-1 --launch-template LaunchTemplateId=<lt-id>
+   ```
+   or in the console: EC2 → Launch Templates → `isaac-sim-workstation` →
+   Actions → Launch instance from template → Launch. Launching any other
+   way is denied.
+5. If it already exists, start it (Instance state → Start).
+6. Connect via SSH and NICE DCV the same way as the single-user flow
+   above. Set the `ubuntu` password yourself with `sudo passwd ubuntu` on
+   a fresh instance.
+7. **Stop the instance** when done. This is the most important habit on a
+   shared account — a forgotten `g6.2xlarge` costs ~$23/day. The
+   auto-shutdown is a backstop, not a substitute.
+8. **Terminate** it when the project pauses for a while, to stop the
+   ~$40/month disk cost. The disk goes with it, so push your work first.
+   Launch again from the template when you are back.
 
 ### Notes for the multi-user case
 
@@ -162,5 +181,5 @@ the account and you're an **IAM user**, the work splits up:
   run `sudo passwd ubuntu`.
 - **Isaac Sim won't start** — you skipped the NVIDIA Developer account.
   Create one and log in inside Isaac Sim's first-run dialog.
-- **Forgot to stop** — set an AWS Budget alert. A `g6e.xlarge` left
-  running for a week is ~$310.
+- **Forgot to stop** — set an AWS Budget alert. A `g6.2xlarge` left
+  running for a week is ~$165.

@@ -2,7 +2,7 @@
 Auto-shutdown checker for the Isaac Sim EC2 instance.
 
 EventBridge calls this function on a fixed schedule (hourly by default).
-On every run it asks two questions about the instance:
+On every run it finds the Isaac Sim instance by tag and asks two questions:
 
   1. Has it been running longer than MAX_RUNTIME_HOURS?
   2. Is the local wall-clock time at or past CURFEW_HOUR?
@@ -18,13 +18,11 @@ import datetime
 import logging
 import os
 
-import boto3
+from common import ec2, find_tagged_instances, is_dry_run
 
 # Lambda already configures a root logger, so we just grab it and set a level.
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-ec2 = boto3.client("ec2")
 
 
 def _local_now(timezone_name):
@@ -45,33 +43,9 @@ def _local_now(timezone_name):
         return now_utc.astimezone(datetime.timezone(datetime.timedelta(hours=-5)))
 
 
-def _describe(instance_id):
-    """Fetch the one instance we care about. Returns None if it no longer exists."""
-    response = ec2.describe_instances(InstanceIds=[instance_id])
-    for reservation in response.get("Reservations", []):
-        for instance in reservation.get("Instances", []):
-            return instance
-    return None
-
-
-def handler(event, context):  # noqa: ARG001 - Lambda passes both, we need neither
-    instance_id = os.environ["INSTANCE_ID"]
-    max_runtime_hours = float(os.environ["MAX_RUNTIME_HOURS"])
-    curfew_hour = int(os.environ["CURFEW_HOUR"])
-    timezone_name = os.environ["TIMEZONE"]
-    # Dry run lets you watch the logs and confirm the logic before it can
-    # actually stop anything.
-    dry_run = os.environ.get("DRY_RUN", "false").lower() == "true"
-
-    instance = _describe(instance_id)
-    if instance is None:
-        logger.warning("Instance %s not found - nothing to do", instance_id)
-        return {"action": "none", "reason": "instance-not-found"}
-
-    state = instance["State"]["Name"]
-    if state != "running":
-        logger.info("Instance %s is %s - nothing to do", instance_id, state)
-        return {"action": "none", "reason": f"state-{state}"}
+def _check_one(instance, max_runtime_hours, curfew_hour, timezone_name, dry_run):
+    """Decide what to do with one running instance. Returns a small result dict."""
+    instance_id = instance["InstanceId"]
 
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     local_now = _local_now(timezone_name)
@@ -96,12 +70,37 @@ def handler(event, context):  # noqa: ARG001 - Lambda passes both, we need neith
             uptime_hours,
             local_now.strftime("%H:%M"),
         )
-        return {"action": "none", "reason": "within-limits", "uptime_hours": round(uptime_hours, 2)}
+        return {"instance": instance_id, "action": "none", "reason": "within-limits", "uptime_hours": round(uptime_hours, 2)}
 
     if dry_run:
         logger.info("DRY RUN - would stop %s because: %s", instance_id, "; ".join(reasons))
-        return {"action": "dry-run", "reasons": reasons}
+        return {"instance": instance_id, "action": "dry-run", "reasons": reasons}
 
     logger.info("Stopping %s because: %s", instance_id, "; ".join(reasons))
     ec2.stop_instances(InstanceIds=[instance_id])
-    return {"action": "stopped", "reasons": reasons, "uptime_hours": round(uptime_hours, 2)}
+    return {"instance": instance_id, "action": "stopped", "reasons": reasons, "uptime_hours": round(uptime_hours, 2)}
+
+
+def handler(event, context):  # noqa: ARG001 - Lambda passes both, we need neither
+    max_runtime_hours = float(os.environ["MAX_RUNTIME_HOURS"])
+    curfew_hour = int(os.environ["CURFEW_HOUR"])
+    timezone_name = os.environ["TIMEZONE"]
+    dry_run = is_dry_run()
+
+    # Normally exactly one instance. The guard Lambda keeps it that way, but
+    # looping costs nothing and means a stray second instance is stopped too.
+    instances = find_tagged_instances()
+    if not instances:
+        logger.warning("No Isaac Sim instance found - nothing to do")
+        return {"action": "none", "reason": "instance-not-found"}
+
+    results = []
+    for instance in instances:
+        state = instance["State"]["Name"]
+        if state != "running":
+            logger.info("Instance %s is %s - nothing to do", instance["InstanceId"], state)
+            results.append({"instance": instance["InstanceId"], "action": "none", "reason": f"state-{state}"})
+            continue
+        results.append(_check_one(instance, max_runtime_hours, curfew_hour, timezone_name, dry_run))
+
+    return {"results": results}

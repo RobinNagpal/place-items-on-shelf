@@ -1,4 +1,4 @@
-# Copy this file to terraform.tfvars and fill in the two IDs.
+# Copy this file to terraform.tfvars and fill in the values.
 #   cp terraform.tfvars.example terraform.tfvars
 #
 # terraform.tfvars is gitignored, so your account details stay out of the repo.
@@ -6,15 +6,28 @@
 # Region the Isaac Sim instance runs in.
 aws_region = "us-east-1"
 
-# From EC2 -> Instances -> isaac-sim-dev.
-instance_id = "i-REPLACE_ME"
+# From EC2 -> AMI Catalog -> Marketplace -> "NVIDIA Isaac Sim Development
+# Workstation (Linux)". Subscribe first, then copy the AMI ID.
+ami_id = "ami-REPLACE_ME"
 
-# From EC2 -> Security Groups -> isaac-sim-sg.
-security_group_id = "sg-REPLACE_ME"
+# Optional: seed the security group with your home IP so SSH / DCV work on
+# day one. Operators can edit the rules afterwards.
+# ssh_dcv_allowed_cidrs = ["203.0.113.7/32"]
+
+# Existing IAM users (e.g. your own admin user) that should also be able to
+# launch / start / stop the Isaac Sim instance. Leave empty for developer only.
+admin_user_names = ["REPLACE_ME_admin"]
 
 # --- Optional overrides. Defaults are shown; delete the lines you don't change.
 
-# developer_user_name       = "isaac-sim-dev"
+# key_pair_name             = "isaac-sim-key"
+# subnet_id                 = null                # default VPC
+# instance_type             = "g6.2xlarge"                # L4 24 GB, ~$0.98/h
+# root_volume_size_gb       = 512
+# instance_name             = "isaac-sim-dev"
+
+# Up to four IAM users to create. Remove a name to delete that user.
+# developer_user_names      = ["robin-robotics", "hassaan-robotics"]
 # create_console_access     = true
 # create_access_key         = true
 
@@ -23,8 +36,10 @@ security_group_id = "sg-REPLACE_ME"
 # curfew_timezone           = "America/New_York"  # US Eastern, DST-aware
 # check_schedule_expression = "cron(0 * * * ? *)"
 
-# Set true for the first day to watch the logs without anything being stopped.
-# auto_shutdown_dry_run     = false
+# Set true for the first day to watch the logs without anything being
+# stopped / terminated.
+# auto_shutdown_dry_run         = false
+# single_instance_guard_dry_run = false
 
 # Set false to pause the schedule without destroying it.
 # auto_shutdown_enabled     = true

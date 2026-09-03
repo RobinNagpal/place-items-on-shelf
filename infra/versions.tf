@@ -15,5 +15,11 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.4"
     }
+
+    # Generates the SSH key pair.
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }

@@ -3,66 +3,121 @@
 # ---------------------------------------------------------------------------
 
 variable "aws_region" {
-  description = "Region the Isaac Sim instance lives in. Keep this the same as the instance."
+  description = "Region the Isaac Sim instance lives in. Keep this the same as the security group and key pair."
   type        = string
   default     = "us-east-1"
 }
 
 variable "project_name" {
-  description = "Short name used as a prefix for every resource this project creates."
+  description = "Short name used as a prefix for every resource this project creates. Also the value of the Purpose tag that marks the Isaac Sim instance."
   type        = string
   default     = "isaac-sim"
 }
 
 # ---------------------------------------------------------------------------
-# Existing resources this project points at
+# The AMI, network and key pair
 #
-# The instance and the security group are NOT created here. The Isaac Sim AMI
-# comes from the AWS Marketplace and needs a manual subscription click, so the
-# manager launches the instance by hand (see ../isaac-sim-aws-setup.md) and then
-# pastes the two IDs below.
+# The Isaac Sim AMI comes from the AWS Marketplace and needs a manual
+# "Subscribe / Accept Terms" click that Terraform cannot perform. Everything
+# else (security group, key pair) is created here.
 # ---------------------------------------------------------------------------
 
-variable "instance_id" {
-  description = "EC2 instance ID of the Isaac Sim workstation, e.g. i-0abc123def4567890."
+variable "ami_id" {
+  description = "AMI ID of the NVIDIA Isaac Sim Marketplace image, e.g. ami-0abc123def4567890. Subscribe to it in the Marketplace first, then copy the ID from the AMI Catalog."
   type        = string
 
   validation {
-    condition     = can(regex("^i-[0-9a-f]{8,17}$", var.instance_id))
-    error_message = "instance_id must look like i-0abc123def4567890."
+    condition     = can(regex("^ami-[0-9a-f]{8,17}$", var.ami_id))
+    error_message = "ami_id must look like ami-0abc123def4567890."
   }
 }
 
-variable "security_group_id" {
-  description = "Security group ID of isaac-sim-sg. The developer is allowed to edit its inbound rules so they can refresh their home IP."
+variable "ssh_dcv_allowed_cidrs" {
+  description = "CIDRs allowed to reach SSH (22) and NICE DCV (8443) when the security group is first created, e.g. [\"203.0.113.7/32\"]. Operators edit the rules by hand afterwards, so this only seeds the first rule set."
+  type        = list(string)
+  default     = []
+}
+
+variable "key_pair_name" {
+  description = "Name of the EC2 key pair Terraform creates and bakes into the launch template. Operators SSH in with the private key from `terraform output -raw ssh_private_key_pem`."
   type        = string
+  default     = "isaac-sim-key"
+}
 
-  validation {
-    condition     = can(regex("^sg-[0-9a-f]{8,17}$", var.security_group_id))
-    error_message = "security_group_id must look like sg-0abc123def4567890."
-  }
+variable "subnet_id" {
+  description = "Subnet to launch into. Leave null to use the default VPC's default subnet, which is where the hand-made security group normally lives."
+  type        = string
+  default     = null
 }
 
 # ---------------------------------------------------------------------------
-# The developer IAM user
+# The launch template - the only way operators can create the instance
 # ---------------------------------------------------------------------------
 
-variable "developer_user_name" {
-  description = "Name of the IAM user created for the developer who uses Isaac Sim."
+variable "instance_type" {
+  description = "Instance type the launch template uses. It is also the only type the IAM policy allows, so a bigger box means changing this and re-applying."
+  type        = string
+  default     = "g6.2xlarge"
+}
+
+variable "root_volume_size_gb" {
+  description = "Root disk size in GiB. The Isaac Sim AMI refuses anything under 512."
+  type        = number
+  default     = 512
+}
+
+variable "instance_name" {
+  description = "Value of the Name tag on the instance, so it is easy to spot in the console."
   type        = string
   default     = "isaac-sim-dev"
 }
 
+# ---------------------------------------------------------------------------
+# Who can operate the instance
+# ---------------------------------------------------------------------------
+
+variable "developer_user_names" {
+  description = "IAM user names to create for the developers who use Isaac Sim. One user per name, up to four. Leave empty to create none."
+  type        = list(string)
+  default     = ["robin-robotics", "hassaan-robotics"]
+
+  validation {
+    condition     = length(var.developer_user_names) <= 4
+    error_message = "developer_user_names holds at most four names."
+  }
+
+  validation {
+    condition     = length(var.developer_user_names) == length(distinct(var.developer_user_names))
+    error_message = "developer_user_names must not contain duplicates."
+  }
+}
+
+variable "admin_user_names" {
+  description = "Names of EXISTING IAM users (for example your own admin user) that should get the same launch / start / stop rights as the developer. They are added to the operators group; nothing else about them is touched."
+  type        = list(string)
+  default     = []
+}
+
 variable "create_console_access" {
-  description = "Create a console password for the user. They are forced to change it on first sign-in."
+  description = "Create a console password for every developer user. They are forced to change it on first sign-in."
   type        = bool
   default     = true
 }
 
 variable "create_access_key" {
-  description = "Create an access key ID + secret for the AWS CLI. Turn off if the user only needs the console."
+  description = "Create an access key ID + secret for the AWS CLI. Turn off if the developers only need the console."
   type        = bool
   default     = true
+}
+
+# ---------------------------------------------------------------------------
+# Single-instance guard
+# ---------------------------------------------------------------------------
+
+variable "single_instance_guard_dry_run" {
+  description = "When true the guard only logs which extra instance it would terminate. Use this for the first day, then flip it off."
+  type        = bool
+  default     = false
 }
 
 # ---------------------------------------------------------------------------
@@ -111,7 +166,7 @@ variable "check_schedule_expression" {
 }
 
 variable "log_retention_days" {
-  description = "How long to keep the checker's CloudWatch logs. Short is fine and cheap."
+  description = "How long to keep the Lambdas' CloudWatch logs. Short is fine and cheap."
   type        = number
   default     = 14
 }

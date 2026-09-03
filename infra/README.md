@@ -1,188 +1,132 @@
 # `infra/` — Terraform for the Isaac Sim AWS setup
 
-Terraform code that does the two "account owner" jobs described in
-[`../isaac-sim-aws-setup.md`](../isaac-sim-aws-setup.md):
+The manager runs this once. It sets up everything the developers need to run
+one Isaac Sim GPU instance, and nothing more.
 
-1. **Creates the developer's IAM user** with permissions scoped to exactly one
-   EC2 instance and one security group — nothing else in the account.
-2. **Creates an auto-shutdown guard rail** so a forgotten Isaac Sim instance
-   cannot run up a bill. A `g6e.xlarge` costs about **$1.86/hour**, so one
-   weekend left running is roughly **$130**.
+## What it creates
 
-The manager runs this once. The developer never runs it.
-
-## What it does NOT do
-
-It does **not** create the EC2 instance, the security group, or the key pair.
-The Isaac Sim AMI comes from the AWS Marketplace and needs a manual
-"Subscribe / Accept Terms" click that Terraform cannot perform. So the manager
-launches the instance by hand — following the **Pre-flight** and **Launch the
-instance** sections of the setup guide — and then pastes the resulting instance
-ID and security group ID into `terraform.tfvars`.
-
-## The shutdown rules
-
-| Rule | Default | Meaning |
-|---|---|---|
-| Max uptime | 2 hours | Running longer than this → stop it |
-| Daily curfew | 15:00 `America/New_York` | At or after 3 PM Eastern → stop it |
-| Check interval | `cron(0 * * * ? *)` | How often the two rules are evaluated |
-
-All three are variables, so you can change them without touching code.
-
-**The check is periodic, not a precise timer.** With hourly checks aligned to
-the top of the hour, an instance started at 09:10 crosses the 2-hour limit at
-11:10 but is actually stopped at the 12:00 check. That is fine for a cost
-guard rail. If you want it tighter, set
-`check_schedule_expression = "cron(*/15 * * * ? *)"` — the Lambda is free at
-this volume, so a shorter interval costs nothing extra.
-
-**Use `cron(...)`, not `rate(...)`, for this schedule.** EventBridge's
-`rate(1 hour)` fires every 60 minutes counting from whenever the rule was
-created or last enabled — not from the top of the clock hour. That means the
-first check could land at, say, 12:37, 1:37, 2:37... instead of 1:00, 2:00,
-3:00, which would push the 3 PM curfew check up to an hour late. `cron(0 * *
-* ? *)` fires exactly on the hour (in UTC, but the Lambda itself resolves the
-curfew in `curfew_timezone`, so this only affects when the *check* runs, not
-what time zone the curfew is measured in).
-
-**Note on the curfew and overnight.** "Stop after 3 PM" covers 15:00 → midnight.
-After midnight the local hour resets to 0, so the curfew stops applying and the
-2-hour max-uptime rule is what catches a late-night session. That is the
-intended behaviour, not a gap being ignored.
-
-**Note on daylight saving.** The default timezone is `America/New_York`, which
-is EST in winter and EDT in summer — the curfew always lands at 3 PM local
-wall-clock time. If you want a fixed UTC-5 all year (strict "EST"), that is not
-what this default gives you.
-
-## How it fits together
-
-```
-EventBridge rule  ──(every hour, on the hour)──▶  Lambda: isaac-sim-auto-shutdown
-"cron(0 * * * ? *)"                                  │
-                                        ├─ ec2:DescribeInstances  (is it running? how long?)
-                                        └─ ec2:StopInstances      (only if a rule is crossed)
-                                                 │
-                                                 ▼
-                                        the Isaac Sim instance
-```
-
-The Lambda can **only stop** the instance. Its IAM role has no permission to
-start, reboot, terminate, or touch any other instance in the account.
-
-## Files
-
-| File | What it holds |
+| Piece | What it does |
 |---|---|
-| `versions.tf` | Terraform and provider version pins |
-| `providers.tf` | AWS provider config and default tags |
-| `variables.tf` | Every input, with defaults and descriptions |
-| `locals.tf` | ARNs built from the instance / security group IDs |
-| `iam_user.tf` | The developer IAM user and its four scoped policies |
-| `auto_shutdown.tf` | Lambda, its IAM role, log group, and the EventBridge schedule |
-| `outputs.tf` | Credentials and sign-in URL to hand to the developer |
-| `lambda/auto_shutdown.py` | The actual shutdown logic (~90 lines of Python) |
-| `terraform.tfvars.example` | Template to copy to `terraform.tfvars` |
+| **Security group + key pair** | Ports 22 and 8443 for SSH and NICE DCV, and an RSA key. Operators edit the inbound IPs themselves. |
+| **Launch template** | The only recipe for the Isaac Sim instance: AMI, `g6.2xlarge`, key pair, security group, 512 GiB disk, `Purpose = isaac-sim` tag. |
+| **Operators group** | The developer users and your admin user. Members can launch from the template and start / stop / reboot / terminate tagged instances. Nothing else. |
+| **Developer IAM users** | Up to four, from `developer_user_names`. Each gets a console password + CLI key and can change their own password and MFA. |
+| **Single-instance guard** | Lambda. If a second Isaac Sim instance is launched, it is terminated within seconds. |
+| **Auto-shutdown** | Lambda. Stops the instance after 2 hours of uptime or after 3 PM Eastern. |
 
-## The developer's permissions
+It does **not** subscribe to the Isaac Sim AMI. That needs a manual click in
+the Marketplace (see [`../isaac-sim-aws-setup.md`](../isaac-sim-aws-setup.md)).
+Terraform can still create everything before that click; only the first launch
+needs the subscription in place.
 
-Four policies are attached to the IAM user:
-
-1. **`AmazonEC2ReadOnlyAccess`** (AWS managed) — see instances, statuses, and
-   the public IP in the console.
-2. **`isaac-sim-operate-instance`** — `ec2:StartInstances`, `StopInstances`,
-   `RebootInstances`, scoped to the one instance ARN.
-3. **`isaac-sim-manage-security-group`** — edit inbound rules on `isaac-sim-sg`
-   only, so the developer can refresh their own home IP without asking the
-   manager every time their ISP reassigns an address.
-4. **`isaac-sim-self-service-credentials`** — change their own password and set
-   up their own MFA device.
-
-That is the whole blast radius. They cannot launch instances, cannot terminate
-anything, and cannot see or change other people's resources.
-
-## Running it
-
-Prerequisites: Terraform ≥ 1.5, and AWS credentials for a user who can create
-IAM users (the account owner / an admin).
+## Run it
 
 ```bash
 cd infra
-
-# 1. Fill in the two IDs from the instance you launched by hand.
-cp terraform.tfvars.example terraform.tfvars
-$EDITOR terraform.tfvars
-
-# 2. Download providers.
+cp terraform.tfvars.example terraform.tfvars   # fill in ami_id, admin_user_names
 terraform init
-
-# 3. Read the plan carefully - it creates an IAM user.
 terraform plan
-
-# 4. Apply.
 terraform apply
 ```
 
-### Recommended first run: dry run
+For the first day, set `auto_shutdown_dry_run = true` and
+`single_instance_guard_dry_run = true`. Both Lambdas then only log what
+they would do. Check the logs, set both to `false`, apply again.
 
-For the first day, set `auto_shutdown_dry_run = true` in `terraform.tfvars`.
-The schedule still fires every hour and the Lambda still logs exactly what it
-*would* stop, but it never calls `StopInstances`. Watch the logs, confirm the
-decisions look right, then set it back to `false` and re-apply.
-
-### Getting the credentials out
-
-Terraform hides secrets in normal output. Read them explicitly:
+Hand each developer their credentials over a secure channel. The secret
+outputs are maps keyed by user name:
 
 ```bash
-terraform output developer_console_signin_url
-terraform output developer_user_name
-terraform output -raw developer_console_password
-terraform output -raw developer_access_key_id
-terraform output -raw developer_secret_access_key
+terraform output console_signin_url
+terraform output -json developer_console_passwords  | jq -r '."robin-robotics"'
+terraform output -json developer_access_key_ids     | jq -r '."robin-robotics"'
+terraform output -json developer_secret_access_keys | jq -r '."robin-robotics"'
+terraform output -raw ssh_private_key_pem > isaac-sim-key.pem   # same key for everyone
 ```
 
-Send these over a secure channel — a password manager or an encrypted message,
-never plain email. The console password is single-use: AWS forces a change on
-first sign-in.
+Developers are listed in `developer_user_names` (default
+`robin-robotics` and `hassaan-robotics`, at most four). Add a name and apply
+to onboard someone. Remove a name and apply to delete their user.
 
-## Testing the shutdown by hand
-
-Start the instance, then invoke the Lambda directly instead of waiting an hour:
+## Create the instance (developer or admin)
 
 ```bash
-aws lambda invoke \
-  --function-name isaac-sim-auto-shutdown \
-  --payload '{}' \
-  /dev/stdout
+terraform output -raw launch_command
+# aws ec2 run-instances --region us-east-1 --launch-template LaunchTemplateId=lt-...
 ```
 
-The response says what it decided: `none` (under both limits), `dry-run`, or
-`stopped` with the reasons. Full history is in CloudWatch:
+Or in the console: EC2 → Launch Templates → `isaac-sim-workstation` →
+Actions → **Launch instance from template**. Any other way to launch is
+denied.
+
+Terminate the instance when the project pauses. That stops the ~$40/month
+disk cost. The disk is deleted with it, so push your work to git first.
+
+## How "only one instance" works
+
+Nothing is keyed on an instance ID. The Isaac Sim instance is whichever
+instance carries the `Purpose = isaac-sim` tag. The template stamps that tag
+on launch and operators cannot change it.
+
+IAM limits *what* can be launched: only via the template, only
+`g6.2xlarge`, only the pinned AMI, key pair and security group. IAM cannot
+count, so the guard Lambda limits *how many*: it runs whenever any instance
+starts booting, keeps the oldest tagged instance, and terminates the rest.
+
+**Already have a hand-launched instance?** Tag it, or the policies and
+Lambdas will not see it:
 
 ```bash
+aws ec2 create-tags --resources i-XXXX --tags Key=Purpose,Value=isaac-sim
+```
+
+## Useful knobs
+
+All in `terraform.tfvars`:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `max_runtime_hours` | `2` | Stop after this much uptime |
+| `curfew_hour` | `15` | Stop at or after this local hour |
+| `curfew_timezone` | `America/New_York` | Timezone for the curfew |
+| `instance_type` | `g6.2xlarge` | Changes the template and the IAM limit together |
+| `auto_shutdown_enabled` | `true` | `false` pauses the hourly check |
+
+Need a long run today? `terraform apply -var="max_runtime_hours=8" -var="curfew_hour=22"`.
+
+## Check the guard rails
+
+```bash
+aws lambda invoke --function-name isaac-sim-auto-shutdown --payload '{}' /dev/stdout
+aws lambda invoke --function-name isaac-sim-single-instance-guard --payload '{}' /dev/stdout
 aws logs tail /aws/lambda/isaac-sim-auto-shutdown --follow
 ```
 
-## Pausing the guard rail
-
-Sometimes you genuinely need a long run — a big training job, a demo that goes
-past 3 PM. Two options, cheapest first:
+## Tear it all down
 
 ```bash
-# Option A: pause the schedule, keep everything in place.
-terraform apply -var="auto_shutdown_enabled=false"
-# ...and remember to turn it back on.
-
-# Option B: raise the limit for a while.
-terraform apply -var="max_runtime_hours=8" -var="curfew_hour=22"
+terraform destroy
 ```
 
-## State file warning
+This removes the user, group, policies, template, and both Lambdas. It does
+**not** terminate the instance, because operators create that outside
+Terraform. Terminate it by hand first (it is the one tagged
+`Purpose = isaac-sim`).
 
-`terraform.tfstate` contains the developer's console password and secret access
-key **in plaintext**. It is gitignored here. Before this is used by more than
-one person, move state to an S3 backend with encryption and locking enabled —
-local state is fine for a single manager running this once, and not fine for a
-team.
+## Files
+
+| File | Holds |
+|---|---|
+| `variables.tf` | Every input |
+| `network.tf` | Security group and SSH key pair |
+| `launch_template.tf` | The instance recipe |
+| `iam_operators.tf` | Group, memberships, EC2 policies |
+| `iam_user.tf` | Developer users and credentials |
+| `single_instance_guard.tf`, `lambda/single_instance_guard.py` | "Keep one" Lambda |
+| `auto_shutdown.tf`, `lambda/auto_shutdown.py` | Stop-on-limit Lambda |
+| `lambda_package.tf`, `lambda/common.py` | Shared zip and tag lookup |
+| `outputs.tf` | Credentials and the launch command |
+
+`terraform.tfstate` holds every developer's password, secret key and the SSH private key in
+plaintext. It is gitignored. Move it to an encrypted S3 backend before more
+than one person runs this.

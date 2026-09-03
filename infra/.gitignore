@@ -17,3 +17,6 @@ crash.log
 # Python bytecode from local syntax checks.
 __pycache__/
 *.pyc
+
+# SSH private key pulled from terraform output. Never commit.
+*.pem

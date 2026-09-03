@@ -5,37 +5,17 @@
 #
 #   EventBridge rule (every hour)
 #     -> Lambda function (lambda/auto_shutdown.py)
-#          -> reads the instance state and uptime
+#          -> finds the instance by its Purpose tag, reads state and uptime
 #          -> calls ec2:StopInstances if a limit is crossed
 #
 # Two limits are enforced: a max uptime (2 hours) and a daily curfew (3 PM
-# Eastern). A g6e.xlarge costs about $1.86/hour, so a forgotten instance is
-# roughly $45 a day. This is the guard rail.
+# Eastern). A g6.2xlarge costs about $0.98/hour, so a forgotten instance is
+# roughly $23 a day. This is the guard rail.
 # ---------------------------------------------------------------------------
-
-# Zip the Python file at plan time. Terraform re-zips automatically whenever
-# the source changes, which makes the Lambda redeploy on the next apply.
-data "archive_file" "auto_shutdown" {
-  type        = "zip"
-  source_file = "${path.module}/lambda/auto_shutdown.py"
-  output_path = "${path.module}/build/auto_shutdown.zip"
-}
 
 # ---------------------------------------------------------------------------
 # Execution role: what the Lambda itself is allowed to do
 # ---------------------------------------------------------------------------
-
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
 
 resource "aws_iam_role" "auto_shutdown" {
   name               = "${local.name_prefix}-auto-shutdown-role"
@@ -67,12 +47,19 @@ data "aws_iam_policy_document" "auto_shutdown" {
   }
 
   statement {
-    sid    = "StopIsaacSimInstance"
+    sid    = "StopTaggedIsaacSimInstances"
     effect = "Allow"
 
-    # Stop only. The Lambda has no way to start, reboot or terminate anything.
+    # Stop only, and only instances carrying the Purpose tag. The Lambda has
+    # no way to start, reboot or terminate anything.
     actions   = ["ec2:StopInstances"]
-    resources = [local.instance_arn]
+    resources = [local.any_instance_arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:ResourceTag/${local.instance_tag_key}"
+      values   = [local.instance_tag_value]
+    }
   }
 }
 
@@ -103,8 +90,8 @@ resource "aws_lambda_function" "auto_shutdown" {
   description   = "Stops the Isaac Sim instance after a max uptime or past the daily curfew."
   role          = aws_iam_role.auto_shutdown.arn
 
-  filename         = data.archive_file.auto_shutdown.output_path
-  source_code_hash = data.archive_file.auto_shutdown.output_base64sha256
+  filename         = data.archive_file.lambda.output_path
+  source_code_hash = data.archive_file.lambda.output_base64sha256
 
   # "file.function" - lambda/auto_shutdown.py, function handler().
   handler = "auto_shutdown.handler"
@@ -117,7 +104,8 @@ resource "aws_lambda_function" "auto_shutdown" {
 
   environment {
     variables = {
-      INSTANCE_ID       = var.instance_id
+      TAG_KEY           = local.instance_tag_key
+      TAG_VALUE         = local.instance_tag_value
       MAX_RUNTIME_HOURS = tostring(var.max_runtime_hours)
       CURFEW_HOUR       = tostring(var.curfew_hour)
       TIMEZONE          = var.curfew_timezone
