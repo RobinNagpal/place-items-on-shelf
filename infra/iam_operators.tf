@@ -222,3 +222,47 @@ resource "aws_iam_group_policy_attachment" "manage_security_group" {
   group      = aws_iam_group.operators.name
   policy_arn = aws_iam_policy.manage_security_group.arn
 }
+
+# ---------------------------------------------------------------------------
+# Policy 4: subscribe to the Isaac Sim Marketplace AMI
+#
+# RunInstances on a Marketplace AMI fails with OptInRequired until someone in
+# the account has accepted that product's terms. Without this policy an operator
+# cannot even open the product page - the console returns
+# "Access denied to aws-marketplace:ViewSubscriptions".
+#
+# Subscribe is included so an operator can accept the terms themselves instead
+# of waiting on the account owner. Unsubscribe is deliberately NOT included:
+# cancelling the subscription would break every future launch, and a day-to-day
+# operator has no reason to do it.
+#
+# Marketplace actions do not support resource-level permissions, so these have
+# to be "*" - this cannot be narrowed to the Isaac Sim product alone. The blast
+# radius is "can subscribe this account to any Marketplace product", which is a
+# spending decision. Grant it only to people trusted with the bill.
+# ---------------------------------------------------------------------------
+
+data "aws_iam_policy_document" "marketplace_subscribe" {
+  statement {
+    sid    = "ViewAndAcceptMarketplaceSubscriptions"
+    effect = "Allow"
+
+    actions = [
+      "aws-marketplace:ViewSubscriptions",
+      "aws-marketplace:Subscribe",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "marketplace_subscribe" {
+  name        = "${local.name_prefix}-marketplace-subscribe"
+  description = "View and accept AWS Marketplace subscriptions, so an operator can opt the account in to the Isaac Sim AMI."
+  policy      = data.aws_iam_policy_document.marketplace_subscribe.json
+}
+
+resource "aws_iam_group_policy_attachment" "marketplace_subscribe" {
+  group      = aws_iam_group.operators.name
+  policy_arn = aws_iam_policy.marketplace_subscribe.arn
+}
