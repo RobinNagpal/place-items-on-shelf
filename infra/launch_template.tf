@@ -27,6 +27,14 @@ resource "aws_launch_template" "isaac_sim" {
   instance_type = var.instance_type
   key_name      = aws_key_pair.isaac_sim.key_name
 
+  # Lets the instance's SSM Agent register itself, which is what makes
+  # `aws ssm start-session` work and removes the need to hand out the SSH
+  # private key. Operators need iam:PassRole on the role behind this profile
+  # or RunInstances is denied outright - see ssm.tf.
+  iam_instance_profile {
+    name = aws_iam_instance_profile.instance.name
+  }
+
   # Stopping from inside the OS (sudo shutdown) stops the instance instead of
   # terminating it, so a careless shutdown does not delete the disk.
   instance_initiated_shutdown_behavior = "stop"

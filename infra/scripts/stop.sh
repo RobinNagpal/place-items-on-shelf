@@ -49,4 +49,4 @@ aws ec2 wait instance-stopped --region "$REGION" --instance-ids "$instance_id"
 
 echo "${instance_id} is stopped. GPU billing has ended; the disk is kept."
 echo "Start it again with:"
-echo "  aws ec2 start-instances --region ${REGION} --instance-ids ${instance_id}"
+echo "  ./start.sh"

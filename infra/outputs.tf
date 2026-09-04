@@ -85,3 +85,13 @@ output "auto_shutdown_rules_summary" {
     var.auto_shutdown_enabled ? "" : "SCHEDULE DISABLED.",
   ])
 }
+
+output "instance_profile_name" {
+  description = "Instance profile the launch template attaches, so the SSM Agent can register. If sessions fail with TargetNotConnected, check the instance actually has this attached."
+  value       = aws_iam_instance_profile.instance.name
+}
+
+output "connect_command" {
+  description = "Open a shell on the instance without an SSH key or an open port. Needs the Session Manager plugin installed locally."
+  value       = "aws ssm start-session --region ${var.aws_region} --target <instance-id>"
+}

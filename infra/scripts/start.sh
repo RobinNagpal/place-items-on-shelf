@@ -57,12 +57,16 @@ public_ip="$(aws ec2 describe-instances \
 echo
 echo "Running: ${instance_id}   public IP: ${public_ip}"
 echo
-echo "  SSH:  ssh -i ~/.ssh/${PROJECT}-key.pem ubuntu@${public_ip}"
-echo "  DCV:  https://${public_ip}:8443"
+echo "  Shell:  ./connect.sh"
+echo "  DCV:    ${public_ip}:${DCV_PORT}   (log in as 'ubuntu')"
 echo
 
 # The instance gets a new public IP on every start, and your own home IP can
 # change too. Either one breaks the security group rule, so check both.
+#
+# Only DCV is affected. ./connect.sh goes through Session Manager and does not
+# care about the security group at all, which is why it is worth saying so
+# here - otherwise a stale rule looks like the whole machine is unreachable.
 my_ip="$(curl -s --max-time 5 https://checkip.amazonaws.com || true)"
 if [ -n "$my_ip" ]; then
   if ! aws ec2 describe-security-groups \
@@ -72,9 +76,11 @@ if [ -n "$my_ip" ]; then
     --output text | grep -q "${my_ip}/32"; then
 
     echo "WARNING: your current IP (${my_ip}) is not allowed in ${PROJECT}-sg,"
-    echo "so SSH and DCV will time out. Add it with:"
+    echo "so the DCV desktop will time out. Add it with:"
     echo
     echo "  ./allow-my-ip.sh"
+    echo
+    echo "(./connect.sh still works - it does not use the security group.)"
     echo
   fi
 fi
