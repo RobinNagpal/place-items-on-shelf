@@ -22,7 +22,9 @@ admin_user_names = ["REPLACE_ME_admin"]
 
 # key_pair_name             = "isaac-sim-key"
 # subnet_id                 = null                # default VPC
-# instance_type             = "g6.2xlarge"                # L4 24 GB, ~$0.98/h
+# instance_type             = "g6e.xlarge"                # L40S 48 GB, ~$1.86/h
+#                                                          # smallest type the
+#                                                          # Marketplace product allows
 # root_volume_size_gb       = 512
 # instance_name             = "isaac-sim-dev"
 

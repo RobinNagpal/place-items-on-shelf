@@ -9,7 +9,7 @@
 #          -> calls ec2:StopInstances if a limit is crossed
 #
 # Two limits are enforced: a max uptime (2 hours) and a daily curfew (3 PM
-# Eastern). A g6.2xlarge costs about $0.98/hour, so a forgotten instance is
+# Eastern). A g6e.xlarge costs about $1.86/hour, so a forgotten instance is
 # roughly $23 a day. This is the guard rail.
 # ---------------------------------------------------------------------------
 

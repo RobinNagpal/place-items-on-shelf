@@ -14,11 +14,13 @@ running, stop it when idle.
 
 | State | Per hour | Per month if left this way |
 |---|---|---|
-| **Running** (`g6.2xlarge`, L4 24 GB) | ~$0.98 | ~$700 |
+| **Running** (`g6e.xlarge`, L40S 48 GB) | ~$1.86 | ~$1,360 |
 | **Stopped** (disk only, 512 GB gp3) | ~$0.06 | ~$40 |
 
-Realistic budget: **~$15–20/day** of active work + ~$40/month standby.
-Stop the instance whenever you walk away.
+Realistic budget: **~$8–12/day** for a 4–6 hour session, + ~$40/month
+standby. Stop the instance whenever you walk away.
+
+This is the smallest instance the Marketplace product allows — see below.
 
 ## Pre-flight (do these once, in this order)
 
@@ -27,8 +29,8 @@ Stop the instance whenever you walk away.
 2. **AWS region** — pick **us-east-1** or **us-west-2** (lowest GPU price)
    and stay in it.
 3. **vCPU quota** — AWS console → Service Quotas → EC2 → search
-   *"Running On-Demand G and VT instances"* → request **16** (a
-   `g6.2xlarge` needs 8, so this leaves headroom). Approval can take hours to 2 days. Submit
+   *"Running On-Demand G and VT instances"* → request **8** (a
+   `g6e.xlarge` needs 4, so this leaves headroom). Approval can take hours to 2 days. Submit
    this first.
 4. **Key pair** — EC2 → Key Pairs → Create:
    - Name: `isaac-sim-key`, Type: **RSA**, Format: **.pem**.
@@ -46,9 +48,13 @@ Stop the instance whenever you walk away.
    from EC2 Console.
 2. On the launch wizard:
    - **Name**: `isaac-sim-dev`
-   - **Instance type**: `g6.2xlarge` (L4 24 GB GPU, 8 vCPU, 32 GB RAM —
-     enough for this project at about half the price of `g6e.xlarge`).
-     Move up to `g6e.xlarge` (L40S 48 GB) if scenes get heavy.
+   - **Instance type**: `g6e.xlarge` (L40S 48 GB GPU, 4 vCPU, 32 GB RAM).
+     **Do not substitute a cheaper `g6`/`g5` type to save money.** The
+     Marketplace product only permits certain instance types, and
+     `g6e.xlarge` is the smallest of them. Anything else fails at launch
+     with `UnsupportedOperation: The instance configuration for this AWS
+     Marketplace product is not supported`. The current list is on the
+     product's "Continue to Configuration" page.
    - **Key pair**: `isaac-sim-key`
    - **Network → Firewall**: select existing → `isaac-sim-sg`
    - **Storage**: **512 GiB** gp3 (AMI minimum)
@@ -107,7 +113,7 @@ The Terraform in [`infra/`](infra/README.md) does most of this. In short:
 2. Runs `terraform apply`. That creates:
    - Your IAM user, with console + programmatic access.
    - The `isaac-sim-sg` security group and the `isaac-sim-key` key pair.
-   - A **launch template** that pins the AMI, `g6.2xlarge`, the key pair,
+   - A **launch template** that pins the AMI, `g6e.xlarge`, the key pair,
      the security group and the disk. It is the only way you can create
      the instance.
    - An **operators group** containing you and the manager's own user.
@@ -150,7 +156,7 @@ The Terraform in [`infra/`](infra/README.md) does most of this. In short:
    above. Set the `ubuntu` password yourself with `sudo passwd ubuntu` on
    a fresh instance.
 7. **Stop the instance** when done. This is the most important habit on a
-   shared account — a forgotten `g6.2xlarge` costs ~$23/day. The
+   shared account — a forgotten `g6e.xlarge` costs ~$45/day. The
    auto-shutdown is a backstop, not a substitute.
 8. **Terminate** it when the project pauses for a while, to stop the
    ~$40/month disk cost. The disk goes with it, so push your work first.
@@ -181,5 +187,8 @@ The Terraform in [`infra/`](infra/README.md) does most of this. In short:
   run `sudo passwd ubuntu`.
 - **Isaac Sim won't start** — you skipped the NVIDIA Developer account.
   Create one and log in inside Isaac Sim's first-run dialog.
-- **Forgot to stop** — set an AWS Budget alert. A `g6.2xlarge` left
-  running for a week is ~$165.
+- **Forgot to stop** — set an AWS Budget alert. A `g6e.xlarge` left
+  running for a week is ~$313.
+- **`UnsupportedOperation` at launch** — the instance type is not on the
+  Marketplace product's allow-list. It is not a subscription problem; check
+  the type, not the agreement.
