@@ -185,6 +185,14 @@ The Terraform in [`infra/`](infra/README.md) does most of this. In short:
   group from your current IP. Update the rule.
 - **DCV login rejected** — `ubuntu` user has no password yet. SSH in and
   run `sudo passwd ubuntu`.
+- **DCV accepts the password, then the screen goes black** with *"No
+  license available. Please check your EC2 configuration"* — the instance's
+  IAM role cannot read the DCV licence object. DCV is free on EC2 but still
+  checks a licence in the regional `dcv-license.<region>` S3 bucket. Add
+  `s3:GetObject` on `arn:aws:s3:::dcv-license.<region>/*` to the instance
+  role (`infra/dcv_license.tf` does this), then
+  `sudo systemctl restart dcvserver`. Nothing else about the session,
+  password or security group is wrong when this happens.
 - **Isaac Sim won't start** — you skipped the NVIDIA Developer account.
   Create one and log in inside Isaac Sim's first-run dialog.
 - **Forgot to stop** — set an AWS Budget alert. A `g6e.xlarge` left

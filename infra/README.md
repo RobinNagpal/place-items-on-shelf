@@ -12,6 +12,7 @@ one Isaac Sim GPU instance, and nothing more.
 | **Operators group** | The developer users and your admin user. Members can launch from the template and start / stop / reboot / terminate tagged instances. Nothing else. |
 | **Developer IAM users** | Up to four, from `developer_user_names`. Each gets a console password + CLI key and can change their own password and MFA. |
 | **Session Manager access** | An instance role so the SSM Agent can register, plus `ssm:StartSession` for operators. Gives a shell with no SSH key and no open port. |
+| **DCV licence access** | `s3:GetObject` on the regional `dcv-license` bucket, on the same instance role. Without it the remote desktop connects and then goes black. |
 | **Single-instance guard** | Lambda. If a second Isaac Sim instance is launched, it is terminated within seconds. |
 | **Auto-shutdown** | Lambda. Stops the instance after 2 hours of uptime or after 3 PM Eastern. |
 
@@ -144,6 +145,7 @@ stay unless you destroy that too.
 | `launch_template.tf` | The instance recipe |
 | `iam_operators.tf` | Group, memberships, EC2 policies |
 | `ssm.tf` | Instance role for the SSM Agent, and the operators' session policy |
+| `dcv_license.tf` | S3 read so the DCV server can validate its licence |
 | `iam_user.tf` | Developer users and credentials |
 | `single_instance_guard.tf`, `lambda/single_instance_guard.py` | "Keep one" Lambda |
 | `auto_shutdown.tf`, `lambda/auto_shutdown.py` | Stop-on-limit Lambda |

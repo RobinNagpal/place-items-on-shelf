@@ -160,6 +160,16 @@ You do **not** need the SSH private key. `./connect.sh` reaches the machine
 through Session Manager instead. The key still exists for `--with-ssh`, but
 nothing in the normal flow uses it.
 
+## If the desktop connects then goes black
+
+`No license available. Please check your EC2 configuration` means the
+instance's IAM role cannot read its Amazon DCV licence from S3. DCV is free on
+EC2 but still validates a licence against the regional `dcv-license` bucket.
+`infra/dcv_license.tf` grants that; if you see this error the Terraform has not
+been applied yet. After it is, `./connect.sh` then
+`sudo systemctl restart dcvserver` — no relaunch needed, the role change
+reaches the running instance on its own.
+
 ## Cost
 
 The auto-shutdown Lambda stops the instance after **2 hours** of uptime, or once
