@@ -145,9 +145,13 @@ Skip `--replace` if a teammate's IP is also in the list.
 
 1. **The Marketplace subscription is accepted.** Otherwise `RunInstances` fails
    with `OptInRequired`.
-2. **The G-instance vCPU quota is high enough.** `g6.2xlarge` is 8 vCPUs, so
-   "Running On-Demand G and VT instances" must be at least 8, or the launch
+2. **The G-instance vCPU quota is high enough.** `g6e.xlarge` is 4 vCPUs, so
+   "Running On-Demand G and VT instances" must be at least 4, or the launch
    fails with `VcpuLimitExceeded`.
+
+   The instance type must also be one the Marketplace product permits.
+   `g6e.xlarge` is the smallest it allows; a cheaper `g6`/`g5` fails with
+   `UnsupportedOperation`, which reads like a subscription problem but is not.
 3. **The Session Manager plugin is installed locally.** On macOS:
    `brew install --cask session-manager-plugin`. Without it `./connect.sh`
    cannot run the session it just opened.

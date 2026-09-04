@@ -55,9 +55,9 @@ variable "subnet_id" {
 # ---------------------------------------------------------------------------
 
 variable "instance_type" {
-  description = "Instance type the launch template uses. It is also the only type the IAM policy allows, so a bigger box means changing this and re-applying."
+  description = "Instance type the launch template uses. It is also the only type the IAM policy allows, so a bigger box means changing this and re-applying. Must be on the Marketplace product's supported list - g6e.xlarge is the smallest one it allows."
   type        = string
-  default     = "g6.2xlarge"
+  default     = "g6e.xlarge"
 }
 
 variable "root_volume_size_gb" {

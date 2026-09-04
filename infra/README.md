@@ -8,7 +8,7 @@ one Isaac Sim GPU instance, and nothing more.
 | Piece | What it does |
 |---|---|
 | **Security group + key pair** | Ports 22 and 8443 for SSH and NICE DCV, and an RSA key. Operators edit the inbound IPs themselves. |
-| **Launch template** | The only recipe for the Isaac Sim instance: AMI, `g6.2xlarge`, key pair, security group, 512 GiB disk, `Purpose = isaac-sim` tag. |
+| **Launch template** | The only recipe for the Isaac Sim instance: AMI, `g6e.xlarge`, key pair, security group, 512 GiB disk, `Purpose = isaac-sim` tag. |
 | **Operators group** | The developer users and your admin user. Members can launch from the template and start / stop / reboot / terminate tagged instances. Nothing else. |
 | **Developer IAM users** | Up to four, from `developer_user_names`. Each gets a console password + CLI key and can change their own password and MFA. |
 | **Session Manager access** | An instance role so the SSM Agent can register, plus `ssm:StartSession` for operators. Gives a shell with no SSH key and no open port. |
@@ -90,7 +90,7 @@ instance carries the `Purpose = isaac-sim` tag. The template stamps that tag
 on launch and operators cannot change it.
 
 IAM limits *what* can be launched: only via the template, only
-`g6.2xlarge`, only the pinned AMI, key pair and security group. IAM cannot
+`g6e.xlarge`, only the pinned AMI, key pair and security group. IAM cannot
 count, so the guard Lambda limits *how many*: it runs whenever any instance
 starts booting, keeps the oldest tagged instance, and terminates the rest.
 
@@ -110,7 +110,7 @@ All in `terraform.tfvars`:
 | `max_runtime_hours` | `2` | Stop after this much uptime |
 | `curfew_hour` | `15` | Stop at or after this local hour |
 | `curfew_timezone` | `America/New_York` | Timezone for the curfew |
-| `instance_type` | `g6.2xlarge` | Changes the template and the IAM limit together |
+| `instance_type` | `g6e.xlarge` | Changes the template and the IAM limit together. Must be on the Marketplace product's allow-list; `g6e.xlarge` is the smallest permitted. |
 | `auto_shutdown_enabled` | `true` | `false` pauses the hourly check |
 
 Need a long run today? `terraform apply -var="max_runtime_hours=8" -var="curfew_hour=22"`.
