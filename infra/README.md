@@ -11,6 +11,7 @@ one Isaac Sim GPU instance, and nothing more.
 | **Launch template** | The only recipe for the Isaac Sim instance: AMI, `g6.2xlarge`, key pair, security group, 512 GiB disk, `Purpose = isaac-sim` tag. |
 | **Operators group** | The developer users and your admin user. Members can launch from the template and start / stop / reboot / terminate tagged instances. Nothing else. |
 | **Developer IAM users** | Up to four, from `developer_user_names`. Each gets a console password + CLI key and can change their own password and MFA. |
+| **Session Manager access** | An instance role so the SSM Agent can register, plus `ssm:StartSession` for operators. Gives a shell with no SSH key and no open port. |
 | **Single-instance guard** | Lambda. If a second Isaac Sim instance is launched, it is terminated within seconds. |
 | **Auto-shutdown** | Lambda. Stops the instance after 2 hours of uptime or after 3 PM Eastern. |
 
@@ -56,6 +57,10 @@ terraform output -json developer_secret_access_keys | jq -r '."robin-robotics"'
 terraform output -raw ssh_private_key_pem > isaac-sim-key.pem   # same key for everyone
 ```
 
+The SSH key is now a fallback, not the way in. Operators reach the instance
+with `aws ssm start-session`, which needs no key and no inbound port, so you no
+longer have to hand the `.pem` to anyone. See `ssm.tf`.
+
 Developers are listed in `developer_user_names` (default
 `robin-robotics` and `hassaan-robotics`, at most four). Add a name and apply
 to onboard someone. Remove a name and apply to delete their user.
@@ -70,6 +75,10 @@ terraform output -raw launch_command
 Or in the console: EC2 → Launch Templates → `isaac-sim-workstation` →
 Actions → **Launch instance from template**. Any other way to launch is
 denied.
+
+Easier: `scripts/launch.sh` does the same thing, refuses to create a second
+instance, and waits for the SSM Agent so `scripts/connect.sh` works right
+after. See [`scripts/README.md`](scripts/README.md).
 
 Terminate the instance when the project pauses. That stops the ~$40/month
 disk cost. The disk is deleted with it, so push your work to git first.
@@ -134,6 +143,7 @@ stay unless you destroy that too.
 | `network.tf` | Security group and SSH key pair |
 | `launch_template.tf` | The instance recipe |
 | `iam_operators.tf` | Group, memberships, EC2 policies |
+| `ssm.tf` | Instance role for the SSM Agent, and the operators' session policy |
 | `iam_user.tf` | Developer users and credentials |
 | `single_instance_guard.tf`, `lambda/single_instance_guard.py` | "Keep one" Lambda |
 | `auto_shutdown.tf`, `lambda/auto_shutdown.py` | Stop-on-limit Lambda |

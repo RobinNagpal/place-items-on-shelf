@@ -59,35 +59,44 @@ public_ip="$(aws ec2 describe-instances \
 echo
 echo "Running: ${instance_id}   public IP: ${public_ip}"
 echo
-echo "  SSH:  ssh -i ~/.ssh/${PROJECT}-key.pem ubuntu@${public_ip}"
-echo "  DCV:  https://${public_ip}:8443"
-echo
 
-# --- Two things that commonly block the first connection -------------------
-
-# The security group starts with no inbound rules at all, so nothing can reach
-# the box until an operator adds their own IP.
-rule_count="$(aws ec2 describe-security-groups \
-  --region "$REGION" \
-  --filters "Name=group-name,Values=${PROJECT}-sg" \
-  --query 'length(SecurityGroups[0].IpPermissions)' \
-  --output text 2>/dev/null || echo 0)"
-
-if [ "$rule_count" = "0" ]; then
-  echo "WARNING: the ${PROJECT}-sg security group has no inbound rules, so you cannot"
-  echo "connect yet. Open SSH and DCV to your current IP with:"
+# The agent needs a minute or two after "running" before a session can be
+# opened. Waiting here means the first ./connect.sh just works instead of
+# failing with TargetNotConnected on a machine that is merely still booting.
+echo "Waiting for the SSM Agent to check in..."
+if wait_for_ssm "$instance_id"; then
+  echo "SSM is ready."
+  ssm_ready="yes"
+else
   echo
-  echo "  MYIP=\$(curl -s https://checkip.amazonaws.com)"
-  echo "  aws ec2 authorize-security-group-ingress --region ${REGION} \\"
-  echo "    --group-id \$(aws ec2 describe-security-groups --region ${REGION} \\"
-  echo "        --filters Name=group-name,Values=${PROJECT}-sg \\"
-  echo "        --query 'SecurityGroups[0].GroupId' --output text) \\"
-  echo "    --ip-permissions \\"
-  echo "      \"IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=\$MYIP/32,Description=SSH}]\" \\"
-  echo "      \"IpProtocol=tcp,FromPort=8443,ToPort=8443,IpRanges=[{CidrIp=\$MYIP/32,Description=DCV}]\""
+  explain_ssm_timeout "$instance_id"
   echo
+  ssm_ready="no"
 fi
 
+# --- What to do next -------------------------------------------------------
+#
+# A new machine needs one thing before the desktop will let you in: the ubuntu
+# user has no password, and DCV authenticates against the Linux user. Setting
+# it needs a shell, which is what Session Manager is for.
+
+echo
+echo "Next, in order:"
+echo
+if [ "$ssm_ready" = "yes" ]; then
+  echo "  1. ./connect.sh          open a shell (no SSH key needed)"
+else
+  echo "  1. ./connect.sh          open a shell - see the warning above first"
+fi
+echo "       sudo passwd ubuntu   set the DCV login password (new machine only)"
+echo "       exit"
+echo
+echo "  2. ./allow-my-ip.sh      open DCV to your current IP"
+echo
+echo "  3. DCV client -> ${public_ip}:${DCV_PORT}, log in as 'ubuntu'"
+echo "       Get the macOS client from https://www.amazondcv.com/"
+echo "       Then run ~/isaacsim/isaac-sim.sh in the remote desktop."
+echo
 echo "Remember: the auto-shutdown Lambda stops this instance after 2 hours of"
 echo "uptime, or once it is past 3 PM US Eastern. Run ./stop.sh when you finish"
 echo "so you are not relying on the guard rail."
