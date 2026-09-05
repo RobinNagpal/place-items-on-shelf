@@ -44,9 +44,16 @@ If you want to *learn the skills* the walkthrough assumes — perception,
 motion planning, IK, RL, imitation learning, VLAs, LLM routing — work
 through the small, self-contained software exercises in:
 
-- **[`learning-checklist.md`](learning-checklist.md)** — Around 20
-  arm-focused, software-only practice projects. Each takes a day or two,
-  runs entirely in simulation, and stands on its own.
+- **[`../exercises/learning-checklist.md`](../exercises/learning-checklist.md)** —
+  Around 20 arm-focused, software-only practice projects. Each takes a
+  day or two, runs entirely in simulation, and stands on its own.
+  Implementations live in [`../exercises/`](../exercises/).
+
+## Outside material
+
+- **[`learning-resources.md`](learning-resources.md)** — Vetted courses
+  and open-source projects for ROS 2, MoveIt 2, Gazebo, and VLA models,
+  with ratings, star counts, and a suggested order to work through them.
 
 ## Reference (lives inside Layer 2)
 
