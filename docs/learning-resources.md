@@ -60,19 +60,50 @@ Caveat: 4.1 / 5 is good, not great. Reviews complain about pace and
 Ubuntu-version drift. Check which distro the current recording targets
 before you follow along.
 
-## 15 more, ranked by how useful they are here
+## 15 more, best first
 
 Seven courses, then eight open-source projects.
 
 ### Courses
 
+#### 1. Modern Robotics — free video lectures (Northwestern)
+
+- **Videos:** <https://modernrobotics.northwestern.edu/nu-gm-book-resource/introduction-autoplay/>
+- **Authors:** Kevin M. Lynch and Frank C. Park, Northwestern University
+- **Cost:** free. The videos are a public YouTube playlist
+- **Also free:** the [code library](https://github.com/NxRLab/ModernRobotics)
+  (~2.9k stars) in Python, MATLAB, and Mathematica
+- **Structured version:** the [Coursera specialization](https://www.coursera.org/specializations/modernrobotics),
+  ~4.7–4.9 / 5 across its six courses, thousands of reviews, free to audit
+
+**Start here.** This is the single best item on the page and the only one
+that is both free and university-grade.
+
+Thirteen chapters of short videos, following the Lynch and Park textbook:
+configuration space, rigid-body motions, forward kinematics, velocity
+kinematics and statics, inverse kinematics, closed chains, dynamics of
+open chains, trajectory generation, motion planning, robot control,
+grasping and manipulation, and wheeled mobile robots.
+
+Every other course on this page teaches you to *drive* a tool. This one
+teaches you what the tool is doing. When MoveIt returns a plan you did
+not expect, or an IK call fails with no obvious reason, the answer is
+almost always in one of these chapters — chapter 6 for IK, chapter 5 for
+Jacobians and singularities, chapter 9 for trajectory generation.
+
+Practical note: watch it *alongside* the ROS 2 courses, not before them.
+The chapters are short and self-contained, so pull up the one that
+matches whatever is confusing you that week. Chapters 2–6 and 9 cover
+almost everything a fixed arm needs; 12 and 13 are out of scope here.
+
+#### The rest
+
 | # | Resource | Rating | Covers | Cost |
 |---|---|---|---|---|
-| 1 | [Robotics and ROS 2 — Learn by Doing! Manipulators](https://www.udemy.com/course/robotics-and-ros-2-learn-by-doing-manipulators/) (Antonio Brandi) | 4.5 / 5, 812 ratings, ~7,500 students, 21 h | URDF, Gazebo, `ros2_control`, kinematics, MoveIt 2, then the same code on a 3D-printed Arduino arm | Paid |
-| 2 | [ROS 2 MoveIt 2 — Control a Robotic Arm](https://www.udemy.com/course/ros2-moveit2/) (Edouard Renard) | Consistently strong reviews; the most-recommended MoveIt 2 course | Configuring a 6-axis arm for MoveIt 2 from scratch, gripper, Setup Assistant, MoveIt–ROS 2 bridge | Paid |
-| 3 | [ROS 2 for Beginners Level 2 — TF, URDF, RViz, Gazebo](https://www.udemy.com/course/ros2-tf-urdf-rviz-gazebo/) (Edouard Renard) | 4.7 / 5, 1,218 ratings | TF trees, writing URDF/xacro by hand, RViz, Gazebo worlds. The prerequisite for everything above | Paid |
-| 4 | [The Construct — ROS 2 Manipulation Basics](https://www.theconstruct.ai/robotigniteacademy_learnros/ros-courses-library/ros2-manipulation-basics/) and [Manipulation & Perception](https://www.theconstruct.ai/robotigniteacademy_learnros/ros-courses-library/ros2-manipulation-perception-online-course/) | Long-running, widely used in industry training | MoveIt 2 packages, Python and C++ planning, then perception-driven pick-and-place on a UR3e + gripper + 3D sensor | Subscription; runs in the browser, no local install |
-| 5 | [Modern Robotics: Mechanics, Planning, and Control](https://www.coursera.org/specializations/modernrobotics) (Northwestern, Kevin Lynch) | ~4.7–4.9 / 5 across its six courses, thousands of reviews | The theory the tools hide: configuration space, screws and twists, forward/inverse kinematics, Jacobians, trajectory generation | Free to audit |
+| 2 | [Robotics and ROS 2 — Learn by Doing! Manipulators](https://www.udemy.com/course/robotics-and-ros-2-learn-by-doing-manipulators/) (Antonio Brandi) | 4.5 / 5, 812 ratings, ~7,500 students, 21 h | URDF, Gazebo, `ros2_control`, kinematics, MoveIt 2, then the same code on a 3D-printed Arduino arm | Paid |
+| 3 | [ROS 2 MoveIt 2 — Control a Robotic Arm](https://www.udemy.com/course/ros2-moveit2/) (Edouard Renard) | Consistently strong reviews; the most-recommended MoveIt 2 course | Configuring a 6-axis arm for MoveIt 2 from scratch, gripper, Setup Assistant, MoveIt–ROS 2 bridge | Paid |
+| 4 | [ROS 2 for Beginners Level 2 — TF, URDF, RViz, Gazebo](https://www.udemy.com/course/ros2-tf-urdf-rviz-gazebo/) (Edouard Renard) | 4.7 / 5, 1,218 ratings | TF trees, writing URDF/xacro by hand, RViz, Gazebo worlds. The prerequisite for the two above | Paid |
+| 5 | [The Construct — ROS 2 Manipulation Basics](https://www.theconstruct.ai/robotigniteacademy_learnros/ros-courses-library/ros2-manipulation-basics/) and [Manipulation & Perception](https://www.theconstruct.ai/robotigniteacademy_learnros/ros-courses-library/ros2-manipulation-perception-online-course/) | Long-running, widely used in industry training | MoveIt 2 packages, Python and C++ planning, then perception-driven pick-and-place on a UR3e + gripper + 3D sensor | Subscription; runs in the browser, no local install |
 | 6 | [MoveIt 2 official tutorials](https://moveit.picknik.ai/) ([repo](https://github.com/moveit/moveit2_tutorials), ~370 stars) | Reference-grade | Every MoveIt 2 concept with runnable code: `MoveGroupInterface`, planning scene, Servo, Task Constructor, Setup Assistant | Free |
 | 7 | [Automatic Addison — ROS 2 arm series](https://automaticaddison.com/how-to-control-a-robotic-arm-using-ros-2-control-and-gazebo/) | Widely linked in the ROS 2 community | Written, copy-pasteable walkthroughs: [`ros2_control` + Gazebo](https://automaticaddison.com/how-to-control-a-robotic-arm-using-ros-2-control-and-gazebo/), then [MoveIt 2 config for a simulated arm](https://automaticaddison.com/configure-moveit-2-for-a-simulated-robot-arm-ros-2-jazzy/) | Free |
 
@@ -113,16 +144,18 @@ Narrower, but directly useful for this repo:
 
 If you are starting from zero:
 
-1. **ROS 2 basics and URDF** — course 3, or the free tutorials in item 7.
-2. **Motion planning** — course 2, then the official tutorials (item 6)
+1. **ROS 2 basics and URDF** — course 4, or the free tutorials in item 7.
+2. **Motion planning** — course 3, then the official tutorials (item 6)
    as the reference you keep open.
-3. **A full arm project** — course 1, or our
+3. **A full arm project** — course 2, or our
    [exercises 18–22](../exercises/).
-4. **The theory, when the tools stop making sense** — course 5.
-5. **Learned policies and VLAs** — LeRobot (item 13) first, because it
+4. **Learned policies and VLAs** — LeRobot (item 13) first, because it
    runs on a laptop, then openpi (14) and OpenVLA (15).
 
-Courses 1–4 overlap heavily. Pick one, not all four.
+Run **item 1, Modern Robotics, across all four steps** rather than as a
+step of its own. It is the theory the others assume.
+
+Courses 2–5 overlap heavily. Pick one, not all four.
 
 ## Adding to this list
 
