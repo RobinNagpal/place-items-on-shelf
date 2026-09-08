@@ -2,10 +2,15 @@
 #
 #   Pull request touching infra/  ->  fmt + validate + Lambda syntax check.
 #                                     No AWS access, so anyone's PR is safe.
-#   Push to main touching infra/  ->  plan, then apply. Runs as the
-#   (or "Run workflow" by hand)       isaac-sim-github-deploy IAM role, which
+#   "Run workflow" by hand        ->  apply OR destroy. Runs as the
+#                                     isaac-sim-github-deploy IAM role, which
 #                                     AWS only hands out to this repo's main
 #                                     branch. Nothing else can apply.
+#
+# There is deliberately NO apply-on-merge trigger. It was removed when the
+# stack was torn down, so a later merge touching infra/ cannot silently
+# rebuild the whole thing. To bring the stack back, run this workflow by hand
+# with action = apply.
 
 name: terraform
 
@@ -14,18 +19,37 @@ on:
     paths:
       - "infra/**"
       - ".github/workflows/terraform.yml"
-  push:
-    branches: [main]
-    paths:
-      - "infra/**"
-      - ".github/workflows/terraform.yml"
+
   workflow_dispatch:
+    inputs:
+      action:
+        description: "What to run against infra/."
+        type: choice
+        options:
+          - apply
+          - destroy
+        default: apply
+
+      confirm:
+        description: "Destroy only: type exactly  destroy isaac-sim  to proceed. Ignored by apply."
+        type: string
+        default: ""
+
+      terminate_instance:
+        description: "Destroy only: also terminate the running Purpose=isaac-sim instance. DELETES ITS 512 GiB DISK. Leave off to abort if one is running."
+        type: boolean
+        default: false
+
+      force_destroy_users:
+        description: "Destroy only: delete the developer IAM users even if they added their own MFA device or access key. Needed if destroy fails with DeleteConflict."
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   id-token: write # needed to get the OIDC token AWS trusts
 
-# Never run two applies at once. A second push waits for the first to finish.
+# Never run two of these at once. A second run waits for the first to finish.
 concurrency:
   group: terraform-infra
   cancel-in-progress: false
@@ -62,7 +86,7 @@ jobs:
         run: python3 -m py_compile lambda/*.py
 
   apply:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,3 +108,79 @@ jobs:
 
       - name: Apply
         run: terraform apply tfplan
+
+  destroy:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    runs-on: ubuntu-latest
+    steps:
+      # Guard 1: a typo in the dropdown should not delete the stack. The
+      # operator has to type the phrase out before anything touches AWS.
+      - name: Check the confirmation phrase
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "destroy isaac-sim" ]; then
+            echo "::error::Confirmation phrase missing or wrong. Re-run with confirm = 'destroy isaac-sim'."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::729763663166:role/isaac-sim-github-deploy
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      # Guard 2: the instance is launched by hand from the template, so it is
+      # NOT in Terraform state and `terraform destroy` will not touch it. Left
+      # behind it becomes an orphan that still bills. Abort unless the operator
+      # asked for it to go too.
+      - name: Handle the untracked Isaac Sim instance
+        run: |
+          ids=$(aws ec2 describe-instances \
+            --filters "Name=tag:Purpose,Values=isaac-sim" \
+                      "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[].Instances[].InstanceId" --output text)
+
+          if [ -z "$ids" ]; then
+            echo "No Purpose=isaac-sim instance is alive. Nothing to terminate."
+            exit 0
+          fi
+
+          echo "Found untracked Isaac Sim instance(s): $ids"
+
+          if [ "${{ github.event.inputs.terminate_instance }}" != "true" ]; then
+            echo "::error::Instance(s) $ids are still alive and terraform destroy will not remove them."
+            echo "::error::Push any work off the disk first, then re-run with terminate_instance = true."
+            exit 1
+          fi
+
+          echo "Terminating $ids (its disk is delete-on-termination and goes with it)."
+          aws ec2 terminate-instances --instance-ids $ids
+          aws ec2 wait instance-terminated --instance-ids $ids
+          echo "Terminated."
+
+      - name: Init
+        run: terraform init
+
+      # aws_iam_user.force_destroy is read from STATE at delete time, not from
+      # the config, so passing the variable to `destroy` alone does nothing.
+      # This targeted apply writes the new value into state first.
+      - name: Allow the developer users to be deleted
+        if: github.event.inputs.force_destroy_users == 'true'
+        run: |
+          terraform apply -auto-approve \
+            -var="force_destroy_users=true" \
+            -target=aws_iam_user.developers
+
+      # Printed in full so the run log is the record of what was removed.
+      - name: Plan the destroy
+        run: |
+          terraform plan -destroy \
+            -var="force_destroy_users=${{ github.event.inputs.force_destroy_users }}" \
+            -out=tfdestroy
+
+      - name: Destroy
+        run: terraform apply tfdestroy
