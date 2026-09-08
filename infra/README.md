@@ -166,14 +166,19 @@ Two things worth knowing before you run it:
   looks for anything tagged `Purpose = isaac-sim` and refuses to continue
   while one is alive, unless `terminate_instance` is on. Its 512 GiB root
   disk is delete-on-termination and goes with it — **push your work to git
-  first**.
+  first**. The termination happens late in the run, only once the destroy
+  plan has come back clean, so a job that dies on a state lock or an
+  unresolvable AMI does not cost you the disk for nothing.
 - **`force_destroy = false` on the developer users** blocks deletion if
   someone set up their own MFA device or a second access key, which the
   self-service policy actively encourages. AWS returns `DeleteConflict` and
   the destroy stops part-way. Re-run with `force_destroy_users = true`.
   Terraform reads that flag from state rather than config at delete time, so
   the workflow does a targeted `apply` to write it into state before the
-  destroy — that is what the extra step in the log is.
+  destroy — that is what the extra step in the log is. If that run then
+  fails for some other reason, a cleanup step puts the flag back to
+  `false`, so nobody is left with a stack where a plain `terraform destroy`
+  silently wipes credentials.
 
 ## Files
 

