@@ -239,18 +239,129 @@ jobs:
       - name: Destroy
         run: terraform apply tfdestroy
 
-      # If the run failed after the flag was written, it would sit in state as
-      # `true` - nothing ever refreshes it back from the API - and the next
-      # plain `terraform destroy` from anyone's laptop would wipe the
-      # developers' credentials with no DeleteConflict to stop it. Put it back.
-      - name: Re-arm the delete guard on the users
-        if: failure() && github.event.inputs.force_destroy_users == 'true'
+      # Proof, not trust. `Destroy complete!` only says Terraform is happy with
+      # its own state file. This asks AWS directly: is anything of ours still
+      # standing, and is everything that was NOT ours still there?
+      #
+      # Written out longhand rather than through a helper. Each check is a
+      # plain command whose output should be empty (or non-empty, in the second
+      # half), so a reader can see exactly what was asked of AWS.
+      - name: Verify the teardown
         run: |
-          if ! terraform state list aws_iam_user.developers | grep -q .; then
-            echo "The developer users are already gone from state. Nothing to re-arm."
-            exit 0
+          fail=0
+
+          check_empty() {
+            if [ -n "$2" ]; then
+              echo "::error::STILL PRESENT - $1: $2"
+              fail=1
+            else
+              echo "gone:  $1"
+            fi
+          }
+
+          check_present() {
+            if [ -n "$2" ]; then
+              echo "kept:  $1 -> $2"
+            else
+              echo "::error::MISSING - $1 should have survived this destroy"
+              fail=1
+            fi
+          }
+
+          # ---- these must all be GONE ----------------------------------------
+
+          users=""
+          for u in robin-robotics hassaan-robotics; do
+            found=$(aws iam get-user --user-name "$u" \
+              --query User.UserName --output text 2>/dev/null || true)
+            users="$users $found"
+          done
+          check_empty "developer IAM users" "$(echo $users)"
+
+          group=$(aws iam get-group --group-name isaac-sim-operators \
+            --query Group.GroupName --output text 2>/dev/null || true)
+          check_empty "IAM group isaac-sim-operators" "$group"
+
+          policies=$(aws iam list-policies --scope Local \
+            --query "Policies[?starts_with(PolicyName,'isaac-sim')].PolicyName" \
+            --output text || true)
+          check_empty "customer-managed IAM policies isaac-sim-*" "$policies"
+
+          # The deploy role is bootstrap's, not ours, so it is excluded here and
+          # asserted as a survivor further down.
+          roles=$(aws iam list-roles \
+            --query "Roles[?starts_with(RoleName,'isaac-sim') && RoleName!='isaac-sim-github-deploy'].RoleName" \
+            --output text || true)
+          check_empty "IAM roles isaac-sim-*" "$roles"
+
+          profile=$(aws iam get-instance-profile --instance-profile-name isaac-sim-instance \
+            --query InstanceProfile.InstanceProfileName --output text 2>/dev/null || true)
+          check_empty "instance profile isaac-sim-instance" "$profile"
+
+          templates=$(aws ec2 describe-launch-templates \
+            --query "LaunchTemplates[?starts_with(LaunchTemplateName,'isaac-sim')].LaunchTemplateName" \
+            --output text 2>/dev/null || true)
+          check_empty "launch template" "$templates"
+
+          sg=$(aws ec2 describe-security-groups \
+            --filters Name=group-name,Values=isaac-sim-sg \
+            --query "SecurityGroups[].GroupName" --output text || true)
+          check_empty "security group isaac-sim-sg" "$sg"
+
+          keys=$(aws ec2 describe-key-pairs \
+            --filters Name=key-name,Values=isaac-sim-key \
+            --query "KeyPairs[].KeyName" --output text || true)
+          check_empty "key pair isaac-sim-key" "$keys"
+
+          fns=$(aws lambda list-functions \
+            --query "Functions[?starts_with(FunctionName,'isaac-sim')].FunctionName" \
+            --output text || true)
+          check_empty "Lambda functions" "$fns"
+
+          rules=$(aws events list-rules --name-prefix isaac-sim \
+            --query "Rules[].Name" --output text || true)
+          check_empty "EventBridge rules" "$rules"
+
+          groups=$(aws logs describe-log-groups \
+            --log-group-name-prefix /aws/lambda/isaac-sim \
+            --query "logGroups[].logGroupName" --output text || true)
+          check_empty "CloudWatch log groups" "$groups"
+
+          instances=$(aws ec2 describe-instances \
+            --filters "Name=tag:Purpose,Values=isaac-sim" \
+                      "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[].Instances[].InstanceId" --output text || true)
+          check_empty "tagged EC2 instances" "$instances"
+
+          state=$(terraform state list 2>/dev/null || true)
+          check_empty "resources left in Terraform state" "$(echo $state)"
+
+          # ---- these must all SURVIVE ----------------------------------------
+          # This half is the point of scoping the destroy to infra/. If any of
+          # these vanished, something outside this project was damaged.
+
+          admin=$(aws iam get-user --user-name dodao-admin \
+            --query User.UserName --output text 2>/dev/null || true)
+          check_present "pre-existing admin user dodao-admin" "$admin"
+
+          oidc=$(aws iam list-open-id-connect-providers \
+            --query "OpenIDConnectProviderList[?contains(Arn,'token.actions.githubusercontent.com')].Arn" \
+            --output text || true)
+          check_present "account-wide GitHub OIDC provider" "$oidc"
+
+          deploy=$(aws iam get-role --role-name isaac-sim-github-deploy \
+            --query Role.RoleName --output text 2>/dev/null || true)
+          check_present "bootstrap deploy role" "$deploy"
+
+          bucket=""
+          aws s3api head-bucket --bucket isaac-sim-tfstate-729763663166 2>/dev/null \
+            && bucket="isaac-sim-tfstate-729763663166"
+          check_present "Terraform state bucket" "$bucket"
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Teardown verification FAILED - see the lines above."
+            exit 1
           fi
 
-          terraform apply -auto-approve -refresh=false \
-            -var="force_destroy_users=false" \
-            -target=aws_iam_user.developers
+          echo
+          echo "Verification passed: the stack is gone, and nothing outside it was touched."

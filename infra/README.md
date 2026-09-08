@@ -147,6 +147,13 @@ This removes the developer users, the group, the policies, the security
 group, the key pair, the launch template, the instance role, and both
 Lambdas with their log groups and EventBridge rules.
 
+The last step then asks AWS directly whether any of it is still standing,
+and whether the things that were never ours — `dodao-admin`, the
+account-wide GitHub OIDC provider, the deploy role, the state bucket — are
+still there. `Destroy complete!` only means Terraform is happy with its own
+state file; that step is the actual proof, and it fails the run if either
+half is wrong.
+
 Three things it does **not** remove, on purpose:
 
 - **The `bootstrap/` stack** — the state bucket, the lock table, and the
