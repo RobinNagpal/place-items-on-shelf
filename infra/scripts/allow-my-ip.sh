@@ -117,8 +117,11 @@ echo
 echo "The UDP rule only helps once DCV offers QUIC. To switch it on, open a"
 echo "shell with ./connect.sh and run:"
 echo
-echo "  sudo sed -i 's/^#\\?enable-quic-frontend=.*/enable-quic-frontend=true/' /etc/dcv/dcv.conf"
+echo "  sudo sed -i 's/^ *#\\? *enable-quic-frontend *=.*/enable-quic-frontend = true/' /etc/dcv/dcv.conf"
 echo "  grep enable-quic-frontend /etc/dcv/dcv.conf   # confirm it says true"
 echo "  sudo systemctl restart dcvserver"
+echo "  sudo ss -ulnp | grep 8443                     # proves QUIC is listening"
 echo
-echo "Then reconnect and check the DCV client shows a QUIC/UDP connection."
+echo "The spaces around '=' matter: dcv.conf writes 'enable-quic-frontend = false',"
+echo "so a pattern without them matches nothing and silently changes nothing."
+echo "The ss check is the real proof - a UDP listener on 8443 means QUIC is on."

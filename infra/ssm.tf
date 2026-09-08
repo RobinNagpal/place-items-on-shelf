@@ -38,9 +38,12 @@ data "aws_iam_policy_document" "instance_assume_role" {
   }
 }
 
+# This is the instance's only identity, and two separate things depend on it:
+# the SSM Agent below, and the DCV licence check in dcv_license.tf. Anything
+# the machine itself needs to reach in AWS gets attached here.
 resource "aws_iam_role" "instance" {
   name               = "${local.name_prefix}-instance"
-  description        = "Worn by the Isaac Sim instance. Lets its SSM Agent register as a managed node so operators can open a session."
+  description        = "Worn by the Isaac Sim instance. Lets its SSM Agent register as a managed node, and lets DCV read its licence."
   assume_role_policy = data.aws_iam_policy_document.instance_assume_role.json
 }
 
