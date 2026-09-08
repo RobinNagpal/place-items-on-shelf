@@ -170,3 +170,17 @@ variable "log_retention_days" {
   type        = number
   default     = 14
 }
+
+variable "force_destroy_users" {
+  description = <<-EOT
+    Delete the developer IAM users even when they carry credentials Terraform
+    did not create - a self-service MFA device, or a second access key. Leave
+    false during normal operation so a stray `terraform destroy` cannot wipe
+    someone's account by accident. The teardown workflow sets it to true only
+    after the operator asks for it, and only because AWS refuses to delete a
+    user that still has anything attached.
+  EOT
+
+  type    = bool
+  default = false
+}

@@ -22,13 +22,21 @@ needs the subscription in place.
 
 ## How changes get applied
 
-Nobody runs `terraform apply` by hand day to day. GitHub Actions does it:
+GitHub Actions does it, and since the teardown it only ever runs when
+someone asks:
 
 1. Open a pull request that touches `infra/`. The `terraform` workflow runs
    `fmt`, `validate`, and a Lambda syntax check. No AWS access.
 2. The repo owner reviews and merges. Only they can merge to `main`.
-3. On merge, the workflow assumes the `isaac-sim-github-deploy` role via
-   OIDC (no stored AWS keys) and runs `plan` then `apply`.
+3. Merging changes nothing on AWS. **There is no apply-on-merge trigger any
+   more.** To apply, go to Actions -> `terraform` -> **Run workflow**, pick
+   `action = apply`, and run it from `main`. The workflow assumes the
+   `isaac-sim-github-deploy` role via OIDC (no stored AWS keys) and runs
+   `plan` then `apply`.
+
+The trigger was removed on purpose when the stack was destroyed, so a later
+merge touching `infra/` cannot quietly rebuild a GPU workstation and two IAM
+users that nobody asked for.
 
 `terraform.tfvars` is committed on purpose. It holds the AMI ID and user
 names, nothing secret. Edit it in a PR to add a developer.
@@ -125,15 +133,59 @@ aws logs tail /aws/lambda/isaac-sim-auto-shutdown --follow
 
 ## Tear it all down
 
-```bash
-terraform destroy
-```
+Use the workflow, not your laptop. Actions -> `terraform` -> **Run
+workflow**, from `main`:
 
-This removes the users, group, policies, template, and both Lambdas. It does
-**not** terminate the instance, because operators create that outside
-Terraform. Terminate it by hand first (it is the one tagged
-`Purpose = isaac-sim`). The state bucket and deploy role in `bootstrap/`
-stay unless you destroy that too.
+| Input | Value |
+|---|---|
+| `action` | `destroy` |
+| `confirm` | `destroy isaac-sim` — typed exactly, or the run stops before touching AWS |
+| `terminate_instance` | `true` only once the work on the disk is pushed to git |
+| `force_destroy_users` | `true` only if a first run failed with `DeleteConflict` |
+
+This removes the developer users, the group, the policies, the security
+group, the key pair, the launch template, the instance role, and both
+Lambdas with their log groups and EventBridge rules.
+
+The last step then asks AWS directly whether any of it is still standing,
+and whether the things that were never ours — `dodao-admin`, the
+account-wide GitHub OIDC provider, the deploy role, the state bucket — are
+still there. `Destroy complete!` only means Terraform is happy with its own
+state file; that step is the actual proof, and it fails the run if either
+half is wrong.
+
+Three things it does **not** remove, on purpose:
+
+- **The `bootstrap/` stack** — the state bucket, the lock table, and the
+  GitHub OIDC provider. That provider is account-wide and other repositories
+  authenticate through it, so deleting it would break their deploys too.
+  Destroy `bootstrap/` only if you are closing the whole account down.
+- **`dodao-admin`** — a pre-existing user. Terraform manages only its
+  membership of the operators group, so destroy removes it from the group
+  and leaves the user alone.
+- **The Marketplace subscription** to the Isaac Sim AMI. Account-level, free
+  to hold, and needed again if the stack ever comes back.
+
+Two things worth knowing before you run it:
+
+- **The instance is not in Terraform state.** Operators launch it by hand
+  from the template, so `terraform destroy` cannot see it. The workflow
+  looks for anything tagged `Purpose = isaac-sim` and refuses to continue
+  while one is alive, unless `terminate_instance` is on. Its 512 GiB root
+  disk is delete-on-termination and goes with it — **push your work to git
+  first**. The termination happens late in the run, only once the destroy
+  plan has come back clean, so a job that dies on a state lock or an
+  unresolvable AMI does not cost you the disk for nothing.
+- **`force_destroy = false` on the developer users** blocks deletion if
+  someone set up their own MFA device or a second access key, which the
+  self-service policy actively encourages. AWS returns `DeleteConflict` and
+  the destroy stops part-way. Re-run with `force_destroy_users = true`.
+  Terraform reads that flag from state rather than config at delete time, so
+  the workflow does a targeted `apply` to write it into state before the
+  destroy — that is what the extra step in the log is. If that run then
+  fails for some other reason, a cleanup step puts the flag back to
+  `false`, so nobody is left with a stack where a plain `terraform destroy`
+  silently wipes credentials.
 
 ## Files
 
@@ -150,7 +202,7 @@ stay unless you destroy that too.
 | `lambda_package.tf`, `lambda/common.py` | Shared zip and tag lookup |
 | `outputs.tf` | Credentials and the launch command |
 | `bootstrap/` | One-time: S3 state bucket, lock table, GitHub deploy role |
-| `../.github/workflows/terraform.yml` | The check-on-PR, apply-on-merge workflow |
+| `../.github/workflows/terraform.yml` | Check-on-PR, plus the manual `apply` / `destroy` run |
 
 State holds every developer's password, secret key and the SSH private key
 in plaintext. It lives in the encrypted, versioned, private S3 bucket that

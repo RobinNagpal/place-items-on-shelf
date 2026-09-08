@@ -17,7 +17,8 @@ resource "aws_iam_user" "developers" {
 
   # Refuse to delete the user while it still has keys or policies attached.
   # Prevents a surprise `terraform destroy` from silently wiping credentials.
-  force_destroy = false
+  # The teardown workflow flips this on deliberately - see the variable.
+  force_destroy = var.force_destroy_users
 }
 
 # Console password. Built only when the flag is on. password_reset_required

